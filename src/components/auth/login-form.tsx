@@ -14,9 +14,34 @@ export function LoginForm() {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
 
-  function handleSubmit() {
+  async function handleSubmit() {
+  try {
+    const response = await fetch('http://localhost:3000/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        senha: password,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || 'Email ou senha incorretos');
+      return;
+    }
+
+    console.log('Usuário logado:', data.user);
+
     router.replace('/(tabs)');
+  } catch (error) {
+    console.error('Erro ao conectar com o backend:', error);
+    alert('Não foi possível conectar ao servidor');
   }
+}
 
   return (
     <View style={styles.container}>
