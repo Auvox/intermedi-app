@@ -16,6 +16,7 @@ export default function CadastroScreen() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmaSenha, setConfirmaSenha] = useState('');
+  const [remedioFrequente, setRemedioFrequente] = useState('');
   
   
   return (
@@ -37,6 +38,11 @@ export default function CadastroScreen() {
               value={telefone}
               onChangeText={setTelefone}
               keyboardType="phone-pad"
+            />
+            <TextField
+             placeholder="Medicamento frequente (opcional)"
+              value={remedioFrequente}
+              onChangeText={setRemedioFrequente}
             />
             <TextField
               placeholder="E-mail"

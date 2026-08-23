@@ -16,6 +16,7 @@ export default function RootLayout() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="endereco-picker" />
       <Stack.Screen name="medicamento/[id]" />
+      <Stack.Screen name="notificacoes" />
     </Stack>
   );
 }

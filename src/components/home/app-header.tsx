@@ -37,10 +37,11 @@ export function AppHeader({ address }: AppHeaderProps) {
           <Ionicons name="search" size={22} color={Colors.primary} />
         </Pressable>
         <Pressable
-          hitSlop={8}
-          style={styles.bellButton}
-          accessibilityRole="button"
-          accessibilityLabel="Notificações">
+           hitSlop={8}
+           style={styles.bellButton}
+           onPress={() => router.push('/notificacoes')}
+           accessibilityRole="button"
+           accessibilityLabel="Notificações">
           <Ionicons name="notifications" size={22} color={Colors.primary} />
           <View style={styles.badge} />
         </Pressable>
