@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View, Modal } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
+import { useState } from 'react';
 import { AppText } from '@/components/ui/app-text';
 import { Wordmark } from '@/components/ui/brand-mark';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, Spacing, Radius } from '@/constants/theme';
+
 
 export type AppHeaderProps = {
   address?: string;
@@ -14,6 +15,7 @@ export type AppHeaderProps = {
 export function AppHeader({ address }: AppHeaderProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const [searchModalVisible, setSearchModalVisible] = useState(false);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + Spacing.md }]}>
@@ -33,19 +35,48 @@ export function AppHeader({ address }: AppHeaderProps) {
       </View>
 
       <View style={styles.actions}>
-        <Pressable hitSlop={8} accessibilityRole="button" accessibilityLabel="Buscar">
+        <Pressable
+          hitSlop={8}
+          onPress={() => setSearchModalVisible(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Buscar">
           <Ionicons name="search" size={22} color={Colors.primary} />
         </Pressable>
         <Pressable
-           hitSlop={8}
-           style={styles.bellButton}
-           onPress={() => router.push('/notificacoes')}
-           accessibilityRole="button"
-           accessibilityLabel="Notificações">
+          hitSlop={8}
+          style={styles.bellButton}
+          onPress={() => router.push('/notificacoes')}
+          accessibilityRole="button"
+          accessibilityLabel="Notificações">
           <Ionicons name="notifications" size={22} color={Colors.primary} />
           <View style={styles.badge} />
         </Pressable>
       </View>
+      <Modal
+        transparent
+        visible={searchModalVisible}
+        animationType="fade"
+        onRequestClose={() => setSearchModalVisible(false)}>
+        <Pressable style={styles.overlay} onPress={() => setSearchModalVisible(false)}>
+          <Pressable style={styles.modal} onPress={() => { }}>
+            <AppText variant="h3" style={styles.modalTitle}>
+              O que você deseja buscar?
+            </AppText>
+
+            <Pressable
+              style={styles.optionButton}
+              onPress={() => setSearchModalVisible(false)}>
+              <AppText variant="body">Medicamento</AppText>
+            </Pressable>
+
+            <Pressable
+              style={styles.optionButton}
+              onPress={() => setSearchModalVisible(false)}>
+              <AppText variant="body">Farmácia</AppText>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -92,5 +123,27 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: Colors.danger,
+  },
+  overlay: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: Spacing.xl,
+    backgroundColor: Colors.overlay,
+  },
+  modal: {
+    padding: Spacing.xl,
+    gap: Spacing.md,
+    borderRadius: Radius.lg,
+    backgroundColor: Colors.surface,
+  },
+  modalTitle: {
+    textAlign: 'center',
+  },
+  optionButton: {
+    padding: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    borderRadius: Radius.md,
+    alignItems: 'center',
   },
 });
