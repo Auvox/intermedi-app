@@ -16,7 +16,7 @@ export default function FavoritosScreen() {
       <AppHeader address="R. das Flores, 123" />
 
       <View style={styles.subHeader}>
-        <BackButton tone="dark" onPress={() => router.canGoBack() && router.back()} />
+        <BackButton tone="dark" onPress={() => router.replace('/(tabs)')} />
         <AppText variant="h3" color={Colors.textMuted} style={styles.subHeaderTitle}>
           Favoritos
         </AppText>
