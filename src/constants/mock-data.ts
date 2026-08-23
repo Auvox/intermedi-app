@@ -3,7 +3,7 @@ import type { Ionicons } from '@expo/vector-icons';
 type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 
 export const currentUser = {
-  firstName: 'José',
+  firstName: 'Matheus',
 };
 
 export type Category = {
@@ -39,20 +39,20 @@ export const pharmacyStatusLabel: Record<PharmacyStatus, string> = {
 
 export const pharmacies: Pharmacy[] = [
   {
-    id: 'central',
-    name: 'Farmácia Central',
-    address: 'Rua das Flores, 123',
-    hours: 'Aberta até 22h',
-    phone: '(11) 98769-9876',
+    id: 'ubs-guaianases-ii',
+    name: 'UBS Guaianases II',
+    address: 'R. Comandante Carlos Ruhl, 189 - Guaianases, São Paulo - SP',
+    hours: 'Seg. a sex., das 7h às 19h',
+    phone: '(11) 2554-4064',
     status: 'em-estoque',
   },
   {
-    id: 'popular',
-    name: 'Farmácia Popular',
-    address: 'Rua dos Pinheiros, 987',
-    hours: 'Aberta até 23h',
-    phone: '(11) 98769-9876',
-    status: 'poucas-unidades',
+    id: 'ubs-jardim-soares',
+    name: 'UBS Jardim Soares',
+    address: 'R. Feliciano de Mendonça, 496 - Jardim Soares, São Paulo - SP',
+    hours: 'Seg. a sex., das 7h às 19h',
+    phone: '(11) 2557-7022',
+    status: 'indisponivel',
   },
 ];
 

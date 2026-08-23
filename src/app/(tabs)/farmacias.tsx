@@ -9,7 +9,7 @@ import { Colors, Spacing } from '@/constants/theme';
 export default function FarmaciasScreen() {
   return (
     <View style={styles.flex}>
-      <AppHeader address="R. das Flores, 123" />
+      <AppHeader address="Etec Guaianases" />
 
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
         <AppText variant="h3" style={styles.title}>

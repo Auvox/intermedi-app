@@ -16,14 +16,16 @@ export default function CadastroScreen() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmaSenha, setConfirmaSenha] = useState('');
-
+  
+  
   return (
     <KeyboardAvoidingView
       style={styles.flex}
       behavior={Platform.select({ ios: 'padding', default: undefined })}>
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
-        <AuthHeader title="Criar Conta" />
-
+      
+        <AuthHeader title="Criar Conta" showBack  />
+       
         <View style={styles.body}>
           <StepIndicator steps={registerSteps} currentIndex={0} />
 

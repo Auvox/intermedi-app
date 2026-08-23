@@ -1,13 +1,15 @@
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View,  } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import { BackButton } from '@/components/ui/back-button';
 import { CopyrightFooter } from '@/components/auth/copyright-footer';
 import { LoginForm } from '@/components/auth/login-form';
 import { AppText } from '@/components/ui/app-text';
 import { Wordmark } from '@/components/ui/brand-mark';
 import { Colors, Spacing } from '@/constants/theme';
+import { useRouter } from 'expo-router';
 
 export default function LoginScreen() {
+  const router = useRouter();
   return (
     <KeyboardAvoidingView
       style={styles.flex}
@@ -15,6 +17,7 @@ export default function LoginScreen() {
       <SafeAreaView style={styles.flex}>
         <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
           <View style={styles.body}>
+            <BackButton tone="dark" onPress={() => router.replace('/welcome')} />
             <AppText variant="h1" style={styles.title}>
               Login
             </AppText>

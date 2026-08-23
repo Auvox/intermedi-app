@@ -13,7 +13,7 @@ export default function FavoritosScreen() {
 
   return (
     <View style={styles.flex}>
-      <AppHeader address="R. das Flores, 123" />
+      <AppHeader address="Etec Guaianases" />
 
       <View style={styles.subHeader}>
         <BackButton tone="dark" onPress={() => router.replace('/(tabs)')} />

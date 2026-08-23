@@ -7,7 +7,7 @@ import { AppText } from '@/components/ui/app-text';
 import type { Category } from '@/constants/mock-data';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 
-const SCROLL_STEP = 220;
+const SCROLL_STEP = 216;
 
 export type CategoryCarouselProps = {
   categories: Category[];
@@ -32,7 +32,7 @@ export function CategoryCarousel({ categories }: CategoryCarouselProps) {
         <Ionicons name="chevron-back" size={18} color={Colors.textOnPrimary} />
       </Pressable>
 
-      <ScrollView
+      <ScrollView  style={styles.scrollView}
         ref={scrollRef}
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -74,6 +74,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     gap: Spacing.xl,
     paddingHorizontal: Spacing.xs,
@@ -96,4 +99,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: Colors.text,
   },
+ 
+  
 });

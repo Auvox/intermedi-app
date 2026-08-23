@@ -13,7 +13,7 @@ export default function PerfilScreen() {
 
   return (
     <View style={styles.flex}>
-      <AppHeader address="R. das Flores, 123" />
+      <AppHeader address="Etec Guaianases" />
 
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
         <View style={styles.profileCard}>
