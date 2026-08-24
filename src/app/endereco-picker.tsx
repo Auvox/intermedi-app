@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, View } from 'react-native';
-
+import * as Location from 'expo-location';
 import { AddressListItem } from '@/components/address/address-list-item';
 import { AppHeader } from '@/components/home/app-header';
 import { AppText } from '@/components/ui/app-text';
@@ -15,11 +15,26 @@ export default function EnderecoPickerScreen() {
   const router = useRouter();
   const [selectedId, setSelectedId] = useState('casa');
   const [search, setSearch] = useState('');
+  const [coordenadas, setCoordenadas] = useState('');
 
   function selectAndReturn(id: string) {
     setSelectedId(id);
     router.back();
   }
+  async function usarLocalizacaoAtual() {
+  const { status } = await Location.requestForegroundPermissionsAsync();
+
+  if (status !== 'granted') {
+    setCoordenadas('Permissão de localização não concedida.');
+    return;
+  }
+
+  const localizacao = await Location.getCurrentPositionAsync({});
+
+  setCoordenadas(
+    `Latitude: ${localizacao.coords.latitude}\nLongitude: ${localizacao.coords.longitude}`,
+  );
+}
 
   return (
     <View style={styles.flex}>
@@ -43,12 +58,19 @@ export default function EnderecoPickerScreen() {
         />
 
         <View style={styles.list}>
-          <AddressListItem
-            icon="locate-outline"
-            label={currentLocation.label}
-            address={currentLocation.address}
-            onPress={() => selectAndReturn('atual')}
-          />
+        <AddressListItem
+  icon="locate-outline"
+  label={currentLocation.label}
+  address={currentLocation.address}
+  onPress={usarLocalizacaoAtual}
+/>
+
+{coordenadas ? (
+  <AppText variant="label" color={Colors.textSecondary}>
+    {coordenadas}
+  </AppText>
+) : null}
+          
           {savedAddresses.map((address) => (
             <AddressListItem
               key={address.id}
