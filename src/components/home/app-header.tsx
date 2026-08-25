@@ -74,6 +74,7 @@ export function AppHeader({ address }: AppHeaderProps) {
               onPress={() => setSearchModalVisible(false)}>
               <AppText variant="body">Farmácia</AppText>
             </Pressable>
+
           </Pressable>
         </Pressable>
       </Modal>
