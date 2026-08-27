@@ -54,6 +54,19 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="buscar-medicamentos"
+        options={{
+          title: 'Remédios',
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              focused={focused}
+              outlineName="medkit-outline"
+              filledName="medkit"
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="index"
         options={{
           title: 'Início',
