@@ -5,16 +5,18 @@ import { AppHeader } from '@/components/home/app-header';
 import { PharmacyCard } from '@/components/pharmacy/pharmacy-card';
 import { AppText } from '@/components/ui/app-text';
 import { BackButton } from '@/components/ui/back-button';
+import { useTheme } from '@/context/theme-context';
 import { getMedicineById, getPharmacyById } from '@/constants/mock-data';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 
 export default function MedicamentoScreen() {
+  const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const medicine = getMedicineById(id);
 
   if (!medicine) {
     return (
-      <View style={styles.flex}>
+      <View style={[styles.flex, { backgroundColor: colors.background }]}>
         <AppHeader address="R. das Flores, 123" />
         <View style={styles.notFound}>
           <AppText variant="body">Medicamento não encontrado.</AppText>
@@ -28,8 +30,8 @@ export default function MedicamentoScreen() {
     .filter((pharmacy): pharmacy is NonNullable<typeof pharmacy> => Boolean(pharmacy));
 
   return (
-    <View style={styles.flex}>
-      <AppHeader address="R. das Flores, 123" />
+    <View style={[styles.flex, { backgroundColor: colors.background }]}>
+      <AppHeader address="Etec Guaianases" />
 
       <View style={styles.subHeader}>
         <BackButton tone="dark" />

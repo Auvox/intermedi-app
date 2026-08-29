@@ -6,10 +6,12 @@ import { AuthHeader } from '@/components/auth/auth-header';
 import { registerSteps, StepIndicator } from '@/components/auth/step-indicator';
 import { Button } from '@/components/ui/button';
 import { TextField } from '@/components/ui/text-field';
+import { useTheme } from '@/context/theme-context';
 import { Colors, Spacing } from '@/constants/theme';
 
 export default function CadastroScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
   const [nome, setNome] = useState('');
   const [cpf, setCpf] = useState('');
   const [telefone, setTelefone] = useState('');
@@ -21,7 +23,7 @@ export default function CadastroScreen() {
   
   return (
     <KeyboardAvoidingView
-      style={styles.flex}
+      style={[styles.flex, { backgroundColor: colors.background }]}
       behavior={Platform.select({ ios: 'padding', default: undefined })}>
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
       

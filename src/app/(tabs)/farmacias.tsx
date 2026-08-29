@@ -4,10 +4,12 @@ import { TextField } from '@/components/ui/text-field';
 import { AppHeader } from '@/components/home/app-header';
 import { PharmacyCard } from '@/components/pharmacy/pharmacy-card';
 import { AppText } from '@/components/ui/app-text';
+import { useTheme } from '@/context/theme-context';
 import { pharmacies } from '@/constants/mock-data';
 import { Colors, Spacing } from '@/constants/theme';
 
 export default function FarmaciasScreen() {
+  const { colors } = useTheme();
   const [busca, setBusca] = useState('');
 
   const farmaciasFiltradas = pharmacies.filter((pharmacy) => {
@@ -19,7 +21,7 @@ export default function FarmaciasScreen() {
   );
 });
   return (
-    <View style={styles.flex}>
+    <View style={[styles.flex, { backgroundColor: colors.background }]}>
       <AppHeader address="Etec Guaianases" />
 
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>

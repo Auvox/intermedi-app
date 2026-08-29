@@ -14,15 +14,17 @@ import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
 import { Wordmark } from '@/components/ui/brand-mark';
 import { TextField } from '@/components/ui/text-field';
+import { useTheme } from '@/context/theme-context';
 import { Colors, Spacing } from '@/constants/theme';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
   const [contact, setContact] = useState('');
 
   return (
     <KeyboardAvoidingView
-      style={styles.flex}
+      style={[styles.flex, { backgroundColor: colors.background }]}
       behavior={Platform.select({ ios: 'padding', default: undefined })}>
       <SafeAreaView style={styles.flex}>
         <View style={styles.topBar}>

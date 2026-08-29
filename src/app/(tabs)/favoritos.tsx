@@ -5,14 +5,16 @@ import { AppHeader } from '@/components/home/app-header';
 import { FavoriteCard } from '@/components/pharmacy/favorite-card';
 import { AppText } from '@/components/ui/app-text';
 import { BackButton } from '@/components/ui/back-button';
+import { useTheme } from '@/context/theme-context';
 import { favoritePharmacies } from '@/constants/mock-data';
 import { Colors, Spacing } from '@/constants/theme';
 
 export default function FavoritosScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
 
   return (
-    <View style={styles.flex}>
+    <View style={[styles.flex, { backgroundColor: colors.background }]}>
       <AppHeader address="Etec Guaianases" />
 
       <View style={styles.subHeader}>

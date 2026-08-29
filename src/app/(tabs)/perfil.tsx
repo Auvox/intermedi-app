@@ -5,14 +5,16 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { AppHeader } from '@/components/home/app-header';
 import { ProfileMenuItem } from '@/components/profile/profile-menu-item';
 import { AppText } from '@/components/ui/app-text';
+import { useTheme } from '@/context/theme-context';
 import { currentUser } from '@/constants/mock-data';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 
 export default function PerfilScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
 
   return (
-    <View style={styles.flex}>
+    <View style={[styles.flex, { backgroundColor: colors.background }]}>
       <AppHeader address="Etec Guaianases" />
 
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
@@ -25,7 +27,13 @@ export default function PerfilScreen() {
           </AppText>
         </View>
 
-        <View style={styles.menuGroup}>
+        <View style={[styles.menuGroup, { borderColor: colors.surfaceMuted }]}>
+          <ProfileMenuItem
+            icon="moon-outline"
+            title="Modo escuro"
+            subtitle="Altere a aparência do aplicativo"
+            showThemeSwitch
+          />
           <ProfileMenuItem
             icon="person-outline"
             title="Meus dados"
@@ -39,7 +47,7 @@ export default function PerfilScreen() {
           Mais
         </AppText>
 
-        <View style={styles.menuGroup}>
+        <View style={[styles.menuGroup, { borderColor: colors.surfaceMuted }]}>
           <ProfileMenuItem icon="notifications-outline" title="Ajuda & suporte" />
           <ProfileMenuItem icon="heart-outline" title="Sobre o aplicativo" />
         </View>
@@ -51,7 +59,6 @@ export default function PerfilScreen() {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   scrollContent: {
     paddingHorizontal: Spacing.xl,
@@ -81,7 +88,6 @@ const styles = StyleSheet.create({
   menuGroup: {
     borderRadius: Radius.lg,
     borderWidth: 1,
-    borderColor: Colors.surfaceMuted,
     overflow: 'hidden',
   },
   moreTitle: {

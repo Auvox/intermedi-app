@@ -1,6 +1,7 @@
 import { StyleSheet, Text, type TextProps } from 'react-native';
 
-import { Colors, FontSize } from '@/constants/theme';
+import { useTheme } from '@/context/theme-context';
+import { FontSize } from '@/constants/theme';
 
 export type AppTextVariant =
   | 'h1'
@@ -19,7 +20,17 @@ export type AppTextProps = TextProps & {
 };
 
 export function AppText({ variant = 'body', color, style, ...rest }: AppTextProps) {
-  return <Text style={[styles[variant], color ? { color } : null, style]} {...rest} />;
+  const { colors } = useTheme();
+  const defaultColor =
+    variant === 'label' || variant === 'caption'
+      ? colors.textMuted
+      : variant === 'button'
+        ? colors.textOnPrimary
+        : variant === 'link'
+          ? colors.primary
+          : colors.text;
+
+  return <Text style={[styles[variant], { color: color ?? defaultColor }, style]} {...rest} />;
 }
 
 const styles = StyleSheet.create({
@@ -27,43 +38,36 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xxxl,
     lineHeight: 42,
     fontWeight: '800',
-    color: Colors.text,
   },
   h2: {
     fontSize: FontSize.xxl,
     lineHeight: 34,
     fontWeight: '800',
-    color: Colors.text,
   },
   h3: {
     fontSize: FontSize.lg,
     lineHeight: 24,
     fontWeight: '700',
-    color: Colors.text,
   },
   body: {
     fontSize: FontSize.md,
     lineHeight: 22,
     fontWeight: '400',
-    color: Colors.text,
   },
   bodyBold: {
     fontSize: FontSize.md,
     lineHeight: 22,
     fontWeight: '700',
-    color: Colors.text,
   },
   label: {
     fontSize: FontSize.sm,
     lineHeight: 20,
     fontWeight: '400',
-    color: Colors.textMuted,
   },
   button: {
     fontSize: FontSize.md,
     lineHeight: 20,
     fontWeight: '800',
-    color: Colors.textOnPrimary,
     textTransform: 'uppercase',
     letterSpacing: 0.3,
   },
@@ -71,13 +75,11 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xs,
     lineHeight: 16,
     fontWeight: '400',
-    color: Colors.textMuted,
   },
   link: {
     fontSize: FontSize.sm,
     lineHeight: 20,
     fontWeight: '600',
-    color: Colors.primary,
     textDecorationLine: 'underline',
   },
 });

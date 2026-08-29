@@ -8,10 +8,12 @@ import { AppHeader } from '@/components/home/app-header';
 import { AppText } from '@/components/ui/app-text';
 import { BackButton } from '@/components/ui/back-button';
 import { TextField } from '@/components/ui/text-field';
+import { useTheme } from '@/context/theme-context';
 import { currentLocation, savedAddresses } from '@/constants/mock-data';
 import { Colors, Spacing } from '@/constants/theme';
 
 export default function EnderecoPickerScreen() {
+  const { colors } = useTheme();
   const router = useRouter();
   const [selectedId, setSelectedId] = useState('casa');
   const [search, setSearch] = useState('');
@@ -37,7 +39,7 @@ export default function EnderecoPickerScreen() {
 }
 
   return (
-    <View style={styles.flex}>
+    <View style={[styles.flex, { backgroundColor: colors.background }]}>
       <AppHeader />
 
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>

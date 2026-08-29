@@ -5,14 +5,16 @@ import { CopyrightFooter } from '@/components/auth/copyright-footer';
 import { LoginForm } from '@/components/auth/login-form';
 import { AppText } from '@/components/ui/app-text';
 import { Wordmark } from '@/components/ui/brand-mark';
+import { useTheme } from '@/context/theme-context';
 import { Colors, Spacing } from '@/constants/theme';
 import { useRouter } from 'expo-router';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
   return (
     <KeyboardAvoidingView
-      style={styles.flex}
+      style={[styles.flex, { backgroundColor: colors.background }]}
       behavior={Platform.select({ ios: 'padding', default: undefined })}>
       <SafeAreaView style={styles.flex}>
         <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>

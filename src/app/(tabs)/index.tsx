@@ -5,6 +5,7 @@ import { AppHeader } from '@/components/home/app-header';
 import { CategoryCarousel } from '@/components/home/category-carousel';
 import { ConsultaCard } from '@/components/home/consulta-card';
 import { AppText } from '@/components/ui/app-text';
+import { useTheme } from '@/context/theme-context';
 import { categories, currentUser, medicines } from '@/constants/mock-data';
 import { Colors, Spacing } from '@/constants/theme';
 
@@ -17,9 +18,10 @@ function getGreeting() {
 
 export default function InicioScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
 
   return (
-    <View style={styles.flex}>
+    <View style={[styles.flex, { backgroundColor: colors.background }]}>
       <AppHeader address="Etec Guaianases" />
 
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>

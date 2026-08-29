@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { AppText } from '@/components/ui/app-text';
 import { Wordmark } from '@/components/ui/brand-mark';
+import { useTheme } from '@/context/theme-context';
 import { Colors, Spacing, Radius } from '@/constants/theme';
 
 
@@ -16,9 +17,10 @@ export function AppHeader({ address }: AppHeaderProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [searchModalVisible, setSearchModalVisible] = useState(false);
+  const { colors } = useTheme();
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + Spacing.md }]}>
+    <View style={[styles.container, { paddingTop: insets.top + Spacing.md, borderBottomColor: colors.surfaceMuted, backgroundColor: colors.surface }]}>
       <View style={styles.left}>
         <Wordmark height={22} />
         {address && (
@@ -29,7 +31,7 @@ export function AppHeader({ address }: AppHeaderProps) {
             <AppText variant="label" numberOfLines={1} style={styles.addressText}>
               {address}
             </AppText>
-            <Ionicons name="chevron-down" size={14} color={Colors.textMuted} />
+            <Ionicons name="chevron-down" size={14} color={colors.textMuted} />
           </Pressable>
         )}
       </View>
@@ -57,8 +59,8 @@ export function AppHeader({ address }: AppHeaderProps) {
         visible={searchModalVisible}
         animationType="fade"
         onRequestClose={() => setSearchModalVisible(false)}>
-        <Pressable style={styles.overlay} onPress={() => setSearchModalVisible(false)}>
-          <Pressable style={styles.modal} onPress={() => { }}>
+        <Pressable style={[styles.overlay, { backgroundColor: colors.overlay }]} onPress={() => setSearchModalVisible(false)}>
+          <Pressable style={[styles.modal, { backgroundColor: colors.surface }]} onPress={() => { }}>
             <AppText variant="h3" style={styles.modalTitle}>
               O que você deseja buscar?
             </AppText>
@@ -90,8 +92,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.surfaceMuted,
-    backgroundColor: Colors.surface,
   },
   left: {
     flexDirection: 'row',
@@ -129,13 +129,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: Spacing.xl,
-    backgroundColor: Colors.overlay,
   },
   modal: {
     padding: Spacing.xl,
     gap: Spacing.md,
     borderRadius: Radius.lg,
-    backgroundColor: Colors.surface,
   },
   modalTitle: {
     textAlign: 'center',

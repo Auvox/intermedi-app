@@ -22,11 +22,40 @@ export const Colors = {
 
   warning: '#F5A524',
   warningSoft: '#FEF3D6',
-  danger: '#EF4444',
 
+  danger: '#EF4444',
   star: '#FBBF24',
+
   overlay: 'rgba(0,0,0,0.35)',
 } as const;
+
+export const DarkColors = {
+  primary: '#12B76A',
+  primaryDark: '#0C8F53',
+  primaryDarker: '#096D40',
+  primarySoft: '#123D2A',
+  primaryBorder: '#245A40',
+
+  background: '#101412',
+  surface: '#171C19',
+  surfaceMuted: '#202622',
+
+  text: '#F3F4F4',
+  textSecondary: '#A7B0AA',
+  textMuted: '#737D77',
+  textOnPrimary: '#FFFFFF',
+
+  border: '#29312D',
+
+  warning: '#F5A524',
+  warningSoft: '#463914',
+
+  danger: '#EF4444',
+  star: '#FBBF24',
+
+  overlay: 'rgba(0,0,0,0.60)',
+} as const;
+
 
 export const Fonts = Platform.select({
   ios: {

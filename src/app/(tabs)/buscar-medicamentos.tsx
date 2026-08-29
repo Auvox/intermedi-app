@@ -6,11 +6,13 @@ import { AppHeader } from '@/components/home/app-header';
 import { MedicineCard } from '@/components/medicine/medicine-card';
 import { AppText } from '@/components/ui/app-text';
 import { TextField } from '@/components/ui/text-field';
+import { useTheme } from '@/context/theme-context';
 import { medicines } from '@/constants/mock-data';
 import { Colors, Spacing } from '@/constants/theme';
 
 export default function BuscarMedicamentosScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
   const [busca, setBusca] = useState('');
 
   const termo = busca.trim().toLowerCase();
@@ -21,7 +23,7 @@ export default function BuscarMedicamentosScreen() {
   );
 
   return (
-    <View style={styles.flex}>
+    <View style={[styles.flex, { backgroundColor: colors.background }]}>
       <AppHeader address="Etec Guaianases" />
 
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>

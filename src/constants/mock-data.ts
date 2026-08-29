@@ -72,7 +72,7 @@ export const medicines: Medicine[] = [
     dosage: '600mg',
     category: 'Anti-inflamatório não esteroidal',
     description: 'Ibuprofeno é indicado para o alívio da dor, inflamação e febre.',
-    pharmacyIds: ['central', 'popular'],
+    pharmacyIds: ['ubs-guaianases-ii', 'ubs-jardim-soares'],
   },
   {
     id: 'dipirona-500',
@@ -80,7 +80,7 @@ export const medicines: Medicine[] = [
     dosage: '500mg',
     category: 'Analgésicos e antitérmicos',
     description: 'Dipirona é indicada para o alívio da dor e febre.',
-    pharmacyIds: ['central', 'popular'],
+    pharmacyIds: ['ubs-guaianases-ii', 'ubs-jardim-soares'],
   },
 ];
 
@@ -100,13 +100,13 @@ export type SavedAddress = {
 };
 
 export const savedAddresses: SavedAddress[] = [
-  { id: 'casa', label: 'Casa', address: 'R. das Flores, 123', icon: 'home-outline' },
+  { id: 'casa', label: 'Casa', address: 'Etec Guaianases', icon: 'home-outline' },
   { id: 'apartamento', label: 'Apartamento', address: 'R. dos Pinheiros, 987', icon: 'business-outline' },
 ];
 
 export const currentLocation = {
   label: 'Usar localização atual',
-  address: 'R. das Madeiras, 678',
+  address: 'Etec Guaianases',
 };
 
 export const favoritePharmacies: Pharmacy[] = [pharmacies[0]];

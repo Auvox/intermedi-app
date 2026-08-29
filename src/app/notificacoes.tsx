@@ -3,11 +3,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/ui/app-text';
 import { BackButton } from '@/components/ui/back-button';
+import { useTheme } from '@/context/theme-context';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 
 export default function NotificacoesScreen() {
+  const { colors } = useTheme();
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
         <BackButton tone="dark" />
         <AppText variant="h2">Notificações</AppText>

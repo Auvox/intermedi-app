@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '@/context/theme-context';
 
-import { Colors, FontSize, Spacing } from '@/constants/theme';
+import { FontSize, Spacing } from '@/constants/theme';
 
 export type TextFieldProps = TextInputProps & {
   secureToggle?: boolean;
@@ -11,12 +12,13 @@ export type TextFieldProps = TextInputProps & {
 
 export function TextField({ secureToggle = false, secureTextEntry, style, ...rest }: TextFieldProps) {
   const [hidden, setHidden] = useState(secureToggle);
+  const { colors } = useTheme();
 
   return (
-    <View style={styles.wrapper}>
+    <View style={[styles.wrapper, { borderBottomColor: colors.border }]}>
       <TextInput
-        style={[styles.input, style]}
-        placeholderTextColor={Colors.textMuted}
+        style={[styles.input, { color: colors.text }, style]}
+        placeholderTextColor={colors.textMuted}
         secureTextEntry={secureToggle ? hidden : secureTextEntry}
         autoCapitalize="none"
         {...rest}
@@ -28,7 +30,7 @@ export function TextField({ secureToggle = false, secureTextEntry, style, ...res
           style={styles.iconButton}
           accessibilityRole="button"
           accessibilityLabel={hidden ? 'Mostrar senha' : 'Ocultar senha'}>
-          <Ionicons name={hidden ? 'eye-off-outline' : 'eye-outline'} size={20} color={Colors.textMuted} />
+          <Ionicons name={hidden ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.textMuted} />
         </Pressable>
       )}
     </View>
@@ -40,13 +42,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
     paddingBottom: Spacing.sm,
   },
   input: {
     flex: 1,
     fontSize: FontSize.md,
-    color: Colors.text,
     paddingVertical: Spacing.xs,
   },
   iconButton: {
