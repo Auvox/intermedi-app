@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 
-export async function jsonHandlerUsuarios(req, res) {
+async function jsonHandlerUsuarios(req, res) {
 
   app.use(cors());
   
