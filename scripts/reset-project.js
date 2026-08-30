@@ -42,6 +42,8 @@ export default function RootLayout() {
 }
 `;
 
+// Cria um prompt para o usuario inserir os dados
+
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
@@ -50,7 +52,7 @@ const rl = readline.createInterface({
 const moveDirectories = async (userInput) => {
   try {
     if (userInput === "y") {
-      // Create the app-example directory
+      // Cria o diretório exemplo do app
       await fs.promises.mkdir(exampleDirPath, { recursive: true });
       console.log(`📁 /${exampleDir} directory created.`);
     }

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TextField } from '@/components/ui/text-field';
 import { Colors, Spacing } from '@/constants/theme';
+import { Platform } from 'react-native';
 
 export function LoginForm() {
   const router = useRouter();
@@ -14,9 +15,15 @@ export function LoginForm() {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
 
+  const API_URL = Platform.select({
+  ios: 'http://localhost:3000',    
+  android: 'http://10.0.2.2:3000',   
+  default: 'http://localhost:3000',
+});
+
   async function handleSubmit() {
   try {
-    const response = await fetch('http://localhost:3000/api/auth/login', {
+    const response = await fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

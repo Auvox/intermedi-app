@@ -1,12 +1,12 @@
 const express = require("express");
-const users = require("../data/users");
+const pacientes = require("../data/pacientes");
 
 const router = express.Router();
 
 router.post("/login", (req, res) => {
   const { email, senha } = req.body;
 
-  const user = users.find(
+  const user = pacientes.find(
     (user) => user.email === email && user.senha === senha
   );
 
