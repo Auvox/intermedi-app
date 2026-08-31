@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
   "start": "node --watch src/server.js",
-  "dev": "npx nodemon --watch src src/server.js"
+  "dev": "npx nodemon --watch src src/server.js",
+  "generate-bd": "node src/gerar-banco.js"
   },
   "keywords": [],
   "author": "",

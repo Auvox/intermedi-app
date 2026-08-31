@@ -12,7 +12,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use(jsonHandlerUsuarios);
+//app.use(jsonHandlerUsuarios);
 
 app.use("/api/auth", authRoutes);
 
@@ -29,4 +29,10 @@ app.get("/api/pacientes", async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: "Erro ao buscar pacientes no banco SQL" });
     }
+});
+
+const PORT = 3000;
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
