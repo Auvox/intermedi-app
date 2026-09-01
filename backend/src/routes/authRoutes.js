@@ -1,10 +1,9 @@
 const express = require("express");
-// 1. Importação corrigida com as chaves { }
-const { buscarTodosOsPacientes } = require("../data/pacientes");
 
+const { buscarTodosOsPacientes } = require("../data/pacientes");
+const { cadastrarPaciente } = require('../data/pacientes');
 const router = express.Router();
 
-// 2. Adicionado o "async" antes da função da rota
 router.post("/login", async (req, res) => {
     const { email, senha } = req.body;
 
@@ -38,6 +37,27 @@ router.post("/login", async (req, res) => {
         console.error("Erro interno no login:", error);
         res.status(500).json({ message: "Erro interno no servidor ao autenticar" });
     }
+});
+
+router.post('/register', async (req, res) => {
+   try {
+    console.log("Dados recebidos no backend:", req.body);
+
+    // ⚠️ ESSA LINHA É A QUE INSERE DE FATO NO BANCO:
+    const resultado = await cadastrarPaciente(req.body); 
+
+    // Retorna o sucesso para o front-end exibir o alert()
+    return res.status(201).json({ 
+      message: 'Usuário cadastrado com sucesso', 
+      user: resultado 
+    });
+
+  } catch (err) {
+    console.error("Erro na rota de cadastro:", err.message);
+    return res.status(400).json({ 
+      message: 'Erro ao salvar no banco: ' + err.message 
+    });
+  }
 });
 
 module.exports = router;
