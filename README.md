@@ -1,56 +1,66 @@
-# Welcome to your Expo app 👋
+## Para Executar
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+1 - Instale o git caso não tenha, através do link abaixo.
 
-## Get started
+[![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)](https://git-scm.com)
 
-1. Install dependencies
+2 - Instale o Node (ou atualize).
 
-   ```bash
-   npm install
-   ```
+[![NPM](https://img.shields.io/badge/NPM-%23CB3837.svg?style=for-the-badge&logo=npm&logoColor=white)](https://nodejs.org/pt-br)
 
-2. Start the app
+4 - Copie o seguinte comando abaixo para clonar o repositório para a sua maquina.
 
-   ```bash
-   npx expo start
-   ```
+> git clone https://github.com/Auvox/intermedi-app.git
 
-In the output, you'll find options to open the app in a
+5 - Reinicialize o repositório git dentro da pasta intermedi-app
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+> cd intermedi-app
+> git init
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Para desenvolvedores Full-Stack, Front End e Back end.
 
-## Get a fresh project
+Você precisa executar os seguintes comandos, para rodar o Front-end (o app).
 
-When you're ready, run:
+> npx expo start
 
-```bash
-npm run reset-project
-```
+### Possíveis erros podem ocorrer!
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+**Caso apareça a seguinte mensagem** 
 
-### Other setup steps
+`Need to install the following packages:
+expo@57.0.18
+Ok to proceed? (y)`
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Você irá **precisar** discar a tecla "y" para que execute.
 
-## Learn more
+**Caso apareça a seguinte mensagem**
 
-To learn more about developing your project with Expo, look at the following resources:
+`ConfigError: Cannot determine the project's Expo SDK version because the module expo is not installed. Install it with npm install expo and try again.`
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+**Execute** o seguinte comando:
 
-## Join the community
+>npm install expo.
 
-Join our community of developers creating universal apps.
+<p>Logo após você poderá executar o comando:</p>
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+> npx expo start
+
+## Para desenvolvedores Back-End
+
+6 - Antes de executar o programa, abra **OUTRO** cmd ou seu Terminal (acesse a) seguinte pasta e dê o comando, abaixo:
+
+> cd intermedi-app
+
+> cd backend
+
+6 - Instale ou atualize o módulo SQLite.
+
+> npm install sqlite3
+
+7 - Gere o banco de dados antes de executar:
+
+> npm run generate-bd
+
+8 - Execute o servidor
+
+> npm start
