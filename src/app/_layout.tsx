@@ -1,11 +1,11 @@
-import { useEffect } from 'react';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { ThemeProvider, useTheme } from '@/context/theme-context';
+import { ThemeProvider, useTheme } from "@/context/theme-context";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
 
 SplashScreen.preventAutoHideAsync();
-
+// just a test
 export default function RootLayout() {
   useEffect(() => {
     SplashScreen.hideAsync();
@@ -23,12 +23,13 @@ function ThemedNavigator() {
 
   return (
     <>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <StatusBar style={isDark ? "light" : "dark"} />
       <Stack
         screenOptions={{
           headerShown: false,
           contentStyle: { backgroundColor: colors.background },
-        }}>
+        }}
+      >
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
