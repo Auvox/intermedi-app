@@ -34,7 +34,21 @@ db.serialize(() => {
     )
   `);
 
-  // 2. Tabela de Pacientes
+  // 2. Tabela de Endereços
+  db.run(`
+    CREATE TABLE IF NOT EXISTS tbEndereco (
+       idEndereco INTEGER PRIMARY KEY AUTOINCREMENT,
+       logradouroEndereco VARCHAR(150),
+       numeroEndereco VARCHAR(20),
+       bairroEndereco VARCHAR(100),
+       cidadeEndereco VARCHAR(100),
+       ufEndereco CHAR(2),
+       cepEndereco VARCHAR(10),
+       complementoEndereco VARCHAR(150)
+    )
+  `);
+
+  // 3. Tabela de Pacientes (Criada após tbEndereco para garantir integridade da FK)
   db.run(`
     CREATE TABLE IF NOT EXISTS tbPaciente (
       idPaciente INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,7 +65,7 @@ db.serialize(() => {
     )
   `);
 
-  // 3. Povoa a tabela de remédios para testes
+  // 4. Povoa a tabela de remédios para testes
   const insertRemedios = `
     INSERT OR IGNORE INTO tbCadastroRemedio (idRemedio, nomeRemedio, descRemedio, dosagemRemedio, fabricanteRemedio) 
     VALUES 
@@ -87,37 +101,72 @@ function buscarIdRemedioPorNome(nomeRemedio) {
 
 async function cadastrarPaciente(dados) {
   const fkIdRemedioFrequente = await buscarIdRemedioPorNome(dados.remedioFrequente);
-  
+
   return new Promise((resolve, reject) => {
-    const query = `
-      INSERT INTO tbPaciente (
-        nomePaciente, 
-        cpfPaciente, 
-        telPaciente, 
-        emailPaciente, 
-        senhaPaciente, 
-        dataNascPaciente, 
-        fkIdRemedioFrequente
+    // 1. Cadastra o endereço primeiro
+    const queryEndereco = `
+      INSERT INTO tbEndereco (
+        logradouroEndereco, 
+        numeroEndereco, 
+        bairroEndereco, 
+        cidadeEndereco, 
+        ufEndereco, 
+        cepEndereco,
+        complementoEndereco
       ) 
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
 
-    const params = [
-      dados.nomePaciente,
-      dados.cpfPaciente,
-      dados.telPaciente || null,
-      dados.emailPaciente,
-      dados.senhaPaciente,
-      dados.dataNascPaciente || '2000-01-01',
-      fkIdRemedioFrequente // Utiliza a variável com o ID obtido da busca
+    const paramsEndereco = [
+      dados.ruaEndereco || null,
+      dados.numeroEndereco || null,
+      dados.bairroEndereco || null,
+      dados.cidadeEndereco || null,
+      dados.ufEndereco || null,
+      dados.cepEndereco || null,
+      dados.complementoEndereco || null
     ];
 
-    db.run(query, params, function (err) {
-      if (err) {
-        reject(err);
-      } else {
-        resolve({ idPaciente: this.lastID });
-      }
+    db.run(queryEndereco, paramsEndereco, function (err) {
+      if (err) return reject(err);
+
+      // Captura o ID do endereço recém-criado
+      const fkIdEndereco = this.lastID;
+
+      // 2. Cadastra o paciente com as duas chaves estrangeiras (Endereço e Remédio)
+      const queryPaciente = `
+        INSERT INTO tbPaciente (
+          nomePaciente, 
+          cpfPaciente, 
+          telPaciente, 
+          emailPaciente, 
+          senhaPaciente, 
+          dataNascPaciente, 
+          fkIdEndereco,
+          fkIdRemedioFrequente
+        ) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      const paramsPaciente = [
+        dados.nomePaciente,
+        dados.cpfPaciente,
+        dados.telPaciente || null,
+        dados.emailPaciente,
+        dados.senhaPaciente,
+        dados.dataNascPaciente || '2000-01-01',
+        fkIdEndereco,
+        fkIdRemedioFrequente
+      ];
+
+      db.run(queryPaciente, paramsPaciente, function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          // Resolve com ambos os IDs gerados
+          resolve({ idPaciente: this.lastID, idEndereco: fkIdEndereco });
+        }
+      });
     });
   });
 }
