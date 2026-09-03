@@ -2,7 +2,7 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
 
-const dbFolder = path.join(__dirname, '..', '..', 'database');
+const dbFolder = path.join(__dirname, 'database');
 const sqlPath = path.join(dbFolder, 'intermedi.sql');
 const dbPath = path.join(dbFolder, 'intermedi.db');
 
