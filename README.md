@@ -57,10 +57,6 @@ Você irá **precisar** discar a tecla "y" para que execute.
 
 > npm install sqlite3
 
-7 - Gere o banco de dados antes de executar:
-
-> npm run generate-bd
-
-8 - Execute o servidor
+7 - Execute o servidor
 
 > npm start
