@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TextField } from '@/components/ui/text-field';
 import { Colors, Spacing } from '@/constants/theme';
-import { Platform } from 'react-native';
 
 export function LoginForm() {
   const router = useRouter();
@@ -41,9 +42,15 @@ export function LoginForm() {
       return;
     }
 
-    console.log('Usuário logado:', data.user);
+    if (!data.user?.nome) {
+      alert('O servidor não retornou os dados do usuário');
+      return;
+    }
+
+    await AsyncStorage.setItem('usuario', JSON.stringify(data.user));
 
     router.replace('/(tabs)');
+
   } catch (error) {
     console.error('Erro ao conectar com o backend:', error);
     alert('Não foi possível conectar ao servidor');

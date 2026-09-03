@@ -1,13 +1,18 @@
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
-
+import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppHeader } from '@/components/home/app-header';
 import { CategoryCarousel } from '@/components/home/category-carousel';
 import { ConsultaCard } from '@/components/home/consulta-card';
 import { AppText } from '@/components/ui/app-text';
 import { useTheme } from '@/context/theme-context';
-import { categories, currentUser, medicines } from '@/constants/mock-data';
+import { categories, medicines } from '@/constants/mock-data';
 import { Colors, Spacing } from '@/constants/theme';
+
+type UsuarioLogado = {
+  nome?: string;
+};
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -19,6 +24,28 @@ function getGreeting() {
 export default function InicioScreen() {
   const router = useRouter();
   const { colors } = useTheme();
+  const [nomeUsuario, setNomeUsuario] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function carregarUsuario() {
+      try {
+        const usuarioSalvo = await AsyncStorage.getItem('usuario');
+
+        if (!usuarioSalvo) return;
+
+        const usuario: UsuarioLogado = JSON.parse(usuarioSalvo);
+        const nome = usuario.nome?.trim();
+
+        if (nome) {
+          setNomeUsuario(nome);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar o usuário salvo:', error);
+      }
+    }
+
+    carregarUsuario();
+  }, []);
 
   return (
     <View style={[styles.flex, { backgroundColor: colors.background }]}>
@@ -27,7 +54,14 @@ export default function InicioScreen() {
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
         <View style={styles.section}>
           <AppText variant="h2">
-            {getGreeting()}, <AppText variant="h2" color={Colors.primary}>{currentUser.firstName}!</AppText>
+            {getGreeting()}
+            {nomeUsuario ? (
+              <AppText variant="h2" color={Colors.primary}>
+                {`, ${nomeUsuario}!`}
+              </AppText>
+            ) : (
+              '!'
+            )}
           </AppText>
           <AppText variant="body" color={Colors.textSecondary}>
             Encontre medicamentos perto de você!
