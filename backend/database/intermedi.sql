@@ -4,7 +4,6 @@ CREATE TABLE IF NOT EXISTS tbEndereco (
     numeroEndereco VARCHAR(20),
     bairroEndereco VARCHAR(100),
     cidadeEndereco VARCHAR(100),
-    estadoEndereco VARCHAR(100),
     ufEndereco CHAR(2),
     cepEndereco VARCHAR(10),
     complementoEndereco VARCHAR(150)
