@@ -1,44 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Image, ScrollView, StyleSheet, View } from 'react-native';
 import { AppHeader } from '@/components/home/app-header';
 import { ProfileMenuItem } from '@/components/profile/profile-menu-item';
 import { AppText } from '@/components/ui/app-text';
 import { useTheme } from '@/context/theme-context';
 import { Colors, Radius, Spacing } from '@/constants/theme';
-import { useEffect, useState } from 'react';
-
-type UsuarioLogado = {
-  nome?: string;
-};
+import { getApiAssetUrl } from '@/constants/api';
+import { useUser } from '@/context/user-context';
 
 export default function PerfilScreen() {
   const router = useRouter();
   const { colors } = useTheme();
-  const [nomeUsuario, setNomeUsuario] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function carregarUsuario() {
-      try {
-        const usuarioSalvo = await AsyncStorage.getItem('usuario');
-
-        if (!usuarioSalvo) return;
-
-        const usuario: UsuarioLogado = JSON.parse(usuarioSalvo);
-        const nome = usuario.nome?.trim();
-
-        if (nome) {
-          setNomeUsuario(nome);
-        }
-      } catch (error) {
-        console.error('Erro ao carregar o usuário salvo:', error);
-      }
-    }
-
-    carregarUsuario();
-  }, []);
-
+  const { user } = useUser();
+  const profileImage = getApiAssetUrl(user?.fotoPerfilPaciente);
 
   return (
     <View style={[styles.flex, { backgroundColor: colors.background }]}>
@@ -47,12 +22,16 @@ export default function PerfilScreen() {
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
         <View style={styles.profileCard}>
           <View style={styles.avatar}>
-            <Ionicons name="person" size={28} color={Colors.textOnPrimary} />
+            {profileImage ? (
+              <Image source={{ uri: profileImage }} style={styles.avatarImage} />
+            ) : (
+              <Ionicons name="person" size={28} color={Colors.textOnPrimary} />
+            )}
           </View>
           <AppText variant="h3" color={Colors.textOnPrimary}>
             Olá,{' '}
             <AppText variant="h2" color={Colors.textOnPrimary}>
-              {nomeUsuario ?? 'usuário'}!
+              {user?.nome?.trim() || 'usuário'}!
             </AppText>
           </AppText>
         </View>
@@ -112,6 +91,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
   },
   menuGroup: {
     borderRadius: Radius.lg,

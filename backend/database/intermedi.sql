@@ -114,10 +114,11 @@ CREATE TABLE IF NOT EXISTS tbPaciente (
     cpfPaciente VARCHAR(14) NOT NULL UNIQUE,
     telPaciente VARCHAR(20),
     dataNascPaciente TEXT NOT NULL,
+    fotoPerfilPaciente VARCHAR(500),
     createdAtPaciente TEXT DEFAULT CURRENT_TIMESTAMP,
     fkIdRemedioFrequente INTEGER,
-    FOREIGN KEY (fkIdRemedioFrequente) REFERENCES tbCadastroRemedio(idRemedio)
     fkIdEndereco INTEGER,
+    FOREIGN KEY (fkIdRemedioFrequente) REFERENCES tbCadastroRemedio(idRemedio),
     FOREIGN KEY (fkIdEndereco) REFERENCES tbEndereco(idEndereco)
 );
 

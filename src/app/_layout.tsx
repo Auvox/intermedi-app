@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { ThemeProvider, useTheme } from '@/context/theme-context';
+import { UserProvider } from '@/context/user-context';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -13,7 +14,9 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider>
-      <ThemedNavigator />
+      <UserProvider>
+        <ThemedNavigator />
+      </UserProvider>
     </ThemeProvider>
   );
 }

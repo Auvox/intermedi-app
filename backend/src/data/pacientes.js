@@ -44,12 +44,48 @@ db.serialize(() => {
       cpfPaciente VARCHAR(14) UNIQUE,
       telPaciente VARCHAR(20),
       dataNascPaciente TEXT,
+      fotoPerfilPaciente VARCHAR(500),
       fkIdEndereco INTEGER,
       fkIdRemedioFrequente INTEGER,
       FOREIGN KEY (fkIdEndereco) REFERENCES tbEndereco(idEndereco),
       FOREIGN KEY (fkIdRemedioFrequente) REFERENCES tbCadastroRemedio(idRemedio)
     )
   `);
+
+  // Mantém bancos já existentes compatíveis com a coluna de foto de perfil.
+  db.all('PRAGMA table_info(tbPaciente)', [], (err, columns) => {
+    if (err) {
+      console.error('Erro ao verificar as colunas de tbPaciente:', err.message);
+      return;
+    }
+
+    const hasFotoPerfilPaciente = columns.some(
+      (column) => column.name === 'fotoPerfilPaciente'
+    );
+    const hasFotoPerfilAntiga = columns.some(
+      (column) => column.name === 'fotoPerfil'
+    );
+
+    if (!hasFotoPerfilPaciente && hasFotoPerfilAntiga) {
+      db.run(
+        'ALTER TABLE tbPaciente RENAME COLUMN fotoPerfil TO fotoPerfilPaciente',
+        (alterErr) => {
+          if (alterErr) {
+            console.error(
+              'Erro ao renomear fotoPerfil para fotoPerfilPaciente:',
+              alterErr.message
+            );
+          }
+        }
+      );
+    } else if (!hasFotoPerfilPaciente) {
+      db.run('ALTER TABLE tbPaciente ADD COLUMN fotoPerfilPaciente VARCHAR(500)', (alterErr) => {
+        if (alterErr) {
+          console.error('Erro ao adicionar fotoPerfilPaciente em tbPaciente:', alterErr.message);
+        }
+      });
+    }
+  });
 
   // 3. Povoa a tabela de remédios para testes
   const insertRemedios = `
@@ -64,7 +100,7 @@ db.serialize(() => {
 
 function buscarTodosOsPacientes() {
   return new Promise((resolve, reject) => {
-    const query = "SELECT idPaciente, nomePaciente, emailPaciente, senhaPaciente, telPaciente, dataNascPaciente FROM tbPaciente";
+    const query = "SELECT idPaciente, nomePaciente, emailPaciente, senhaPaciente, telPaciente, dataNascPaciente, fotoPerfilPaciente FROM tbPaciente";
 
     db.all(query, [], (err, rows) => {
       if (err) return reject(err);
@@ -122,7 +158,32 @@ async function cadastrarPaciente(dados) {
   });
 }
 
+function atualizarFotoPerfil(idPaciente, caminhoFoto) {
+  return new Promise((resolve, reject) => {
+    const query = `
+      UPDATE tbPaciente
+      SET fotoPerfilPaciente = ?
+      WHERE idPaciente = ?
+    `;
+
+    db.run(query, [caminhoFoto, idPaciente], function (err) {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      if (this.changes === 0) {
+        resolve(false);
+        return;
+      }
+
+      resolve(true);
+    });
+  });
+}
+
 module.exports = {
   buscarTodosOsPacientes,
-  cadastrarPaciente
+  cadastrarPaciente,
+  atualizarFotoPerfil
 };

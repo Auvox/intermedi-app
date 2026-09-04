@@ -2,6 +2,9 @@ const express = require("express");
 const cors = require("cors");
 const { buscarTodosOsPacientes } = require("./data/pacientes.js");
 
+const path = require('path');
+const patientRoutes = require('./routes/patientRoutes');
+
 const middlewareModulo = require("./middlewares/jsonHandlerUsuarios");
 const jsonHandlerUsuarios = middlewareModulo.jsonHandlerUsuarios || middlewareModulo.default || middlewareModulo;
 
@@ -11,10 +14,13 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads'))
+  );
 
 //app.use(jsonHandlerUsuarios);
 
 app.use("/api/auth", authRoutes);
+app.use('/api/pacientes', patientRoutes);
 
 app.get("/", (req, res) => {
     res.json({

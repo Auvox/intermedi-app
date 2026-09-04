@@ -1,26 +1,21 @@
 import { useState } from 'react';
-import { Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
-
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TextField } from '@/components/ui/text-field';
 import { Colors, Spacing } from '@/constants/theme';
+import { API_URL } from '@/constants/api';
+import { useUser } from '@/context/user-context';
 
 export function LoginForm() {
   const router = useRouter();
+  const { setUser } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
-
-  const API_URL = Platform.select({
-  ios: 'http://localhost:3000',    
-  android: 'http://192.168.1.3:3000',
-  default: 'http://localhost:3000',
-});
 
   async function handleSubmit() {
   try {
@@ -47,7 +42,7 @@ export function LoginForm() {
       return;
     }
 
-    await AsyncStorage.setItem('usuario', JSON.stringify(data.user));
+    await setUser(data.user);
 
     router.replace('/(tabs)');
 

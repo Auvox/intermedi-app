@@ -12,6 +12,8 @@ import { BackButton } from '@/components/ui/back-button';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/context/theme-context';
 import { Colors, Radius, Spacing } from '@/constants/theme';
+import { API_URL, getApiAssetUrl } from '@/constants/api';
+import { useUser } from '@/context/user-context';
 
 type ProfileForm = {
   nome: string;
@@ -35,9 +37,19 @@ export default function MeusDadosScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { user, setUser } = useUser();
   const form = emptyProfile;
 
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [photoToUpload, setPhotoToUpload] = useState<ImagePicker.ImagePickerAsset | null>(null);
+  const [savingPhoto, setSavingPhoto] = useState(false);
+  const displayedProfileImage = profileImage ?? getApiAssetUrl(user?.fotoPerfilPaciente);
+
+  function selecionarFoto(asset: ImagePicker.ImagePickerAsset) {
+    setProfileImage(asset.uri);
+    setPhotoToUpload(asset);
+  }
+
 async function escolherDaGaleria() {
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ['images'],
@@ -47,7 +59,7 @@ async function escolherDaGaleria() {
   });
 
   if (!result.canceled) {
-    setProfileImage(result.assets[0].uri);
+    selecionarFoto(result.assets[0]);
   }
 }
 
@@ -70,7 +82,7 @@ async function tirarFoto() {
   });
 
   if (!result.canceled) {
-    setProfileImage(result.assets[0].uri);
+    selecionarFoto(result.assets[0]);
   }
 }
 
@@ -89,6 +101,53 @@ function escolherFoto() {
       style: 'cancel',
     },
   ]);
+}
+
+async function salvarFoto() {
+  if (!user?.id) {
+    Alert.alert('Erro', 'Faça login novamente para salvar a foto.');
+    return;
+  }
+
+  if (!photoToUpload) {
+    Alert.alert('Foto de perfil', 'Escolha ou tire uma foto antes de salvar.');
+    return;
+  }
+
+  try {
+    setSavingPhoto(true);
+    const formData = new FormData();
+    const fileName = photoToUpload.fileName || `perfil-${user.id}.jpg`;
+
+    formData.append('foto', {
+      uri: photoToUpload.uri,
+      name: fileName,
+      type: photoToUpload.mimeType || 'image/jpeg',
+    } as unknown as Blob);
+
+    const response = await fetch(`${API_URL}/api/pacientes/${user.id}/foto`, {
+      method: 'PUT',
+      body: formData,
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Não foi possível salvar a foto.');
+    }
+
+    await setUser({
+      ...user,
+      fotoPerfilPaciente: data.fotoPerfilPaciente,
+    });
+    setPhotoToUpload(null);
+    setProfileImage(getApiAssetUrl(data.fotoPerfilPaciente));
+    Alert.alert('Pronto', 'Foto de perfil atualizada.');
+  } catch (error) {
+    console.error('Erro ao salvar foto:', error);
+    Alert.alert('Erro', error instanceof Error ? error.message : 'Não foi possível salvar a foto.');
+  } finally {
+    setSavingPhoto(false);
+  }
 }
 
   return (
@@ -122,8 +181,8 @@ function escolherFoto() {
               styles.avatar,
               { backgroundColor: colors.primarySoft, borderColor: colors.surface },
             ]}>
-            {profileImage ? (
-              <Image source={{ uri: profileImage }} style={styles.profileImage} />
+            {displayedProfileImage ? (
+              <Image source={{ uri: displayedProfileImage }} style={styles.profileImage} />
             ) : (
               <Ionicons name="person" size={44} color={colors.primary} />
             )}
@@ -185,7 +244,7 @@ function escolherFoto() {
         </ProfileSection>
 
         <View style={styles.actions}>
-          <Button title="Salvar alterações" />
+          <Button title="Salvar alterações" onPress={salvarFoto} loading={savingPhoto} />
           <Button title="Cancelar" variant="outline" onPress={() => router.back()} />
         </View>
       </ScrollView>

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { TextField } from '@/components/ui/text-field';
 import { useTheme } from '@/context/theme-context';
 import { Spacing } from '@/constants/theme';
+import { API_URL } from '@/constants/api';
 
 export default function CadastroScreen() {
   const router = useRouter();
@@ -19,12 +20,6 @@ export default function CadastroScreen() {
   const [senha, setSenha] = useState('');
   const [confirmaSenha, setConfirmaSenha] = useState('');
   const [remedioFrequente, setRemedioFrequente] = useState('');
-
-   const API_URL = Platform.select({
-    ios: 'http://localhost:3000',    
-    android: 'http://192.168.1.3:3000',
-    default: 'http://localhost:3000',
-    });
 
     async function handleRegister(){
       if(!nome || !cpf || !email || !senha){

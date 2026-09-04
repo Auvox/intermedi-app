@@ -1,9 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router/js-tabs';
-import { StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Colors, Radius, Spacing } from '@/constants/theme';
+import { getApiAssetUrl } from '@/constants/api';
+import { useUser } from '@/context/user-context';
 
 type TabIconProps = {
   focused: boolean;
@@ -18,6 +20,27 @@ function TabIcon({ focused, outlineName, filledName }: TabIconProps) {
         name={focused ? filledName : outlineName}
         size={20}
         color={focused ? Colors.primary : Colors.textOnPrimary}
+      />
+    </View>
+  );
+}
+
+function ProfileTabIcon({ focused }: { focused: boolean }) {
+  const { user } = useUser();
+  const profileImage = getApiAssetUrl(user?.fotoPerfilPaciente);
+
+  if (!profileImage) {
+    return <TabIcon focused={focused} outlineName="person-outline" filledName="person" />;
+  }
+
+  return (
+    <View style={[styles.iconWrapper, focused && styles.iconWrapperFocused]}>
+      <Image
+        source={{ uri: profileImage }}
+        style={[
+          styles.profileTabImage,
+          { borderColor: focused ? Colors.primary : Colors.textOnPrimary },
+        ]}
       />
     </View>
   );
@@ -88,9 +111,7 @@ export default function TabsLayout() {
         name="perfil"
         options={{
           title: 'Perfil',
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} outlineName="person-outline" filledName="person" />
-          ),
+          tabBarIcon: ({ focused }) => <ProfileTabIcon focused={focused} />,
         }}
       />
     </Tabs>
@@ -107,5 +128,11 @@ const styles = StyleSheet.create({
   },
   iconWrapperFocused: {
     backgroundColor: Colors.textOnPrimary,
+  },
+  profileTabImage: {
+    width: 24,
+    height: 24,
+    borderRadius: Radius.pill,
+    borderWidth: 1.5,
   },
 });

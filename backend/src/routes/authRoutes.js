@@ -29,7 +29,8 @@ router.post("/login", async (req, res) => {
             user: {
                 id: user.idPaciente || user.id,
                 nome: user.nomePaciente || user.nome,
-                email: user.emailPaciente || user.email
+                email: user.emailPaciente || user.email,
+                fotoPerfilPaciente: user.fotoPerfilPaciente || null
             }
         });
 
