@@ -35,6 +35,7 @@ function ThemedNavigator() {
         <Stack.Screen name="endereco-picker" />
         <Stack.Screen name="medicamento/[id]" />
         <Stack.Screen name="notificacoes" />
+        <Stack.Screen name="meus-dados" />
       </Stack>
     </>
   );
