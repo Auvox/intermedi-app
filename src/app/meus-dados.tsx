@@ -3,6 +3,9 @@ import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View, Alert, Im
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { File } from 'expo-file-system';
+import { fetch } from 'expo/fetch';
+
 import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -119,11 +122,8 @@ async function salvarFoto() {
     const formData = new FormData();
     const fileName = photoToUpload.fileName || `perfil-${user.id}.jpg`;
 
-    formData.append('foto', {
-      uri: photoToUpload.uri,
-      name: fileName,
-      type: photoToUpload.mimeType || 'image/jpeg',
-    } as unknown as Blob);
+    const file = new File(photoToUpload.uri);
+      formData.append('foto', file, fileName);
 
     const response = await fetch(`${API_URL}/api/pacientes/${user.id}/foto`, {
       method: 'PUT',
@@ -148,6 +148,8 @@ async function salvarFoto() {
   } finally {
     setSavingPhoto(false);
   }
+
+  
 }
 
   return (
