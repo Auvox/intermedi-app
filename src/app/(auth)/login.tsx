@@ -6,7 +6,7 @@ import { LoginForm } from '@/components/auth/login-form';
 import { AppText } from '@/components/ui/app-text';
 import { Wordmark } from '@/components/ui/brand-mark';
 import { useTheme } from '@/context/theme-context';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 import { useRouter } from 'expo-router';
 
 export default function LoginScreen() {
@@ -41,7 +41,6 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   scrollContent: {
     flexGrow: 1,

@@ -27,7 +27,7 @@ export default function BuscarMedicamentosScreen() {
       <AppHeader address="Etec Guaianases" />
 
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
-        <AppText variant="h3" style={styles.title}>
+        <AppText variant="h3" color={colors.textMuted}>
           Medicamentos perto de você
         </AppText>
 
@@ -53,7 +53,7 @@ export default function BuscarMedicamentosScreen() {
 
           {medicamentosFiltrados.length === 0 && (
             <View style={styles.emptyState}>
-              <View style={styles.emptyIcon}>
+              <View style={[styles.emptyIcon, { backgroundColor: colors.primarySoft }]}>
                 <AppText variant="h3" color={Colors.primary}>
                   ?
                 </AppText>
@@ -75,16 +75,12 @@ export default function BuscarMedicamentosScreen() {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   scrollContent: {
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.xl,
     paddingBottom: Spacing.xxxl,
     gap: Spacing.lg,
-  },
-  title: {
-    color: Colors.textMuted,
   },
   list: {
     gap: Spacing.lg,
@@ -99,7 +95,6 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: Colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.sm,

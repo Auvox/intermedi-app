@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/app-text';
 import { BackButton } from '@/components/ui/back-button';
 import { useTheme } from '@/context/theme-context';
-import { Colors, Radius, Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 
 export default function NotificacoesScreen() {
   const { colors } = useTheme();
@@ -17,16 +17,16 @@ export default function NotificacoesScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.notification}>
+        <View style={[styles.notification, { borderColor: colors.border, backgroundColor: colors.surface }]}>
           <AppText variant="h3">Medicamento disponível</AppText>
-          <AppText variant="body" color={Colors.textSecondary}>
+          <AppText variant="body" color={colors.textSecondary}>
             Teste 
           </AppText>
         </View>
 
-        <View style={styles.notification}>
+        <View style={[styles.notification, { borderColor: colors.border, backgroundColor: colors.surface }]}>
           <AppText variant="h3">Bem-vindo ao Intermed!</AppText>
-          <AppText variant="body" color={Colors.textSecondary}>
+          <AppText variant="body" color={colors.textSecondary}>
            Teste 2
           </AppText>
         </View>
@@ -38,7 +38,6 @@ export default function NotificacoesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -57,8 +56,6 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     gap: Spacing.xs,
     borderWidth: 1,
-    borderColor: Colors.border,
     borderRadius: Radius.md,
-    backgroundColor: Colors.surface,
   },
 });

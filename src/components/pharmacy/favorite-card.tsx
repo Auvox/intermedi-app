@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui/app-text';
+import { useTheme } from '@/context/theme-context';
 import type { Pharmacy } from '@/constants/mock-data';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 
@@ -12,8 +13,9 @@ export type FavoriteCardProps = {
 };
 
 export function FavoriteCard({ pharmacy, favorited = true, onToggleFavorite }: FavoriteCardProps) {
+  const { colors } = useTheme();
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.surfaceMuted }]}>
       <View style={styles.iconSquare}>
         <Ionicons name="location" size={26} color={Colors.textOnPrimary} />
       </View>
@@ -50,10 +52,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.md,
-    backgroundColor: Colors.surface,
     borderRadius: Radius.lg,
     borderWidth: 1,
-    borderColor: Colors.surfaceMuted,
     padding: Spacing.lg,
   },
   iconSquare: {

@@ -4,6 +4,7 @@ import { Linking, Pressable, StyleSheet, View } from 'react-native';
 import { StatusBadge } from '@/components/pharmacy/status-badge';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
+import { useTheme } from '@/context/theme-context';
 import type { Pharmacy } from '@/constants/mock-data';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 
@@ -12,6 +13,7 @@ export type PharmacyCardProps = {
 };
 
 export function PharmacyCard({ pharmacy }: PharmacyCardProps) {
+  const { colors } = useTheme();
   function handleViewRoute() {
     const query = encodeURIComponent(pharmacy.address);
     Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${query}`);
@@ -22,7 +24,7 @@ export function PharmacyCard({ pharmacy }: PharmacyCardProps) {
   }
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.surfaceMuted }]}>
       <View style={styles.topRow}>
         <View style={styles.iconSquare}>
           <Ionicons name="location" size={26} color={Colors.textOnPrimary} />
@@ -44,14 +46,14 @@ export function PharmacyCard({ pharmacy }: PharmacyCardProps) {
           </View>
         </View>
 
-        <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
+        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
       </View>
 
       <View style={styles.badgeRow}>
         <StatusBadge status={pharmacy.status} />
       </View>
 
-      <View style={styles.divider} />
+      <View style={[styles.divider, { backgroundColor: colors.surfaceMuted }]} />
 
       <View style={styles.bottomRow}>
         <Pressable
@@ -60,7 +62,7 @@ export function PharmacyCard({ pharmacy }: PharmacyCardProps) {
           accessibilityRole="button"
           accessibilityLabel={`Ligar para ${pharmacy.name}`}>
           <Ionicons name="call" size={18} color={Colors.primary} />
-          <AppText variant="body" color={Colors.text}>
+          <AppText variant="body" color={colors.text}>
             {pharmacy.phone}
           </AppText>
         </Pressable>
@@ -78,10 +80,8 @@ export function PharmacyCard({ pharmacy }: PharmacyCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: Colors.surface,
     borderRadius: Radius.lg,
     borderWidth: 1,
-    borderColor: Colors.surfaceMuted,
     padding: Spacing.lg,
     gap: Spacing.md,
   },
@@ -123,7 +123,6 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: Colors.surfaceMuted,
   },
   bottomRow: {
     flexDirection: 'row',

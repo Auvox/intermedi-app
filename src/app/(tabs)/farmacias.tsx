@@ -6,7 +6,7 @@ import { PharmacyCard } from '@/components/pharmacy/pharmacy-card';
 import { AppText } from '@/components/ui/app-text';
 import { useTheme } from '@/context/theme-context';
 import { pharmacies } from '@/constants/mock-data';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 
 export default function FarmaciasScreen() {
   const { colors } = useTheme();
@@ -25,7 +25,7 @@ export default function FarmaciasScreen() {
       <AppHeader address="Etec Guaianases" />
 
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
-        <AppText variant="h3" style={styles.title}>
+        <AppText variant="h3" color={colors.textMuted}>
           Farmácias perto de você
         </AppText>
         
@@ -48,16 +48,12 @@ export default function FarmaciasScreen() {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   scrollContent: {
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.xl,
     paddingBottom: Spacing.xxxl,
     gap: Spacing.lg,
-  },
-  title: {
-    color: Colors.textMuted,
   },
   list: {
     gap: Spacing.lg,

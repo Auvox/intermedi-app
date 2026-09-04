@@ -5,7 +5,7 @@ import { LoginForm } from '@/components/auth/login-form';
 import { registerSteps, StepIndicator } from '@/components/auth/step-indicator';
 import { Wordmark } from '@/components/ui/brand-mark';
 import { useTheme } from '@/context/theme-context';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 
 export default function RegisterLoginScreen() {
   const { colors } = useTheme();
@@ -33,7 +33,6 @@ export default function RegisterLoginScreen() {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   scrollContent: {
     flexGrow: 1,

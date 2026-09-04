@@ -27,7 +27,7 @@ export default function ForgotPasswordScreen() {
       style={[styles.flex, { backgroundColor: colors.background }]}
       behavior={Platform.select({ ios: 'padding', default: undefined })}>
       <SafeAreaView style={styles.flex}>
-        <View style={styles.topBar}>
+        <View style={[styles.topBar, { borderBottomColor: colors.border }]}>
           <Wordmark height={24} />
         </View>
 
@@ -63,13 +63,11 @@ export default function ForgotPasswordScreen() {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   topBar: {
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
   },
   scrollContent: {
     paddingHorizontal: Spacing.xl,

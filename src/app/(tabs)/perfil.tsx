@@ -1,17 +1,44 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, View } from 'react-native';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppHeader } from '@/components/home/app-header';
 import { ProfileMenuItem } from '@/components/profile/profile-menu-item';
 import { AppText } from '@/components/ui/app-text';
 import { useTheme } from '@/context/theme-context';
-import { currentUser } from '@/constants/mock-data';
 import { Colors, Radius, Spacing } from '@/constants/theme';
+import { useEffect, useState } from 'react';
+
+type UsuarioLogado = {
+  nome?: string;
+};
 
 export default function PerfilScreen() {
   const router = useRouter();
   const { colors } = useTheme();
+  const [nomeUsuario, setNomeUsuario] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function carregarUsuario() {
+      try {
+        const usuarioSalvo = await AsyncStorage.getItem('usuario');
+
+        if (!usuarioSalvo) return;
+
+        const usuario: UsuarioLogado = JSON.parse(usuarioSalvo);
+        const nome = usuario.nome?.trim();
+
+        if (nome) {
+          setNomeUsuario(nome);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar o usuário salvo:', error);
+      }
+    }
+
+    carregarUsuario();
+  }, []);
+
 
   return (
     <View style={[styles.flex, { backgroundColor: colors.background }]}>
@@ -23,7 +50,10 @@ export default function PerfilScreen() {
             <Ionicons name="person" size={28} color={Colors.textOnPrimary} />
           </View>
           <AppText variant="h3" color={Colors.textOnPrimary}>
-            Olá, <AppText variant="h3" color={Colors.textOnPrimary} style={styles.bold}>{currentUser.firstName}</AppText>
+            Olá,{' '}
+            <AppText variant="h2" color={Colors.textOnPrimary}>
+              {nomeUsuario ?? 'usuário'}!
+            </AppText>
           </AppText>
         </View>
 
@@ -44,7 +74,7 @@ export default function PerfilScreen() {
           <ProfileMenuItem icon="log-out-outline" title="Log out" subtitle="Sair da conta" onPress={() => router.replace('/welcome')} />
         </View>
 
-        <AppText variant="h3" color={Colors.textMuted} style={styles.moreTitle}>
+        <AppText variant="h3" color={colors.textMuted} style={styles.moreTitle}>
           Mais
         </AppText>
 
@@ -82,9 +112,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  bold: {
-    fontWeight: '800',
   },
   menuGroup: {
     borderRadius: Radius.lg,

@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui/app-text';
+import { useTheme } from '@/context/theme-context';
 import { Colors, Spacing } from '@/constants/theme';
 
 export type Step = {
@@ -20,6 +21,7 @@ export type StepIndicatorProps = {
 };
 
 export function StepIndicator({ steps, currentIndex }: StepIndicatorProps) {
+  const { colors } = useTheme();
   return (
     <View style={styles.container}>
       {steps.map((step, index) => {
@@ -31,22 +33,23 @@ export function StepIndicator({ steps, currentIndex }: StepIndicatorProps) {
               <View
                 style={[
                   styles.circle,
+                  { backgroundColor: colors.surfaceMuted },
                   (isActive || isDone) && styles.circleActive,
                 ]}>
                 <AppText
                   variant="bodyBold"
-                  color={isActive || isDone ? Colors.textOnPrimary : Colors.textMuted}
+                  color={isActive || isDone ? colors.textOnPrimary : colors.textMuted}
                   style={styles.circleLabel}>
                   {index + 1}
                 </AppText>
               </View>
               {index < steps.length - 1 && (
-                <View style={[styles.line, isDone && styles.lineActive]} />
+                <View style={[styles.line, { backgroundColor: colors.border }, isDone && styles.lineActive]} />
               )}
             </View>
             <AppText
               variant="caption"
-              color={isActive ? Colors.primary : Colors.textMuted}
+              color={isActive ? colors.primary : colors.textMuted}
               style={[styles.label, isActive && styles.labelActive]}>
               {step.label}
             </AppText>
@@ -75,7 +78,6 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: Colors.surfaceMuted,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -88,7 +90,6 @@ const styles = StyleSheet.create({
   line: {
     width: 56,
     height: 2,
-    backgroundColor: Colors.border,
     marginHorizontal: Spacing.xs,
   },
   lineActive: {

@@ -7,7 +7,7 @@ import { AppText } from '@/components/ui/app-text';
 import { BackButton } from '@/components/ui/back-button';
 import { useTheme } from '@/context/theme-context';
 import { getMedicineById, getPharmacyById } from '@/constants/mock-data';
-import { Colors, Radius, Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 
 export default function MedicamentoScreen() {
   const { colors } = useTheme();
@@ -44,8 +44,8 @@ export default function MedicamentoScreen() {
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
         <View style={styles.section}>
           <AppText variant="label">Dosagem</AppText>
-          <View style={styles.readonlyBox}>
-            <AppText variant="bodyBold" color={Colors.textMuted}>
+          <View style={[styles.readonlyBox, { backgroundColor: colors.surfaceMuted }]}>
+            <AppText variant="bodyBold" color={colors.textMuted}>
               {medicine.dosage}
             </AppText>
           </View>
@@ -53,15 +53,15 @@ export default function MedicamentoScreen() {
 
         <View style={styles.section}>
           <AppText variant="label">Descrição</AppText>
-          <View style={[styles.readonlyBox, styles.descriptionBox]}>
-            <AppText variant="body" color={Colors.textMuted}>
+          <View style={[styles.readonlyBox, styles.descriptionBox, { backgroundColor: colors.surfaceMuted }]}>
+            <AppText variant="body" color={colors.textMuted}>
               {medicine.description}
             </AppText>
           </View>
         </View>
 
         <View style={styles.section}>
-          <AppText variant="h3" color={Colors.textMuted}>
+          <AppText variant="h3" color={colors.textMuted}>
             Farmácias Disponíveis
           </AppText>
           <View style={styles.list}>
@@ -78,7 +78,6 @@ export default function MedicamentoScreen() {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   subHeader: {
     flexDirection: 'row',
@@ -103,7 +102,6 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   readonlyBox: {
-    backgroundColor: Colors.surfaceMuted,
     borderRadius: Radius.md,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.lg,

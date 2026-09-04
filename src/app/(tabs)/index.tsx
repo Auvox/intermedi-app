@@ -63,20 +63,20 @@ export default function InicioScreen() {
               '!'
             )}
           </AppText>
-          <AppText variant="body" color={Colors.textSecondary}>
+          <AppText variant="body" color={colors.textSecondary}>
             Encontre medicamentos perto de você!
           </AppText>
         </View>
 
         <View style={styles.section}>
-          <AppText variant="h3" style={styles.sectionTitle}>
+          <AppText variant="h3" color={colors.textMuted} style={styles.sectionTitle}>
             Categorias Principais
           </AppText>
           <CategoryCarousel categories={categories} />
         </View>
 
         <View style={styles.section}>
-          <AppText variant="h3" style={styles.sectionTitle}>
+          <AppText variant="h3" color={colors.textMuted} style={styles.sectionTitle}>
             Últimas Consultas
           </AppText>
           <View style={styles.consultaList}>
@@ -100,7 +100,6 @@ export default function InicioScreen() {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   scrollContent: {
     paddingHorizontal: Spacing.xl,
@@ -111,9 +110,7 @@ const styles = StyleSheet.create({
   section: {
     gap: Spacing.md,
   },
-  sectionTitle: {
-    color: Colors.textMuted,
-  },
+  sectionTitle: {},
   consultaList: {
     gap: Spacing.lg,
   },

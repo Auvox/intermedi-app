@@ -68,7 +68,7 @@ export default function EnderecoPickerScreen() {
 />
 
 {coordenadas ? (
-  <AppText variant="label" color={Colors.textSecondary}>
+  <AppText variant="label" color={colors.textSecondary}>
     {coordenadas}
   </AppText>
 ) : null}
@@ -93,7 +93,6 @@ export default function EnderecoPickerScreen() {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   scrollContent: {
     paddingHorizontal: Spacing.xl,

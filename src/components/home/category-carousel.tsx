@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { AppText } from '@/components/ui/app-text';
+import { useTheme } from '@/context/theme-context';
 import type { Category } from '@/constants/mock-data';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 
@@ -14,6 +15,7 @@ export type CategoryCarouselProps = {
 };
 
 export function CategoryCarousel({ categories }: CategoryCarouselProps) {
+  const { colors } = useTheme();
   const scrollRef = useRef<ScrollView>(null);
   const offset = useRef(0);
 
@@ -42,7 +44,7 @@ export function CategoryCarousel({ categories }: CategoryCarouselProps) {
             <View style={styles.iconCircle}>
               <Ionicons name={category.icon} size={28} color={Colors.textOnPrimary} />
             </View>
-            <AppText variant="label" style={styles.itemLabel} numberOfLines={1}>
+            <AppText variant="label" color={colors.text} style={styles.itemLabel} numberOfLines={1}>
               {category.label}
             </AppText>
           </View>
@@ -97,7 +99,6 @@ const styles = StyleSheet.create({
   },
   itemLabel: {
     textAlign: 'center',
-    color: Colors.text,
   },
  
   

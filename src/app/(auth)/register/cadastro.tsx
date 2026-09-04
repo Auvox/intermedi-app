@@ -7,7 +7,7 @@ import { registerSteps, StepIndicator } from '@/components/auth/step-indicator';
 import { Button } from '@/components/ui/button';
 import { TextField } from '@/components/ui/text-field';
 import { useTheme } from '@/context/theme-context';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 
 export default function CadastroScreen() {
   const router = useRouter();
@@ -127,7 +127,6 @@ export default function CadastroScreen() {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   scrollContent: {
     flexGrow: 1,

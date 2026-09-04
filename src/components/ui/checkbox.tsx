@@ -2,7 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet } from 'react-native';
 
 import { AppText } from '@/components/ui/app-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { useTheme } from '@/context/theme-context';
+import { Spacing } from '@/constants/theme';
 
 export type CheckboxProps = {
   checked: boolean;
@@ -11,6 +12,7 @@ export type CheckboxProps = {
 };
 
 export function Checkbox({ checked, onChange, label }: CheckboxProps) {
+  const { colors } = useTheme();
   return (
     <Pressable
       style={styles.row}
@@ -21,9 +23,9 @@ export function Checkbox({ checked, onChange, label }: CheckboxProps) {
       <Ionicons
         name={checked ? 'checkbox' : 'square-outline'}
         size={22}
-        color={checked ? Colors.primary : Colors.textMuted}
+        color={checked ? colors.primary : colors.textMuted}
       />
-      <AppText variant="body" color={Colors.textSecondary}>
+      <AppText variant="body" color={colors.textSecondary}>
         {label}
       </AppText>
     </Pressable>

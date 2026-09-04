@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui/app-text';
+import { useTheme } from '@/context/theme-context';
 import type { Medicine } from '@/constants/mock-data';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 
@@ -11,9 +12,10 @@ export type MedicineCardProps = {
 };
 
 export function MedicineCard({ medicine, onPress }: MedicineCardProps) {
+  const { colors } = useTheme();
   return (
     <Pressable
-      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+      style={({ pressed }) => [styles.card, { backgroundColor: colors.surface, borderColor: colors.surfaceMuted }, pressed && styles.cardPressed]}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={`Ver detalhes de ${medicine.name} ${medicine.dosage}`}>
@@ -37,19 +39,19 @@ export function MedicineCard({ medicine, onPress }: MedicineCardProps) {
           </View>
         </View>
 
-        <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
+        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
       </View>
 
       <View style={styles.statusRow}>
-        <View style={styles.statusBadge}>
+        <View style={[styles.statusBadge, { backgroundColor: colors.primarySoft }]}>
           <View style={styles.statusDot} />
-          <AppText variant="caption" color={Colors.primaryDark}>
+          <AppText variant="caption" color={colors.primaryDark}>
             Disponível para consulta
           </AppText>
         </View>
       </View>
 
-      <View style={styles.divider} />
+      <View style={[styles.divider, { backgroundColor: colors.surfaceMuted }]} />
 
       <View style={styles.bottomRow}>
         <View style={styles.pharmacyRow}>
@@ -71,10 +73,8 @@ export function MedicineCard({ medicine, onPress }: MedicineCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: Colors.surface,
     borderRadius: Radius.lg,
     borderWidth: 1,
-    borderColor: Colors.surfaceMuted,
     padding: Spacing.lg,
     gap: Spacing.md,
   },
@@ -113,7 +113,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: Colors.primarySoft,
     borderRadius: Radius.pill,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 5,
@@ -126,7 +125,6 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: Colors.surfaceMuted,
   },
   bottomRow: {
     flexDirection: 'row',

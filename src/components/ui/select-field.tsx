@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/ui/app-text';
+import { useTheme } from '@/context/theme-context';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 
 export type SelectFieldProps = {
@@ -17,22 +18,23 @@ export type SelectFieldProps = {
 export function SelectField({ placeholder, value, options, onSelect }: SelectFieldProps) {
   const [open, setOpen] = useState(false);
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
 
   return (
     <>
-      <Pressable style={styles.wrapper} onPress={() => setOpen(true)} accessibilityRole="button">
-        <AppText variant="body" color={value ? Colors.text : Colors.textMuted}>
+      <Pressable style={[styles.wrapper, { borderBottomColor: colors.border }]} onPress={() => setOpen(true)} accessibilityRole="button">
+        <AppText variant="body" color={value ? colors.text : colors.textMuted}>
           {value ?? placeholder}
         </AppText>
-        <Ionicons name="chevron-down" size={18} color={Colors.textMuted} />
+        <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
       </Pressable>
 
       <Modal visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>
-        <Pressable style={styles.backdrop} onPress={() => setOpen(false)}>
+        <Pressable style={[styles.backdrop, { backgroundColor: colors.overlay }]} onPress={() => setOpen(false)}>
           <Pressable
-            style={[styles.sheet, { paddingBottom: insets.bottom + Spacing.lg }]}
+            style={[styles.sheet, { paddingBottom: insets.bottom + Spacing.lg, backgroundColor: colors.surface }]}
             onPress={(event) => event.stopPropagation()}>
-            <View style={styles.sheetHandle} />
+            <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
             <AppText variant="h3" style={styles.sheetTitle}>
               {placeholder}
             </AppText>
@@ -42,7 +44,7 @@ export function SelectField({ placeholder, value, options, onSelect }: SelectFie
               style={styles.list}
               renderItem={({ item }) => (
                 <Pressable
-                  style={styles.option}
+                  style={[styles.option, { borderBottomColor: colors.surfaceMuted }]}
                   onPress={() => {
                     onSelect(item);
                     setOpen(false);
@@ -65,16 +67,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
     paddingBottom: Spacing.sm,
   },
   backdrop: {
     flex: 1,
-    backgroundColor: Colors.overlay,
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: Colors.surface,
     borderTopLeftRadius: Radius.xl,
     borderTopRightRadius: Radius.xl,
     paddingHorizontal: Spacing.xl,
@@ -86,7 +85,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: Radius.pill,
-    backgroundColor: Colors.border,
     marginBottom: Spacing.md,
   },
   sheetTitle: {
@@ -101,6 +99,5 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.surfaceMuted,
   },
 });

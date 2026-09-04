@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
 import { PillIcon } from '@/components/ui/brand-mark';
+import { useTheme } from '@/context/theme-context';
 
 import type { Medicine } from '@/constants/mock-data';
 import { Colors, Radius, Spacing } from '@/constants/theme';
@@ -19,17 +20,20 @@ export function ConsultaCard({
   highlighted = false,
   onConsultar,
 }: ConsultaCardProps) {
+  const { colors } = useTheme();
+
   return (
     <View
       style={[
         styles.card,
+        { backgroundColor: colors.surface, borderColor: colors.surfaceMuted },
         highlighted && styles.cardHighlighted,
       ]}
     >
       <Ionicons
         name="chevron-forward"
         size={18}
-        color={Colors.textMuted}
+        color={colors.textMuted}
         style={styles.chevron}
       />
 
@@ -73,10 +77,8 @@ export function ConsultaCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: Colors.surface,
     borderRadius: Radius.lg,
     borderWidth: 1,
-    borderColor: Colors.surfaceMuted,
     padding: Spacing.lg,
     gap: Spacing.md,
   },

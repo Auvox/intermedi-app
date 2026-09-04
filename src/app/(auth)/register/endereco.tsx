@@ -9,7 +9,7 @@ import { SelectField } from '@/components/ui/select-field';
 import { TextField } from '@/components/ui/text-field';
 import { useTheme } from '@/context/theme-context';
 import { brazilianStates } from '@/constants/mock-data';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 
 export default function EnderecoScreen() {
   const router = useRouter();
@@ -70,7 +70,6 @@ export default function EnderecoScreen() {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   scrollContent: {
     flexGrow: 1,

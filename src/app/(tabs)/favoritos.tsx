@@ -7,7 +7,7 @@ import { AppText } from '@/components/ui/app-text';
 import { BackButton } from '@/components/ui/back-button';
 import { useTheme } from '@/context/theme-context';
 import { favoritePharmacies } from '@/constants/mock-data';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 
 export default function FavoritosScreen() {
   const router = useRouter();
@@ -19,7 +19,7 @@ export default function FavoritosScreen() {
 
       <View style={styles.subHeader}>
         <BackButton tone="dark" onPress={() => router.replace('/(tabs)')} />
-        <AppText variant="h3" color={Colors.textMuted} style={styles.subHeaderTitle}>
+        <AppText variant="h3" color={colors.textMuted} style={styles.subHeaderTitle}>
           Favoritos
         </AppText>
         <View style={styles.subHeaderSpacer} />
@@ -39,7 +39,6 @@ export default function FavoritosScreen() {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   subHeader: {
     flexDirection: 'row',

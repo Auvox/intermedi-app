@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui/app-text';
+import { useTheme } from '@/context/theme-context';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 
 export type AddressListItemProps = {
@@ -21,12 +22,13 @@ export function AddressListItem({
   showMenu = false,
   onPress,
 }: AddressListItemProps) {
+  const { colors } = useTheme();
   return (
     <Pressable
-      style={[styles.row, selected && styles.rowSelected]}
+      style={[styles.row, { borderColor: selected ? colors.primary : colors.border, backgroundColor: colors.surface }, selected && styles.rowSelected]}
       onPress={onPress}
       accessibilityRole="button">
-      <Ionicons name={icon} size={22} color={Colors.text} />
+      <Ionicons name={icon} size={22} color={colors.text} />
 
       <View style={styles.info}>
         <AppText variant="bodyBold" numberOfLines={1}>
@@ -39,7 +41,7 @@ export function AddressListItem({
 
       {selected && <Ionicons name="checkmark-circle" size={22} color={Colors.primary} />}
       {showMenu && (
-        <Ionicons name="ellipsis-vertical" size={18} color={Colors.textMuted} style={styles.menuIcon} />
+        <Ionicons name="ellipsis-vertical" size={18} color={colors.textMuted} style={styles.menuIcon} />
       )}
     </Pressable>
   );
@@ -51,13 +53,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.border,
     borderRadius: Radius.lg,
     paddingVertical: Spacing.lg,
     paddingHorizontal: Spacing.lg,
   },
   rowSelected: {
-    borderColor: Colors.primary,
     borderWidth: 1.5,
   },
   info: {
