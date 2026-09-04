@@ -39,6 +39,7 @@ export default function PerfilScreen() {
             title="Meus dados"
             subtitle="Faça alterações na sua conta"
             showWarning
+            onPress={() => router.push('/meus-dados')}
           />
           <ProfileMenuItem icon="log-out-outline" title="Log out" subtitle="Sair da conta" onPress={() => router.replace('/welcome')} />
         </View>
