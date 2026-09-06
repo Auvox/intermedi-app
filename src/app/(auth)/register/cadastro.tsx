@@ -56,7 +56,7 @@ export default function CadastroScreen() {
       const data = await response.json();
 
       if(!response.ok) {
-        alert(data.message || "Erro ao finalizar o cadastro");
+        alert(data.message || "Erro ao finalizar o cadastro do usuário");
         return;
       }
 

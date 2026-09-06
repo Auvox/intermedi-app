@@ -22,6 +22,53 @@ export default function EnderecoScreen() {
   const [estado, setEstado] = useState<string | undefined>(undefined);
   const [complemento, setComplemento] = useState('');
 
+   const API_URL = Platform.select({
+    ios: 'http://localhost:3000',    
+    android: 'http://10.0.2.2:3000',   
+    default: 'http://localhost:3000',
+    });
+
+    async function handleRegister(){
+      if(!cep || !rua || !numero || !bairro || !cidade || !estado){
+        alert("Preencha os dados obrigatórios, por favor.");
+        return;
+      }
+      try {
+      // Envia os dados para a API.
+      const response = await fetch(`${API_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cepEndereco: cep,
+          ruaEndereco: rua,
+          numeroEndereco: numero,
+          bairroEndereco: bairro,
+          cidadeEndereco: cidade,
+          ufEndereco: estado,
+          complementoEndereco: complemento
+        }),
+      });
+
+      const data = await response.json();
+
+      if(!response.ok) {
+        alert(data.message || "Erro ao finalizar o cadastro de endereço");
+        return;
+      }
+
+      // exibe os dados cadastrados no terminal do backend.
+      console.log("Usuário cadastrado com sucesso", data.user);
+      alert("Conta criada com sucesso!");
+
+      router.replace('/register/login');
+    }
+    catch(err){
+      console.error("Erro ao conectar com o backend", err);
+       alert('Não foi possível conectar ao servidor de cadastro.');
+    }
+  }
   return (
     <KeyboardAvoidingView
       style={[styles.flex, { backgroundColor: colors.background }]}
