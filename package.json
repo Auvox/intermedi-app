@@ -17,7 +17,7 @@
     "expo-image-picker": "~57.0.16",
     "expo-linking": "~57.0.9",
     "expo-location": "~57.0.16",
-    "expo-router": "~57.0.19",
+    "expo-router": "~57.0.20",
     "expo-splash-screen": "~57.0.8",
     "expo-status-bar": "~57.0.1",
     "expo-symbols": "~57.0.2",
@@ -43,7 +43,7 @@
     "eslint": "^9.0.0",
     "eslint-config-expo": "~57.0.2",
     "tsx": "^4.23.12",
-    "typescript": "~6.0.3"
+    "typescript": "~5.9.3"
   },
   "scripts": {
     "start": "expo start",
