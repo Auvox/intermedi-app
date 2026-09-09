@@ -9,6 +9,7 @@ import {
 } from "react-native";
 
 import { AuthHeader } from "@/components/auth/auth-header";
+import { useRegisterData } from "@/components/auth/context-login";
 import { registerSteps, StepIndicator } from "@/components/auth/step-indicator";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/text-field";
@@ -18,16 +19,21 @@ import { useTheme } from "@/context/theme-context";
 export default function CadastroScreen() {
   const router = useRouter();
   const { colors } = useTheme();
+  const { registerData, setRegisterData } = useRegisterData();
 
-  const [nome, setNome] = useState("");
-  const [cpf, setCpf] = useState("");
-  const [telefone, setTelefone] = useState("");
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [confirmaSenha, setConfirmaSenha] = useState("");
-  const [remedioFrequente, setRemedioFrequente] = useState("");
+  const [nome, setNome] = useState(registerData.nome);
+  const [cpf, setCpf] = useState(registerData.cpf);
+  const [telefone, setTelefone] = useState(registerData.telefone);
+  const [email, setEmail] = useState(registerData.email);
+  const [senha, setSenha] = useState(registerData.senha);
+  const [confirmaSenha, setConfirmaSenha] = useState(
+    registerData.confirmaSenha,
+  );
+  const [remedioFrequente, setRemedioFrequente] = useState(
+    registerData.remedioFrequente,
+  );
 
-  async function handleRegister() {
+  function handleNextStep() {
     // Validação dos campos obrigatórios
     if (!nome || !cpf || !email || !senha) {
       alert("Preencha os dados obrigatórios, por favor.");
@@ -40,51 +46,19 @@ export default function CadastroScreen() {
       return;
     }
 
-    try {
-      const response = await fetch("http://localhost:3000/paciente", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          nomePaciente: nome,
-          cpfPaciente: cpf,
-          telPaciente: telefone,
-          emailPaciente: email,
-          senhaPaciente: senha,
-          medicamentoFrequentePaciente: remedioFrequente,
+    // Apenas guarda os dados da 1ª etapa no contexto. A requisição só
+    // acontece de fato quando o usuário finalizar a 2ª etapa (endereço).
+    setRegisterData({
+      nome,
+      cpf,
+      telefone,
+      email,
+      senha,
+      confirmaSenha,
+      remedioFrequente,
+    });
 
-          // Endereço será preenchido na próxima etapa
-          cepPaciente: null,
-          ruaPaciente: null,
-          numeroPaciente: null,
-          bairroPaciente: null,
-          cidadePaciente: null,
-          estadoPaciente: null,
-          complementoPaciente: null,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        console.error("Erro da API:", data);
-
-        alert(data.error || "Erro ao finalizar o cadastro.");
-        return;
-      }
-
-      console.log("Paciente cadastrado com sucesso:", data);
-
-      alert("Conta criada com sucesso!");
-
-      // Vai para a tela de endereço
-      router.replace("/register/endereco");
-    } catch (error) {
-      console.error("Erro ao conectar com o backend:", error);
-
-      alert("Não foi possível conectar ao servidor de cadastro.");
-    }
+    router.push("/register/endereco");
   }
 
   return (
@@ -151,7 +125,7 @@ export default function CadastroScreen() {
 
           <Button
             title="Próxima etapa"
-            onPress={handleRegister}
+            onPress={handleNextStep}
             style={styles.submitButton}
           />
         </View>

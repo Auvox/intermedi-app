@@ -1,45 +1,21 @@
-import { useEffect } from 'react';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { ThemeProvider, useTheme } from '@/context/theme-context';
-import { UserProvider } from '@/context/user-context';
+import { Stack } from "expo-router";
 
-SplashScreen.preventAutoHideAsync();
+import { RegisterProvider } from "@/components/auth/context-login";
+import { UserProvider } from "@/context/user-context";
 
-export default function RootLayout() {
-  useEffect(() => {
-    SplashScreen.hideAsync();
-  }, []);
-
+export default function AuthLayout() {
   return (
-    <ThemeProvider>
+    <RegisterProvider>
       <UserProvider>
-        <ThemedNavigator />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="welcome" />
+          <Stack.Screen name="login" />
+          <Stack.Screen name="forgot-password" />
+          <Stack.Screen name="register/cadastro" />
+          <Stack.Screen name="register/endereco" />
+          <Stack.Screen name="register/login" />
+        </Stack>
       </UserProvider>
-    </ThemeProvider>
-  );
-}
-
-function ThemedNavigator() {
-  const { colors, isDark } = useTheme();
-
-  return (
-    <>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: colors.background },
-        }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="(auth)" />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="endereco-picker" />
-        <Stack.Screen name="medicamento/[id]" />
-        <Stack.Screen name="notificacoes" />
-        <Stack.Screen name="meus-dados" />
-      </Stack>
-    </>
+    </RegisterProvider>
   );
 }
