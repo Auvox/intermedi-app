@@ -52,7 +52,7 @@ export default function SplashRedirectScreen() {
       <CrossPatternBackground />
 
       <View style={styles.center}>
-        <Wordmark height={90} variant="light" />
+        <Wordmark variant="light" />
       </View>
 
       <View style={styles.dots}>

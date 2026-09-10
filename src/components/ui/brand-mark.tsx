@@ -1,7 +1,8 @@
-import { Image } from 'react-native';
+import { Image, View, useWindowDimensions } from 'react-native';
+import { useTheme } from '@/context/theme-context';
 
-const WORDMARK_ASPECT = 1646 / 1046;
-const WORDMARK_LIGHT_ASPECT = 581 / 370;
+// Display only the lettering of the original asset, excluding the surrounding cross.
+const WORDMARK_CROP = { x: 44, y: 132, width: 530, height: 96 };
 const PILL_ASPECT = 324 / 938;
 
 export type WordmarkVariant = 'colored' | 'light';
@@ -11,22 +12,36 @@ export type WordmarkProps = {
   variant?: WordmarkVariant;
 };
 
-export function Wordmark({ height = 32, variant = 'colored' }: WordmarkProps) {
-  const isLight = variant === 'light';
+export function Wordmark({ height = 36, variant }: WordmarkProps) {
+  const { isDark, colors } = useTheme();
+  const { width } = useWindowDimensions();
+  const isLight = variant ? variant === 'light' : isDark;
+  const scale = Math.min(height / WORDMARK_CROP.height, Math.max(1, width - 48) / WORDMARK_CROP.width);
 
   return (
-    <Image
-      source={
-        isLight
-          ? require('../../../assets/images/brand/wordmark-light.png')
-          : require('../../../assets/images/brand/wordmark.png')
-      }
-      resizeMode="contain"
+    <View
+      accessibilityLabel="Intermedi"
+      accessibilityRole="image"
+      accessible
       style={{
-        height,
-        width: height * (isLight ? WORDMARK_LIGHT_ASPECT : WORDMARK_ASPECT),
-      }}
-    />
+        height: WORDMARK_CROP.height * scale,
+        width: WORDMARK_CROP.width * scale,
+        overflow: 'hidden',
+        flexShrink: 0,
+      }}>
+      <Image
+        source={require('../../../assets/images/brand/wordmark-light.png')}
+        tintColor={isLight ? colors.textOnPrimary : colors.primary}
+        accessible={false}
+        style={{
+          position: 'absolute',
+          width: 581 * scale,
+          height: 370 * scale,
+          left: -WORDMARK_CROP.x * scale,
+          top: -WORDMARK_CROP.y * scale,
+        }}
+      />
+    </View>
   );
 }
 

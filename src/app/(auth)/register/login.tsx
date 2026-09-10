@@ -14,13 +14,13 @@ export default function RegisterLoginScreen() {
       style={[styles.flex, { backgroundColor: colors.background }]}
       behavior={Platform.select({ ios: 'padding', default: undefined })}>
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
-        <AuthHeader title="Login" showBack />
+        <AuthHeader title="Login" showBack compact />
 
         <View style={styles.body}>
           <StepIndicator steps={registerSteps} currentIndex={2} />
 
           <View style={styles.logoWrapper}>
-            <Wordmark height={36} />
+            <Wordmark />
           </View>
 
           <LoginForm />

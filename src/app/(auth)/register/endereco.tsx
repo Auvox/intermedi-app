@@ -27,7 +27,7 @@ export default function EnderecoScreen() {
       style={[styles.flex, { backgroundColor: colors.background }]}
       behavior={Platform.select({ ios: 'padding', default: undefined })}>
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
-        <AuthHeader title="Seu Endereço" showBack />
+        <AuthHeader title="Seu endereço" showBack compact />
 
         <View style={styles.body}>
           <StepIndicator steps={registerSteps} currentIndex={1} />
@@ -58,7 +58,10 @@ export default function EnderecoScreen() {
 
           <Button
             title="Cadastrar"
-            onPress={() => router.push('/register/login')}
+            onPress={() => {
+              alert('Conta criada com sucesso!');
+              router.push('/register/login');
+            }}
             style={styles.submitButton}
           />
         </View>
@@ -79,7 +82,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.xl,
     paddingBottom: Spacing.xxl,
-    justifyContent: 'space-between',
     gap: Spacing.xxl,
   },
   form: {

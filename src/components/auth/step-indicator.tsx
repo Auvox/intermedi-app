@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/ui/app-text';
 import { useTheme } from '@/context/theme-context';
 import { Colors, Spacing } from '@/constants/theme';
+import { Ionicons } from '@expo/vector-icons';
 
 export type Step = {
   key: string;
@@ -28,28 +29,27 @@ export function StepIndicator({ steps, currentIndex }: StepIndicatorProps) {
         const isActive = index === currentIndex;
         const isDone = index < currentIndex;
         return (
-          <View key={step.key} style={styles.stepGroup}>
+          <View key={step.key} style={styles.stepGroup} accessible accessibilityLabel={`Etapa ${index + 1} de ${steps.length}: ${step.label}${isActive ? ', atual' : isDone ? ', concluída' : ''}`}>
             <View style={styles.row}>
+              <View style={[styles.line, { backgroundColor: index <= currentIndex ? colors.primary : colors.border, opacity: index === 0 ? 0 : 1 }]} />
               <View
                 style={[
                   styles.circle,
                   { backgroundColor: colors.surfaceMuted },
                   (isActive || isDone) && styles.circleActive,
                 ]}>
-                <AppText
+                {isDone ? <Ionicons name="checkmark" size={18} color={colors.textOnPrimary} /> : <AppText
                   variant="bodyBold"
                   color={isActive || isDone ? colors.textOnPrimary : colors.textMuted}
                   style={styles.circleLabel}>
                   {index + 1}
-                </AppText>
+                </AppText>}
               </View>
-              {index < steps.length - 1 && (
-                <View style={[styles.line, { backgroundColor: colors.border }, isDone && styles.lineActive]} />
-              )}
+              <View style={[styles.line, { backgroundColor: isDone ? colors.primary : colors.border, opacity: index === steps.length - 1 ? 0 : 1 }]} />
             </View>
             <AppText
               variant="caption"
-              color={isActive ? colors.primary : colors.textMuted}
+              color={isActive || isDone ? colors.primary : colors.textSecondary}
               style={[styles.label, isActive && styles.labelActive]}>
               {step.label}
             </AppText>
@@ -65,19 +65,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'center',
-    paddingHorizontal: Spacing.xl,
+    width: '100%',
   },
   stepGroup: {
+    flex: 1,
+    minWidth: 0,
     alignItems: 'center',
   },
   row: {
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
   },
   circle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    flexShrink: 0,
+    marginHorizontal: Spacing.xs,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -88,15 +93,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   line: {
-    width: 56,
+    flex: 1,
     height: 2,
-    marginHorizontal: Spacing.xs,
-  },
-  lineActive: {
-    backgroundColor: Colors.primary,
   },
   label: {
-    marginTop: Spacing.xs,
+    marginTop: Spacing.sm,
+    textAlign: 'center',
   },
   labelActive: {
     fontWeight: '700',

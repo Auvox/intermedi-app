@@ -1,6 +1,7 @@
-import { Ionicons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router/js-tabs';
-import { Image, StyleSheet, View } from 'react-native';
+import { Easing, Image, StyleSheet, View } from 'react-native';
+import { useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Colors, Radius, Spacing } from '@/constants/theme';
@@ -9,16 +10,16 @@ import { useUser } from '@/context/user-context';
 
 type TabIconProps = {
   focused: boolean;
-  outlineName: keyof typeof Ionicons.glyphMap;
-  filledName: keyof typeof Ionicons.glyphMap;
+  outlineName: keyof typeof MaterialCommunityIcons.glyphMap;
+  filledName: keyof typeof MaterialCommunityIcons.glyphMap;
 };
 
 function TabIcon({ focused, outlineName, filledName }: TabIconProps) {
   return (
     <View style={[styles.iconWrapper, focused && styles.iconWrapperFocused]}>
-      <Ionicons
+      <MaterialCommunityIcons
         name={focused ? filledName : outlineName}
-        size={20}
+        size={25}
         color={focused ? Colors.primary : Colors.textOnPrimary}
       />
     </View>
@@ -30,7 +31,7 @@ function ProfileTabIcon({ focused }: { focused: boolean }) {
   const profileImage = getApiAssetUrl(user?.fotoPerfilPaciente);
 
   if (!profileImage) {
-    return <TabIcon focused={focused} outlineName="person-outline" filledName="person" />;
+    return <TabIcon focused={focused} outlineName="account-outline" filledName="account" />;
   }
 
   return (
@@ -48,22 +49,34 @@ function ProfileTabIcon({ focused }: { focused: boolean }) {
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
+  const reduceMotion = useReducedMotion();
+  const bottomPadding = Math.max(insets.bottom, Spacing.md);
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
+        animation: reduceMotion ? 'none' : 'fade',
+        transitionSpec: {
+          animation: 'timing',
+          config: { duration: 220, easing: Easing.inOut(Easing.cubic) },
+        },
         tabBarActiveTintColor: Colors.textOnPrimary,
         tabBarInactiveTintColor: 'rgba(255,255,255,0.75)',
+        tabBarShowLabel: true,
+        tabBarLabelPosition: 'below-icon',
+        tabBarIconStyle: { width: 34, height: 34 },
         tabBarStyle: {
           backgroundColor: Colors.primary,
           borderTopWidth: 0,
-          height: 64 + insets.bottom,
+          height: 64 + bottomPadding,
+          flexShrink: 0,
           paddingTop: Spacing.sm,
-          paddingBottom: insets.bottom,
+          paddingBottom: bottomPadding,
         },
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 11,
+          lineHeight: 16,
           fontWeight: '700',
         },
       }}>
@@ -72,7 +85,7 @@ export default function TabsLayout() {
         options={{
           title: 'Farmácias',
           tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} outlineName="medical-outline" filledName="medical" />
+            <TabIcon focused={focused} outlineName="store-plus-outline" filledName="store-plus" />
           ),
         }}
       />
@@ -83,8 +96,8 @@ export default function TabsLayout() {
           tabBarIcon: ({ focused }) => (
             <TabIcon
               focused={focused}
-              outlineName="medkit-outline"
-              filledName="medkit"
+              outlineName="pill"
+              filledName="pill"
             />
           ),
         }}
@@ -94,7 +107,7 @@ export default function TabsLayout() {
         options={{
           title: 'Início',
           tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} outlineName="home-outline" filledName="home" />
+            <TabIcon focused={focused} outlineName="home-variant-outline" filledName="home-variant" />
           ),
         }}
       />

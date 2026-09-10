@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
@@ -8,7 +8,7 @@ import { useTheme } from '@/context/theme-context';
 import type { Category } from '@/constants/mock-data';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 
-const SCROLL_STEP = 216;
+const MIN_ITEM_WIDTH = 84;
 
 export type CategoryCarouselProps = {
   categories: Category[];
@@ -18,9 +18,13 @@ export function CategoryCarousel({ categories }: CategoryCarouselProps) {
   const { colors } = useTheme();
   const scrollRef = useRef<ScrollView>(null);
   const offset = useRef(0);
+  const [viewportWidth, setViewportWidth] = useState(0);
+  const visibleItems = Math.max(1, Math.floor(viewportWidth / MIN_ITEM_WIDTH));
+  const itemWidth = viewportWidth > 0 ? viewportWidth / visibleItems : MIN_ITEM_WIDTH;
+  const maxOffset = Math.max(0, categories.length * itemWidth - viewportWidth);
 
   function scrollBy(delta: number) {
-    offset.current = Math.max(0, offset.current + delta);
+    offset.current = Math.min(maxOffset, Math.max(0, offset.current + delta));
     scrollRef.current?.scrollTo({ x: offset.current, animated: true });
   }
 
@@ -28,19 +32,24 @@ export function CategoryCarousel({ categories }: CategoryCarouselProps) {
     <View style={styles.row}>
       <Pressable
         style={styles.arrowButton}
-        onPress={() => scrollBy(-SCROLL_STEP)}
+        onPress={() => scrollBy(-visibleItems * itemWidth)}
         accessibilityRole="button"
         accessibilityLabel="Categorias anteriores">
         <Ionicons name="chevron-back" size={18} color={Colors.textOnPrimary} />
       </Pressable>
 
-      <ScrollView  style={styles.scrollView}
+      <ScrollView style={styles.scrollView}
         ref={scrollRef}
         horizontal
+        onLayout={(event) => setViewportWidth(event.nativeEvent.layout.width)}
+        onScroll={(event) => { offset.current = event.nativeEvent.contentOffset.x; }}
+        scrollEventThrottle={16}
+        snapToInterval={itemWidth}
+        decelerationRate="fast"
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}>
         {categories.map((category) => (
-          <View key={category.id} style={styles.item}>
+          <View key={category.id} style={[styles.item, { width: itemWidth }]}>
             <View style={styles.iconCircle}>
               <Ionicons name={category.icon} size={28} color={Colors.textOnPrimary} />
             </View>
@@ -53,7 +62,7 @@ export function CategoryCarousel({ categories }: CategoryCarouselProps) {
 
       <Pressable
         style={styles.arrowButton}
-        onPress={() => scrollBy(SCROLL_STEP)}
+        onPress={() => scrollBy(visibleItems * itemWidth)}
         accessibilityRole="button"
         accessibilityLabel="Próximas categorias">
         <Ionicons name="chevron-forward" size={18} color={Colors.textOnPrimary} />
@@ -69,6 +78,7 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   arrowButton: {
+    flexShrink: 0,
     width: 32,
     height: 32,
     borderRadius: Radius.pill,
@@ -78,18 +88,18 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    minWidth: 0,
   },
   scrollContent: {
-    gap: Spacing.xl,
-    paddingHorizontal: Spacing.xs,
-    flexGrow: 1,
+    paddingVertical: Spacing.xs,
   },
   item: {
     alignItems: 'center',
-    width: 84,
+    flexShrink: 0,
     gap: Spacing.xs,
   },
   iconCircle: {
+    flexShrink: 0,
     width: 64,
     height: 64,
     borderRadius: Radius.pill,
@@ -99,7 +109,7 @@ const styles = StyleSheet.create({
   },
   itemLabel: {
     textAlign: 'center',
+    paddingHorizontal: Spacing.xs,
+    maxWidth: '100%',
   },
- 
-  
 });
