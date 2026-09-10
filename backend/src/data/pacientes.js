@@ -100,7 +100,8 @@ db.serialize(() => {
 
 function buscarTodosOsPacientes() {
   return new Promise((resolve, reject) => {
-    const query = "SELECT idPaciente, nomePaciente, emailPaciente, senhaPaciente, telPaciente, dataNascPaciente, fotoPerfilPaciente FROM tbPaciente";
+    const query = `SELECT p.*, r.nomeRemedio AS remedioFrequente FROM tbPaciente p
+      LEFT JOIN tbCadastroRemedio r ON r.idRemedio = p.fkIdRemedioFrequente`;
 
     db.all(query, [], (err, rows) => {
       if (err) return reject(err);
@@ -182,7 +183,41 @@ function atualizarFotoPerfil(idPaciente, caminhoFoto) {
   });
 }
 
+function perfilPublico(p) {
+  return { id: p.idPaciente, nome: p.nomePaciente, email: p.emailPaciente,
+    cpf: p.cpfPaciente || '', telefone: p.telPaciente || '',
+    remedioFrequente: p.remedioFrequente || '', fotoPerfilPaciente: p.fotoPerfilPaciente || null };
+}
+
+function executarAlteracao(sql, params) {
+  return new Promise((resolve, reject) => {
+    db.run(sql, params, function(err) {
+      if (err) return reject(err);
+      resolve(this.changes > 0);
+    });
+  });
+}
+
+async function editarPaciente(id, dados) {
+  const remedioId = await buscarIdRemedioPorNome(dados.remedioFrequente);
+  if (dados.remedioFrequente && !remedioId) {
+    const error = new Error('Medicamento não encontrado. Informe o nome cadastrado ou deixe em branco.');
+    error.status = 400;
+    throw error;
+  }
+  return executarAlteracao(`UPDATE tbPaciente SET nomePaciente = ?, cpfPaciente = ?,
+    telPaciente = ?, emailPaciente = ?, fkIdRemedioFrequente = ?,
+    senhaPaciente = COALESCE(NULLIF(?, ''), senhaPaciente)
+    WHERE idPaciente = ? AND senhaPaciente = ?`,
+    [dados.nome, dados.cpf, dados.telefone, dados.email, remedioId, dados.senha || '', id, dados.senhaAtual]);
+}
+
+function excluirPaciente(id, senhaAtual) {
+  return executarAlteracao('DELETE FROM tbPaciente WHERE idPaciente = ? AND senhaPaciente = ?', [id, senhaAtual]);
+}
+
 module.exports = {
+  perfilPublico, editarPaciente, excluirPaciente,
   buscarTodosOsPacientes,
   cadastrarPaciente,
   atualizarFotoPerfil

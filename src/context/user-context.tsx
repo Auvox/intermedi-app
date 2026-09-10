@@ -5,6 +5,9 @@ export type LoggedUser = {
   id: number;
   nome: string;
   email: string;
+  cpf?: string;
+  telefone?: string;
+  remedioFrequente?: string;
   fotoPerfilPaciente?: string | null;
 };
 

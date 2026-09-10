@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
@@ -13,6 +13,8 @@ import { API_URL } from '@/constants/api';
 export default function CadastroScreen() {
   const router = useRouter();
   const { colors } = useTheme();
+  const envioEmAndamento = useRef(false);
+  const [salvando, setSalvando] = useState(false);
   const [nome, setNome] = useState('');
   const [cpf, setCpf] = useState('');
   const [telefone, setTelefone] = useState('');
@@ -22,6 +24,7 @@ export default function CadastroScreen() {
   const [remedioFrequente, setRemedioFrequente] = useState('');
 
     async function handleRegister(){
+      if (envioEmAndamento.current) return;
       if(!nome || !cpf || !email || !senha){
         alert("Preencha os dados obrigatórios, por favor.");
         return;
@@ -31,6 +34,8 @@ export default function CadastroScreen() {
         return;
       }
 
+      envioEmAndamento.current = true;
+      setSalvando(true);
       try {
       // Envia os dados para a API.
       const response = await fetch(`${API_URL}/api/auth/register`, {
@@ -64,6 +69,9 @@ export default function CadastroScreen() {
     catch(err){
       console.error("Erro ao conectar com o backend", err);
        alert('Não foi possível conectar ao servidor de cadastro.');
+    } finally {
+      envioEmAndamento.current = false;
+      setSalvando(false);
     }
   }
   
@@ -111,6 +119,7 @@ export default function CadastroScreen() {
           <Button
             title="Próxima etapa"
             onPress={handleRegister}
+            loading={salvando}
             style={styles.submitButton}
           />
         </View>

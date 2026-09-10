@@ -12,7 +12,7 @@ import { FontSize, Radius, Spacing } from '@/constants/theme';
 
 type EditableProfileFieldProps = Pick<
   TextInputProps,
-  'autoCapitalize' | 'keyboardType' | 'maxLength' | 'secureTextEntry'
+  'autoCapitalize' | 'keyboardType' | 'maxLength' | 'secureTextEntry' | 'onChangeText' | 'editable'
 > & {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
@@ -46,6 +46,7 @@ export function EditableProfileField({
         <AppText variant="bodyBold">{label}</AppText>
         <TextInput
           value={value}
+          accessibilityLabel={label}
           placeholder={placeholder}
           placeholderTextColor={colors.textMuted}
           editable={false}

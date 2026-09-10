@@ -1,6 +1,6 @@
 const express = require("express");
 
-const { buscarTodosOsPacientes } = require("../data/pacientes");
+const { buscarTodosOsPacientes, perfilPublico } = require("../data/pacientes");
 const { cadastrarPaciente } = require('../data/pacientes');
 const router = express.Router();
 
@@ -26,12 +26,7 @@ router.post("/login", async (req, res) => {
         // 5. Mapeia os dados dinamicamente baseado nos campos que o SQLite retornar
         res.json({
             message: "Nice",
-            user: {
-                id: user.idPaciente || user.id,
-                nome: user.nomePaciente || user.nome,
-                email: user.emailPaciente || user.email,
-                fotoPerfilPaciente: user.fotoPerfilPaciente || null
-            }
+            user: perfilPublico(user)
         });
 
     } catch (error) {
@@ -42,7 +37,7 @@ router.post("/login", async (req, res) => {
 
 router.post('/register', async (req, res) => {
    try {
-    console.log("Dados recebidos no backend:", req.body);
+
 
     // ⚠️ ESSA LINHA É A QUE INSERE DE FATO NO BANCO:
     const resultado = await cadastrarPaciente(req.body); 
@@ -54,6 +49,9 @@ router.post('/register', async (req, res) => {
     });
 
   } catch (err) {
+    if (err.code === 'SQLITE_CONSTRAINT' && err.message.includes('tbPaciente.cpfPaciente')) {
+      return res.status(409).json({ message: 'Este CPF já está cadastrado. Faça login na sua conta ou confira o CPF informado.' });
+    }
     console.error("Erro na rota de cadastro:", err.message);
     return res.status(400).json({ 
       message: 'Erro ao salvar no banco: ' + err.message 

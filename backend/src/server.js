@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { buscarTodosOsPacientes } = require("./data/pacientes.js");
+const { buscarTodosOsPacientes, perfilPublico } = require("./data/pacientes.js");
 
 const path = require('path');
 const patientRoutes = require('./routes/patientRoutes');
@@ -31,7 +31,7 @@ app.get("/", (req, res) => {
 app.get("/api/pacientes", async (req, res) => {
     try {
         const pacientes = await buscarTodosOsPacientes();
-        res.status(200).json(pacientes);
+        res.status(200).json(pacientes.map(perfilPublico));
     } catch (error) {
         res.status(500).json({ error: "Erro ao buscar pacientes no banco SQL" });
     }
