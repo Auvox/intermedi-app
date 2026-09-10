@@ -21,6 +21,7 @@ export default function PerfilScreen() {
 
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
         <View style={styles.profileCard}>
+          <View style={styles.profileGreeting}>
           <View style={styles.avatar}>
             {profileImage ? (
               <Image source={{ uri: profileImage }} style={styles.avatarImage} />
@@ -28,11 +29,10 @@ export default function PerfilScreen() {
               <Ionicons name="person" size={28} color={Colors.textOnPrimary} />
             )}
           </View>
-          <AppText variant="h3" color={Colors.textOnPrimary}>
-            Olá,{' '}
-            <AppText variant="h2" color={Colors.textOnPrimary}>
-              {user?.nome?.trim() || 'usuário'}!
-            </AppText>
+            <AppText variant="body" color={Colors.textOnPrimary}>Olá!</AppText>
+          </View>
+          <AppText variant="h3" color={Colors.textOnPrimary} style={styles.profileName}>
+            {user?.nome?.trim() || 'Usuário'}
           </AppText>
         </View>
 
@@ -47,7 +47,6 @@ export default function PerfilScreen() {
             icon="person-outline"
             title="Meus dados"
             subtitle="Faça alterações na sua conta"
-            showWarning
             onPress={() => router.push('/meus-dados')}
           />
           <ProfileMenuItem icon="log-out-outline" title="Log out" subtitle="Sair da conta" onPress={() => router.replace('/welcome')} />
@@ -77,16 +76,25 @@ const styles = StyleSheet.create({
     gap: Spacing.xxl,
   },
   profileCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.lg,
+    gap: Spacing.md,
     backgroundColor: Colors.primary,
     borderRadius: Radius.lg,
-    padding: Spacing.xl,
+    padding: Spacing.lg,
+  },
+  profileGreeting: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+  },
+  profileName: {
+    fontSize: 20,
+    lineHeight: 28,
+    fontWeight: '700',
   },
   avatar: {
-    width: 56,
-    height: 56,
+    width: 44,
+    height: 44,
+    flexShrink: 0,
     borderRadius: Radius.pill,
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',

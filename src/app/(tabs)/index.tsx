@@ -1,18 +1,14 @@
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState } from 'react';
 import { AppHeader } from '@/components/home/app-header';
 import { CategoryCarousel } from '@/components/home/category-carousel';
 import { ConsultaCard } from '@/components/home/consulta-card';
 import { AppText } from '@/components/ui/app-text';
 import { useTheme } from '@/context/theme-context';
+import { useUser } from '@/context/user-context';
 import { categories, medicines } from '@/constants/mock-data';
 import { Colors, Spacing } from '@/constants/theme';
-
-type UsuarioLogado = {
-  nome?: string;
-};
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -24,28 +20,9 @@ function getGreeting() {
 export default function InicioScreen() {
   const router = useRouter();
   const { colors } = useTheme();
-  const [nomeUsuario, setNomeUsuario] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function carregarUsuario() {
-      try {
-        const usuarioSalvo = await AsyncStorage.getItem('usuario');
-
-        if (!usuarioSalvo) return;
-
-        const usuario: UsuarioLogado = JSON.parse(usuarioSalvo);
-        const nome = usuario.nome?.trim();
-
-        if (nome) {
-          setNomeUsuario(nome);
-        }
-      } catch (error) {
-        console.error('Erro ao carregar o usuário salvo:', error);
-      }
-    }
-
-    carregarUsuario();
-  }, []);
+  const { user } = useUser();
+  const nomeUsuario = user?.nome?.trim().split(/\s+/)[0];
+  const [selectedMedicineId, setSelectedMedicineId] = useState<string | null>(null);
 
   return (
     <View style={[styles.flex, { backgroundColor: colors.background }]}>
@@ -53,12 +30,14 @@ export default function InicioScreen() {
 
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
         <View style={styles.section}>
-          <AppText variant="h2">
+          <AppText variant="h2" numberOfLines={1} adjustsFontSizeToFit>
             {getGreeting()}
             {nomeUsuario ? (
-              <AppText variant="h2" color={Colors.primary}>
-                {`, ${nomeUsuario}!`}
-              </AppText>
+              <>
+                {', '}
+                <AppText variant="h2" color={Colors.primary}>{nomeUsuario}</AppText>
+                {'!'}
+              </>
             ) : (
               '!'
             )}
@@ -80,14 +59,16 @@ export default function InicioScreen() {
             Últimas Consultas
           </AppText>
           <View style={styles.consultaList}>
-            {medicines.map((medicine, index) => (
+            {medicines.map((medicine) => (
               <ConsultaCard
                 key={medicine.id}
                 medicine={medicine}
-                highlighted={index === medicines.length - 1}
-                onConsultar={() =>
-                  router.push({ pathname: '/medicamento/[id]', params: { id: medicine.id } })
-                }
+                highlighted={selectedMedicineId === medicine.id}
+                onSelect={() => setSelectedMedicineId(medicine.id)}
+                onConsultar={() => {
+                  setSelectedMedicineId(medicine.id);
+                  router.push({ pathname: '/medicamento/[id]', params: { id: medicine.id } });
+                }}
               />
             ))}
           </View>

@@ -16,7 +16,7 @@ export default function WelcomeScreen() {
       <CrossPatternBackground />
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.hero}>
-          <Wordmark height={90} variant="light" />
+          <Wordmark variant="light" />
         </View>
 
         <View style={styles.textBlock}>

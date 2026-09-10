@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
@@ -12,12 +12,14 @@ import { Colors, Radius, Spacing } from '@/constants/theme';
 export type ConsultaCardProps = {
   medicine: Medicine;
   highlighted?: boolean;
+  onSelect: () => void;
   onConsultar: () => void;
 };
 
 export function ConsultaCard({
   medicine,
   highlighted = false,
+  onSelect,
   onConsultar,
 }: ConsultaCardProps) {
   const { colors } = useTheme();
@@ -30,6 +32,12 @@ export function ConsultaCard({
         highlighted && styles.cardHighlighted,
       ]}
     >
+      <Pressable
+        style={styles.row}
+        onPress={onSelect}
+        accessibilityRole="button"
+        accessibilityLabel={`Selecionar ${medicine.name} ${medicine.dosage}`}
+        accessibilityState={{ selected: highlighted }}>
       <Ionicons
         name="chevron-forward"
         size={18}
@@ -37,7 +45,6 @@ export function ConsultaCard({
         style={styles.chevron}
       />
 
-      <View style={styles.row}>
         <View style={styles.iconSquare}>
           <PillIcon
             size={28}
@@ -63,7 +70,7 @@ export function ConsultaCard({
             {medicine.category}
           </AppText>
         </View>
-      </View>
+      </Pressable>
 
       <Button
         title="Consultar"
@@ -90,8 +97,8 @@ const styles = StyleSheet.create({
 
   chevron: {
     position: 'absolute',
-    top: Spacing.lg,
-    right: Spacing.lg,
+    top: 0,
+    right: 0,
   },
 
   row: {

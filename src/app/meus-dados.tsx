@@ -257,7 +257,8 @@ async function salvarFoto(updatedUser: NonNullable<typeof user>) {
           <AppText variant="h2" style={styles.name}>
             {form.nome || 'Seu nome'}
           </AppText>
-          <AppText variant="label">Visualize e altere seus dados pessoais</AppText>
+          <AppText variant="label" style={styles.name}>Toque no lápis para editar cada campo.</AppText>
+          <AppText variant="caption" style={styles.name}>Ao terminar, toque em Salvar alterações.</AppText>
         </View>
 
         <ProfileSection title="Dados cadastrais">

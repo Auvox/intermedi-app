@@ -25,7 +25,7 @@ export default function LoginScreen() {
             </AppText>
 
             <View style={styles.logoWrapper}>
-              <Wordmark height={36} />
+              <Wordmark />
             </View>
 
             <LoginForm />

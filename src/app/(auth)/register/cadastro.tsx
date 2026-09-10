@@ -62,7 +62,6 @@ export default function CadastroScreen() {
 
       // exibe os dados cadastrados no terminal do backend.
       console.log("Usuário cadastrado com sucesso", data.user);
-      alert("Conta criada com sucesso!");
 
       router.replace('/register/endereco');
     }
@@ -82,7 +81,7 @@ export default function CadastroScreen() {
       behavior={Platform.select({ ios: 'padding', default: undefined })}>
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
       
-        <AuthHeader title="Criar Conta" showBack  />
+        <AuthHeader title="Criar conta" showBack compact />
        
         <View style={styles.body}>
           <StepIndicator steps={registerSteps} currentIndex={0} />
@@ -140,7 +139,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.xl,
     paddingBottom: Spacing.xxl,
-    justifyContent: 'space-between',
     gap: Spacing.xxl,
   },
   form: {

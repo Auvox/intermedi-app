@@ -28,7 +28,7 @@ export default function ForgotPasswordScreen() {
       behavior={Platform.select({ ios: 'padding', default: undefined })}>
       <SafeAreaView style={styles.flex}>
         <View style={[styles.topBar, { borderBottomColor: colors.border }]}>
-          <Wordmark height={24} />
+          <Wordmark height={28} />
         </View>
 
         <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
@@ -65,6 +65,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   topBar: {
+    alignItems: 'center',
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
     borderBottomWidth: 1,
