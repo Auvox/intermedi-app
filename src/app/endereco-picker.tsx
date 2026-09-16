@@ -11,6 +11,7 @@ import { TextField } from '@/components/ui/text-field';
 import { useTheme } from '@/context/theme-context';
 import { currentLocation, savedAddresses } from '@/constants/mock-data';
 import { Colors, Spacing } from '@/constants/theme';
+import Mapa from '@/components/map/mapa.web';
 
 export default function EnderecoPickerScreen() {
   const { colors } = useTheme();
@@ -18,25 +19,43 @@ export default function EnderecoPickerScreen() {
   const [selectedId, setSelectedId] = useState('casa');
   const [search, setSearch] = useState('');
   const [coordenadas, setCoordenadas] = useState('');
+  const [localizacao, setLocalizacao] = useState<{
+    latitude: number;
+    longitude: number;
+  }>();
 
   function selectAndReturn(id: string) {
     setSelectedId(id);
     router.back();
   }
   async function usarLocalizacaoAtual() {
-  const { status } = await Location.requestForegroundPermissionsAsync();
-
-  if (status !== 'granted') {
-    setCoordenadas('Permissão de localização não concedida.');
-    return;
+    try {
+      setCoordenadas('Buscando sua localização...');
+  
+      const { status } =
+        await Location.requestForegroundPermissionsAsync();
+  
+      if (status !== 'granted') {
+        setCoordenadas('Permita a localização nas configurações do navegador.');
+        return;
+      }
+  
+      const posicao = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+  
+      setLocalizacao({
+        latitude: posicao.coords.latitude,
+        longitude: posicao.coords.longitude,
+      });
+  
+      setCoordenadas('Localização encontrada.');
+    } catch {
+      setCoordenadas(
+        'Não foi possível obter sua localização. Verifique a permissão do navegador.',
+      );
+    }
   }
-
-  const localizacao = await Location.getCurrentPositionAsync({});
-
-  setCoordenadas(
-    `Latitude: ${localizacao.coords.latitude}\nLongitude: ${localizacao.coords.longitude}`,
-  );
-}
 
   return (
     <View style={[styles.flex, { backgroundColor: colors.background }]}>
@@ -52,6 +71,8 @@ export default function EnderecoPickerScreen() {
         <AppText variant="h3" style={styles.title}>
           Onde você quer encontrar o seu remédio?
         </AppText>
+
+        <Mapa localizacao={localizacao} />
 
         <TextField
           placeholder="Buscar endereço e número"

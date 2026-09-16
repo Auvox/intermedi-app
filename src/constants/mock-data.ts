@@ -29,6 +29,8 @@ export type Pharmacy = {
   hours: string;
   phone: string;
   status: PharmacyStatus;
+  latitude: number;
+  longitude: number;
 };
 
 export const pharmacyStatusLabel: Record<PharmacyStatus, string> = {
@@ -45,6 +47,8 @@ export const pharmacies: Pharmacy[] = [
     hours: 'Seg. a sex., das 7h às 19h',
     phone: '(11) 2554-4064',
     status: 'em-estoque',
+    latitude: -23.545900,
+    longitude: -46.417000,
   },
   {
     id: 'ubs-jardim-soares',
@@ -53,6 +57,8 @@ export const pharmacies: Pharmacy[] = [
     hours: 'Seg. a sex., das 7h às 19h',
     phone: '(11) 2557-7022',
     status: 'indisponivel',
+    latitude: -23.5536467,
+    longitude: -46.4012332,
   },
 ];
 
