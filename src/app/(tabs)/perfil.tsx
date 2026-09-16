@@ -6,13 +6,13 @@ import { ProfileMenuItem } from '@/components/profile/profile-menu-item';
 import { AppText } from '@/components/ui/app-text';
 import { useTheme } from '@/context/theme-context';
 import { Colors, Radius, Spacing } from '@/constants/theme';
-import { getApiAssetUrl } from '@/constants/api';
+import { apiRequest, getApiAssetUrl } from '@/constants/api';
 import { useUser } from '@/context/user-context';
 
 export default function PerfilScreen() {
   const router = useRouter();
   const { colors } = useTheme();
-  const { user } = useUser();
+  const { user, setUser } = useUser();
   const profileImage = getApiAssetUrl(user?.fotoPerfilPaciente);
 
   return (
@@ -50,7 +50,10 @@ export default function PerfilScreen() {
             showWarning
             onPress={() => router.push('/meus-dados')}
           />
-          <ProfileMenuItem icon="log-out-outline" title="Log out" subtitle="Sair da conta" onPress={() => router.replace('/welcome')} />
+          <ProfileMenuItem icon="log-out-outline" title="Log out" subtitle="Sair da conta" onPress={async () => {
+            if (user?.token) void apiRequest('/api/auth/logout', { method: 'POST' }, user.token).catch(() => {});
+            await setUser(null); router.replace('/welcome');
+          }} />
         </View>
 
         <AppText variant="h3" color={colors.textMuted} style={styles.moreTitle}>

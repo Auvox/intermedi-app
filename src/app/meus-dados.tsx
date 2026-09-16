@@ -3,10 +3,7 @@ import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View, Alert, Im
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { File } from 'expo-file-system';
-import { fetch } from 'expo/fetch';
-
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 
 import { EditableProfileField } from '@/components/profile/editable-profile-field';
@@ -15,8 +12,8 @@ import { BackButton } from '@/components/ui/back-button';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/context/theme-context';
 import { Colors, Radius, Spacing } from '@/constants/theme';
-import { API_URL, getApiAssetUrl } from '@/constants/api';
-import { useUser } from '@/context/user-context';
+import { API_URL, ApiError, apiRequest, getApiAssetUrl } from '@/constants/api';
+import { type LoggedUser, useUser } from '@/context/user-context';
 
 type ProfileForm = {
   nome: string;
@@ -40,8 +37,37 @@ export default function MeusDadosScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { user, setUser } = useUser();
-  const form = emptyProfile;
+  const { user, setUser, loading: sessionLoading } = useUser();
+  const [form, setForm] = useState<ProfileForm>(emptyProfile);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [profileError, setProfileError] = useState('');
+  const [retry, setRetry] = useState(0);
+  const [deleting, setDeleting] = useState(false);
+  const token = user?.token;
+  useEffect(() => {
+    if (sessionLoading) return;
+    if (!token) { router.replace('/login'); return; }
+    let active = true;
+    apiRequest<{ user: Omit<LoggedUser, 'token'> }>('/api/pacientes/me', {}, token)
+      .then(async ({ user: fresh }) => {
+        if (!active) return;
+        setForm({ nome: fresh.nome, cpf: fresh.cpf || '', email: fresh.email,
+          telefone: fresh.telefone || '', remedioFrequente: fresh.remedioFrequente || '', senha: '' });
+        await setUser({ ...fresh, token });
+      })
+      .catch(async (error) => {
+        if (!active) return;
+        setProfileError(error.message);
+        if (error instanceof ApiError && error.status === 401) {
+          await setUser(null); router.replace('/login');
+        }
+      })
+      .finally(() => { if (active) setLoadingProfile(false); });
+    return () => { active = false; };
+  }, [token, router, setUser, retry, sessionLoading]);
+  function change(field: keyof ProfileForm, value: string) {
+    setForm((current) => ({ ...current, [field]: value }));
+  }
 
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [photoToUpload, setPhotoToUpload] = useState<ImagePicker.ImagePickerAsset | null>(null);
@@ -106,50 +132,82 @@ function escolherFoto() {
   ]);
 }
 
-async function salvarFoto() {
-  if (!user?.id) {
-    Alert.alert('Erro', 'Faça login novamente para salvar a foto.');
-    return;
-  }
-
-  if (!photoToUpload) {
-    Alert.alert('Foto de perfil', 'Escolha ou tire uma foto antes de salvar.');
-    return;
-  }
-
+async function salvarDados() {
+  if (!user?.token || savingPhoto || deleting || loadingProfile || profileError) return;
+  setSavingPhoto(true);
+  let saved = false;
   try {
-    setSavingPhoto(true);
-    const formData = new FormData();
-    const fileName = photoToUpload.fileName || `perfil-${user.id}.jpg`;
-
-    const file = new File(photoToUpload.uri);
-      formData.append('foto', file, fileName);
-
-    const response = await fetch(`${API_URL}/api/pacientes/${user.id}/foto`, {
-      method: 'PUT',
-      body: formData,
-    });
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Não foi possível salvar a foto.');
+    const { user: updated } = await apiRequest<{ user: Omit<LoggedUser, 'token'> }>('/api/pacientes/me', {
+      method: 'PUT', body: JSON.stringify({ nomePaciente: form.nome, cpfPaciente: form.cpf,
+        emailPaciente: form.email.trim(), telPaciente: form.telefone,
+        medicamentoFrequentePaciente: form.remedioFrequente,
+        ...(form.senha ? { senhaPaciente: form.senha } : {}) }),
+    }, user.token);
+    saved = true;
+    let nextUser = { ...updated, token: user.token };
+    await setUser(nextUser);
+    setForm((current) => ({ ...current, senha: '' }));
+    if (photoToUpload) {
+      const formData = new FormData();
+      const name = photoToUpload.fileName || 'perfil.jpg';
+      if (Platform.OS === 'web') {
+        const blob = await (await globalThis.fetch(photoToUpload.uri)).blob();
+        formData.append('foto', blob, name);
+      } else {
+        // React Native recebe arquivo por URI no FormData.
+        formData.append('foto', { uri: photoToUpload.uri, name,
+          type: photoToUpload.mimeType || 'image/jpeg' } as unknown as Blob);
+      }
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30000);
+      try {
+        const response = await fetch(`${API_URL}/api/pacientes/${user.id}/foto`, {
+          method: 'PUT', headers: { Authorization: `Bearer ${user.token}` },
+          body: formData, signal: controller.signal,
+        });
+        const data = await response.json();
+        if (!response.ok) throw new ApiError(data.message || 'Não foi possível salvar a foto.', response.status);
+        nextUser = { ...nextUser, fotoPerfilPaciente: data.fotoPerfilPaciente };
+        await setUser(nextUser);
+        setPhotoToUpload(null);
+        setProfileImage(getApiAssetUrl(data.fotoPerfilPaciente));
+      } finally { clearTimeout(timeout); }
     }
-
-    await setUser({
-      ...user,
-      fotoPerfilPaciente: data.fotoPerfilPaciente,
-    });
-    setPhotoToUpload(null);
-    setProfileImage(getApiAssetUrl(data.fotoPerfilPaciente));
-    Alert.alert('Pronto', 'Foto de perfil atualizada.');
+    showMessage('Pronto', 'Dados atualizados.');
   } catch (error) {
-    console.error('Erro ao salvar foto:', error);
-    Alert.alert('Erro', error instanceof Error ? error.message : 'Não foi possível salvar a foto.');
-  } finally {
-    setSavingPhoto(false);
-  }
+    const message = error instanceof Error ? error.message : 'Não foi possível salvar.';
+    showMessage('Erro', saved ? `Os dados foram salvos, mas a foto não foi atualizada. ${message}` : message);
+    if (error instanceof ApiError && error.status === 401) { await setUser(null); router.replace('/login'); }
+  } finally { setSavingPhoto(false); }
+}
 
-  
+async function excluirConta() {
+  if (!user?.token || deleting || savingPhoto) return;
+  setDeleting(true);
+  try {
+    await apiRequest('/api/pacientes/me', { method: 'DELETE' }, user.token);
+    await setUser(null);
+    router.replace('/welcome');
+  } catch (error) {
+    showMessage('Erro', error instanceof Error ? error.message : 'Não foi possível excluir a conta.');
+  } finally { setDeleting(false); }
+}
+
+function confirmarExclusao() {
+  const message = 'Sua conta será excluída do Intermedi, inclusive do cadastro compartilhado com o site. Deseja continuar?';
+  if (Platform.OS === 'web') {
+    if (window.confirm(message)) void excluirConta();
+  } else {
+    Alert.alert('Excluir minha conta', message, [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Excluir conta', style: 'destructive', onPress: () => void excluirConta() },
+    ]);
+  }
+}
+
+function showMessage(title: string, message: string) {
+  if (Platform.OS === 'web') window.alert(message);
+  else Alert.alert(title, message);
 }
 
   return (
@@ -176,7 +234,7 @@ async function salvarFoto() {
         ]}>
         <View style={styles.identity}>
           <Pressable
-            onPress={escolherFoto}
+            onPress={Platform.OS === 'web' ? escolherDaGaleria : escolherFoto} disabled={savingPhoto || deleting}
             accessibilityRole="button"
             accessibilityLabel="Alterar foto de perfil"
             style={[
@@ -199,17 +257,23 @@ async function salvarFoto() {
           <AppText variant="label">Visualize e altere seus dados pessoais</AppText>
         </View>
 
+        {loadingProfile ? <AppText>Carregando seus dados...</AppText> : null}
+        {profileError ? <View><AppText>{profileError}</AppText><Button title="Tentar novamente" onPress={() => { setLoadingProfile(true); setProfileError(''); setRetry((n) => n + 1); }} /></View> : null}
         <ProfileSection title="Dados cadastrais">
           <EditableProfileField
             icon="person-outline"
             label="Nome completo"
             value={form.nome}
+            onChangeText={(value) => change('nome', value)}
+            editable={!loadingProfile && !savingPhoto && !deleting && !profileError}
             autoCapitalize="words"
           />
           <EditableProfileField
             icon="document-text-outline"
             label="CPF"
             value={form.cpf}
+            onChangeText={(value) => change('cpf', value)}
+            editable={!loadingProfile && !savingPhoto && !deleting && !profileError}
             keyboardType="numeric"
             maxLength={14}
           />
@@ -217,6 +281,8 @@ async function salvarFoto() {
             icon="mail-outline"
             label="E-mail"
             value={form.email}
+            onChangeText={(value) => change('email', value)}
+            editable={!loadingProfile && !savingPhoto && !deleting && !profileError}
             keyboardType="email-address"
             autoCapitalize="none"
           />
@@ -224,6 +290,8 @@ async function salvarFoto() {
             icon="call-outline"
             label="Telefone"
             value={form.telefone}
+            onChangeText={(value) => change('telefone', value)}
+            editable={!loadingProfile && !savingPhoto && !deleting && !profileError}
             keyboardType="phone-pad"
             maxLength={15}
           />
@@ -234,19 +302,24 @@ async function salvarFoto() {
             icon="medkit-outline"
             label="Medicamento frequente"
             value={form.remedioFrequente}
+            onChangeText={(value) => change('remedioFrequente', value)}
+            editable={!loadingProfile && !savingPhoto && !deleting && !profileError}
             autoCapitalize="words"
           />
           <EditableProfileField
             icon="lock-closed-outline"
             label="Senha"
             value={form.senha}
-            placeholder="••••••••"
+            onChangeText={(value) => change('senha', value)}
+            editable={!loadingProfile && !savingPhoto && !deleting && !profileError}
+            placeholder="Deixe vazio para manter a senha"
             secureTextEntry
           />
         </ProfileSection>
 
         <View style={styles.actions}>
-          <Button title="Salvar alterações" onPress={salvarFoto} loading={savingPhoto} />
+          <Button title="Salvar alterações" onPress={salvarDados} loading={savingPhoto} disabled={loadingProfile || deleting || !!profileError} />
+          <Button title="Excluir minha conta" variant="ghost" onPress={confirmarExclusao} loading={deleting} disabled={savingPhoto || loadingProfile || !!profileError} />
           <Button title="Cancelar" variant="outline" onPress={() => router.back()} />
         </View>
       </ScrollView>

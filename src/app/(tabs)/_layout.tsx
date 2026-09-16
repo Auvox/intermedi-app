@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Redirect } from 'expo-router';
 import { Tabs } from 'expo-router/js-tabs';
 import { Image, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -48,6 +49,9 @@ function ProfileTabIcon({ focused }: { focused: boolean }) {
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
+  const { user, loading } = useUser();
+  if (loading) return null;
+  if (!user?.token) return <Redirect href="/login" />;
 
   return (
     <Tabs

@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TextField } from "@/components/ui/text-field";
 import { Colors, Spacing } from "@/constants/theme";
-import { useUser } from "@/context/user-context";
+import { apiRequest } from "@/constants/api";
+import { type LoggedUser, useUser } from "@/context/user-context";
 
 export function LoginForm() {
   const router = useRouter();
@@ -16,33 +17,21 @@ export function LoginForm() {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
 
+  const [submitting, setSubmitting] = useState(false);
+
   async function handleSubmit() {
-    router.replace("/(tabs)");
-    // try {
-    //   const response = await fetch(`${API_URL}/api/auth/login`, {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({
-    //       email,
-    //       senha: password,
-    //     }),
-    //   });
-    //   const data = await response.json();
-    //   if (!response.ok) {
-    //     alert(data.message || 'Email ou senha incorretos');
-    //     return;
-    //   }
-    //   if (!data.user?.nome) {
-    //     alert('O servidor não retornou os dados do usuário');
-    //     return;
-    //   }
-    //   await setUser(data.user);
-    // } catch (error) {
-    //   console.error('Erro ao conectar com o backend:', error);
-    //   alert('Não foi possível conectar ao servidor');
-    // }
+    if (submitting) return;
+    if (!email.trim() || !password) { alert('Informe e-mail e senha.'); return; }
+    setSubmitting(true);
+    try {
+      const data = await apiRequest<{ user: Omit<LoggedUser, 'token'>; token: string }>('/api/auth/login', {
+        method: 'POST', body: JSON.stringify({ email: email.trim(), senha: password }),
+      });
+      await setUser({ ...data.user, token: data.token }, rememberMe);
+      router.replace('/(tabs)');
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Não foi possível entrar.');
+    } finally { setSubmitting(false); }
   }
 
   return (
@@ -68,6 +57,7 @@ export function LoginForm() {
 
       <Button
         title="Entrar"
+        loading={submitting}
         onPress={handleSubmit}
         style={styles.submitButton}
       />

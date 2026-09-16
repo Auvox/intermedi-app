@@ -1,3 +1,4 @@
+import { apiRequest } from "@/constants/api";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -31,17 +32,21 @@ export default function EnderecoScreen() {
   const [estado, setEstado] = useState<string | undefined>(undefined);
   const [complemento, setComplemento] = useState("");
 
+  const [submitting, setSubmitting] = useState(false);
+
   async function handleRegister() {
+    if (submitting) return;
     // Validação dos campos obrigatórios do endereço
     if (!cep || !rua || !numero || !bairro || !cidade || !estado) {
       alert("Preencha os dados de endereço, por favor.");
       return;
     }
 
+    setSubmitting(true);
     try {
       // Só aqui, na 2ª etapa, a requisição acontece — com os dados da 1ª
       // etapa (guardados no contexto) e os dados de endereço juntos.
-      const response = await fetch(`http://localhost:3000/paciente`, {
+      await apiRequest('/api/auth/register', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -64,17 +69,6 @@ export default function EnderecoScreen() {
         }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        console.error("Erro da API:", data);
-
-        alert(data.message || "Erro ao finalizar o cadastro.");
-        return;
-      }
-
-      console.log("Paciente cadastrado com sucesso:", data);
-
       alert("Conta criada com sucesso!");
 
       resetRegisterData();
@@ -83,8 +77,8 @@ export default function EnderecoScreen() {
     } catch (error) {
       console.error("Erro ao conectar com o backend:", error);
 
-      alert("Não foi possível conectar ao servidor de cadastro.");
-    }
+      alert(error instanceof Error ? error.message : 'Não foi possível cadastrar.');
+    } finally { setSubmitting(false); }
   }
 
   return (
@@ -140,7 +134,7 @@ export default function EnderecoScreen() {
 
           <Button
             title="Cadastrar"
-            onPress={handleRegister}
+            onPress={handleRegister} loading={submitting}
             style={styles.submitButton}
           />
         </View>

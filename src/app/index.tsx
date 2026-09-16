@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Animated, Easing, StyleSheet, View } from 'react-native';
+import { useUser } from '@/context/user-context';
 import { useRouter } from 'expo-router';
 
 import { Wordmark } from '@/components/ui/brand-mark';
@@ -11,6 +12,7 @@ const REDIRECT_DELAY = 1400;
 
 export default function SplashRedirectScreen() {
   const router = useRouter();
+  const { user, loading } = useUser();
   const [dotOpacities] = useState(() =>
     Array.from({ length: DOT_COUNT }, () => new Animated.Value(0.3)),
   );
@@ -39,13 +41,13 @@ export default function SplashRedirectScreen() {
 
     animations.forEach((animation) => animation.start());
 
-    const timeout = setTimeout(() => router.replace('/welcome'), REDIRECT_DELAY);
+    const timeout = loading ? undefined : setTimeout(() => router.replace(user?.token ? '/(tabs)' : '/welcome'), REDIRECT_DELAY);
 
     return () => {
       animations.forEach((animation) => animation.stop());
       clearTimeout(timeout);
     };
-  }, [dotOpacities, router]);
+  }, [dotOpacities, router, user?.token, loading]);
 
   return (
     <View style={styles.container}>

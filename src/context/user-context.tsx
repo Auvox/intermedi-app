@@ -1,42 +1,54 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 
 export type LoggedUser = {
   id: number;
   nome: string;
   email: string;
+  token: string;
+  cpf?: string;
+  telefone?: string;
+  remedioFrequente?: string;
   fotoPerfilPaciente?: string | null;
 };
 
 type UserContextData = {
   user: LoggedUser | null;
-  setUser: (user: LoggedUser | null) => Promise<void>;
+  loading: boolean;
+  setUser: (user: LoggedUser | null, remember?: boolean) => Promise<void>;
 };
 
 const UserContext = createContext<UserContextData | undefined>(undefined);
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUserState] = useState<LoggedUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const persistSession = useRef(true);
 
   useEffect(() => {
-    AsyncStorage.getItem('usuario')
+    AsyncStorage.getItem('intermedi-session-v2')
       .then((savedUser) => {
-        if (savedUser) setUserState(JSON.parse(savedUser));
+        if (savedUser) {
+          const parsed = JSON.parse(savedUser);
+          if (parsed.token && parsed.id) setUserState(parsed);
+        }
       })
-      .catch((error) => console.error('Erro ao carregar usuário:', error));
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
-  async function setUser(nextUser: LoggedUser | null) {
-    setUserState(nextUser);
-
-    if (nextUser) {
-      await AsyncStorage.setItem('usuario', JSON.stringify(nextUser));
+  const setUser = useCallback(async (nextUser: LoggedUser | null, remember?: boolean) => {
+    if (remember !== undefined) persistSession.current = remember;
+    if (!nextUser) setUserState(null);
+    if (nextUser && persistSession.current) {
+      await AsyncStorage.setItem('intermedi-session-v2', JSON.stringify(nextUser));
     } else {
-      await AsyncStorage.removeItem('usuario');
+      await AsyncStorage.removeItem('intermedi-session-v2');
     }
-  }
+    setUserState(nextUser);
+  }, []);
 
-  return <UserContext.Provider value={{ user, setUser }}>{children}</UserContext.Provider>;
+  return <UserContext.Provider value={{ user, setUser, loading }}>{children}</UserContext.Provider>;
 }
 
 export function useUser() {
