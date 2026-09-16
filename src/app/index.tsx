@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Animated, Easing, StyleSheet, View } from 'react-native';
+import { Animated, Easing, Platform, StyleSheet, View } from 'react-native';
 import { useUser } from '@/context/user-context';
 import { useRouter } from 'expo-router';
 
@@ -26,13 +26,13 @@ export default function SplashRedirectScreen() {
             toValue: 1,
             duration: 350,
             easing: Easing.inOut(Easing.ease),
-            useNativeDriver: true,
+            useNativeDriver: Platform.OS !== 'web',
           }),
           Animated.timing(value, {
             toValue: 0.3,
             duration: 350,
             easing: Easing.inOut(Easing.ease),
-            useNativeDriver: true,
+            useNativeDriver: Platform.OS !== 'web',
           }),
           Animated.delay((DOT_COUNT - 1 - index) * 150),
         ]),
