@@ -11,7 +11,7 @@ import { TextField } from '@/components/ui/text-field';
 import { useTheme } from '@/context/theme-context';
 import { currentLocation, savedAddresses } from '@/constants/mock-data';
 import { Colors, Spacing } from '@/constants/theme';
-import Mapa from '@/components/map/mapa.web';
+import Mapa from '@/components/map/mapa';
 
 export default function EnderecoPickerScreen() {
   const { colors } = useTheme();
@@ -36,7 +36,7 @@ export default function EnderecoPickerScreen() {
         await Location.requestForegroundPermissionsAsync();
   
       if (status !== 'granted') {
-        setCoordenadas('Permita a localização nas configurações do navegador.');
+        setCoordenadas('Permita o acesso à localização nas configurações do dispositivo ou navegador.');
         return;
       }
   
@@ -52,7 +52,7 @@ export default function EnderecoPickerScreen() {
       setCoordenadas('Localização encontrada.');
     } catch {
       setCoordenadas(
-        'Não foi possível obter sua localização. Verifique a permissão do navegador.',
+        'Não foi possível obter sua localização. Verifique a permissão de localização.',
       );
     }
   }

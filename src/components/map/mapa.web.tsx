@@ -55,7 +55,7 @@ export default function Mapa({ localizacao }: MapaProps) {
         farmacia.latitude,
       ];
 
-      // textContent evita interpretar nomes e endereços como HTML.
+   
       const conteudo = document.createElement('div');
       conteudo.style.color = '#222';
 
@@ -86,7 +86,7 @@ export default function Mapa({ localizacao }: MapaProps) {
       return marcador;
     });
 
-    // Ao abrir, enquadra as farmácias cadastradas na lista.
+    
     if (!limites.isEmpty()) {
       mapa.fitBounds(limites, {
         padding: 60,
@@ -128,7 +128,7 @@ export default function Mapa({ localizacao }: MapaProps) {
       marcadorUsuarioRef.current.setLngLat(coordenadas);
     }
 
-    // Enquadra sua localização e as UBS na mesma tela.
+ 
     const limites = new maplibregl.LngLatBounds(
       coordenadas,
       coordenadas,
