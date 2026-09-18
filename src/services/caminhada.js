@@ -2,6 +2,8 @@ import * as Location from 'expo-location';
 import { buscarRota } from './rotas';
 
 export async function calcularCaminhada(farmacia) {
+  
+  
   const { status } =
     await Location.requestForegroundPermissionsAsync();
 
@@ -24,6 +26,8 @@ export async function calcularCaminhada(farmacia) {
   };
 
   const rota = await buscarRota(origem, destino, 'pedestrian');
+
+  console.log('passos recebidos', JSON.stringify(rota.passos, null, 2),);
 
 return {
   ...rota,
