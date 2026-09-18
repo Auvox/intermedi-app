@@ -31,7 +31,16 @@ export type Rota = {
   passos: PassoRota[];
 };
 
-export function calcularCaminhada(farmacia: {
-  latitude: number;
-  longitude: number;
-}): Promise<Rota>;
+export type ModoLocomocao =
+  | 'pedestrian'
+  | 'auto'
+  | 'motorcycle'
+  | 'bicycle';
+
+export function calcularCaminhada(
+  farmacia: {
+    latitude: number;
+    longitude: number;
+  },
+  modo?: ModoLocomocao,
+): Promise<Rota>;

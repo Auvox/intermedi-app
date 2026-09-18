@@ -63,12 +63,7 @@ export const mapaHtml = `<!DOCTYPE html>
       var marcadorUsuario = null;
       var mapa = new maplibregl.Map({
         container: 'mapa', center: [-46.417, -23.5459], zoom: 13,
-        style: {
-          version: 8,
-          sources: { osm: { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-            tileSize: 256, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' } },
-          layers: [{ id: 'osm', type: 'raster', source: 'osm' }]
-        }
+        style: 'https://tiles.openfreemap.org/styles/liberty'
       });
       mapa.addControl(new maplibregl.NavigationControl());
      window.atualizarFarmacias = function(lista) {

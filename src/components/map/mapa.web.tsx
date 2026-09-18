@@ -24,29 +24,22 @@ export default function Mapa({localizacao ,geometria, farmacias = pharmacies, }:
   useEffect(() => {
     if (!containerRef.current) return;
 
+    // O Metro não serve o módulo do worker por meio de import.meta.url.
+    // Carrega o worker da mesma versão do MapLibre pelo endereço completo.
+    const workerUrl = URL.createObjectURL(
+      new Blob(
+        ['import "https://unpkg.com/maplibre-gl@6.10.0/dist/maplibre-gl-worker.mjs";'],
+        { type: 'text/javascript' },
+      ),
+    );
+    maplibregl.setWorkerUrl(workerUrl);
+
     const mapa = new maplibregl.Map({
       container: containerRef.current,
-      style: {
-        version: 8,
-        sources: {
-          osm: {
-            type: 'raster',
-            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-            tileSize: 256,
-            attribution:
-              '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-          },
-        },
-        layers: [
-          {
-            id: 'osm',
-            type: 'raster',
-            source: 'osm',
-          },
-        ],
-      },
+      style: 'https://tiles.openfreemap.org/styles/dark',
       center: [-46.417, -23.5459],
       zoom: 13,
+      pitch: 55,
       
     });
 
@@ -95,6 +88,7 @@ export default function Mapa({localizacao ,geometria, farmacias = pharmacies, }:
     
     if (!limites.isEmpty()) {
       mapa.fitBounds(limites, {
+        pitch: 55,
         padding: 60,
         maxZoom: 15,
         duration: 0,
@@ -107,6 +101,7 @@ export default function Mapa({localizacao ,geometria, farmacias = pharmacies, }:
       marcadorUsuarioRef.current = null;
       mapaRef.current = null;
       mapa.remove();
+      URL.revokeObjectURL(workerUrl);
     };
   }, [farmacias]);
 
@@ -145,6 +140,7 @@ export default function Mapa({localizacao ,geometria, farmacias = pharmacies, }:
     });
 
     mapa.fitBounds(limites, {
+      pitch: 55,
       padding: 60,
       maxZoom: 15,
       duration: 0,
@@ -204,6 +200,7 @@ export default function Mapa({localizacao ,geometria, farmacias = pharmacies, }:
       });
 
       mapa.fitBounds(limites, {
+        pitch: 55,
         padding: 40,
         duration: 500,
       });
