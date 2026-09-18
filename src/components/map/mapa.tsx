@@ -2,19 +2,49 @@ import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { mapaHtml } from './mapa-html';
+import type { Rota } from '@/services/caminhada';
+import type { Pharmacy } from '@/constants/mock-data';
 
-type MapaProps = { localizacao?: { latitude: number; longitude: number } };
+type MapaProps = {
+  localizacao?: {
+    latitude: number;
+    longitude: number;
+  };
+  geometria?: Rota['geometria'];
+  farmacias?: Pharmacy[];
+};
 const fonte = { html: mapaHtml };
 
-export default function Mapa({ localizacao }: MapaProps) {
+export default function Mapa({localizacao, geometria, farmacias, }: MapaProps) {
   const webviewRef = useRef<WebView>(null);
   const [pronto, setPronto] = useState(false);
+
+  useEffect(() => {
+  if (!pronto) return;
+
+  webviewRef.current?.injectJavaScript(
+    `window.atualizarFarmacias(${JSON.stringify(farmacias ?? null).replace(/</g, '\\u003c')}); true;`,
+  );
+}, [pronto, farmacias]);
 
   useEffect(() => {
     if (pronto) webviewRef.current?.injectJavaScript(
       `window.atualizarLocalizacao(${JSON.stringify(localizacao ?? null)}); true;`,
     );
   }, [pronto, localizacao]);
+
+  useEffect(() => {
+  if (!pronto) return;
+
+  console.log('Rota enviada ao mapa:', {
+    tipo: geometria?.type,
+    pontos: geometria?.coordinates.length,
+  });
+
+  webviewRef.current?.injectJavaScript(
+    `window.desenharRota(${JSON.stringify(geometria ?? null)}); true;`,
+  );
+}, [pronto, geometria]);
 
   return (
     <View style={styles.container}>
@@ -25,9 +55,13 @@ export default function Mapa({ localizacao }: MapaProps) {
         style={styles.mapa}
         scrollEnabled={false}
         onLoadStart={() => setPronto(false)}
-        onMessage={({ nativeEvent }) => {
-          if (nativeEvent.data === 'pronto') setPronto(true);
-        }}
+       onMessage={({ nativeEvent }) => {
+        console.log('Mensagem do mapa:', nativeEvent.data);
+
+  if (nativeEvent.data === 'pronto') {
+    setPronto(true);
+  }
+}}
       />
     </View>
   );

@@ -3,15 +3,20 @@ import * as maplibregl from 'maplibre-gl';
 
 import { pharmacies } from '@/constants/mock-data';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import type { Rota } from '@/services/caminhada';
+import type { FeatureCollection } from 'geojson';
+import type { Pharmacy } from '@/constants/mock-data';
 
 type MapaProps = {
   localizacao?: {
     latitude: number;
     longitude: number;
   };
+   geometria?: Rota['geometria'];
+   farmacias?: Pharmacy[];
 };
 
-export default function Mapa({ localizacao }: MapaProps) {
+export default function Mapa({localizacao ,geometria, farmacias = pharmacies, }: MapaProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapaRef = useRef<maplibregl.Map | null>(null);
   const marcadorUsuarioRef = useRef<maplibregl.Marker | null>(null);
@@ -42,6 +47,7 @@ export default function Mapa({ localizacao }: MapaProps) {
       },
       center: [-46.417, -23.5459],
       zoom: 13,
+      
     });
 
     mapaRef.current = mapa;
@@ -49,7 +55,7 @@ export default function Mapa({ localizacao }: MapaProps) {
 
     const limites = new maplibregl.LngLatBounds();
 
-    const marcadoresFarmacias = pharmacies.map((farmacia) => {
+    const marcadoresFarmacias = farmacias.map((farmacia) => {
       const coordenadas: [number, number] = [
         farmacia.longitude,
         farmacia.latitude,
@@ -102,7 +108,7 @@ export default function Mapa({ localizacao }: MapaProps) {
       mapaRef.current = null;
       mapa.remove();
     };
-  }, []);
+  }, [farmacias]);
 
   useEffect(() => {
     const mapa = mapaRef.current;
@@ -134,7 +140,7 @@ export default function Mapa({ localizacao }: MapaProps) {
       coordenadas,
     );
 
-    pharmacies.forEach((farmacia) => {
+    farmacias.forEach((farmacia) => {
       limites.extend([farmacia.longitude, farmacia.latitude]);
     });
 
@@ -143,7 +149,77 @@ export default function Mapa({ localizacao }: MapaProps) {
       maxZoom: 15,
       duration: 0,
     });
-  }, [localizacao]);
+  }, [localizacao, farmacias]);
+
+  useEffect(() => {
+  const mapa = mapaRef.current;
+  if (!mapa) return;
+
+  function desenhar() {
+    if (!mapa) return;
+
+    const dados: FeatureCollection = {
+      type: 'FeatureCollection',
+      features: geometria
+        ? [{
+            type: 'Feature',
+            properties: {},
+            geometry: geometria,
+          }]
+        : [],
+    };
+
+    const fonte = mapa.getSource('rota') as
+      | maplibregl.GeoJSONSource
+      | undefined;
+
+    if (fonte) {
+      fonte.setData(dados);
+    } else if (geometria) {
+      mapa.addSource('rota', {
+        type: 'geojson',
+        data: dados,
+      });
+
+      mapa.addLayer({
+        id: 'linha-rota',
+        type: 'line',
+        source: 'rota',
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round',
+        },
+        paint: {
+          'line-color': '#10b968',
+          'line-width': 5,
+        },
+      });
+    }
+
+    if (geometria?.coordinates.length) {
+      const limites = new maplibregl.LngLatBounds();
+
+      geometria.coordinates.forEach((ponto) => {
+        limites.extend(ponto);
+      });
+
+      mapa.fitBounds(limites, {
+        padding: 40,
+        duration: 500,
+      });
+    }
+  }
+
+  if (mapa.isStyleLoaded()) {
+    desenhar();
+  } else {
+    mapa.once('load', desenhar);
+  }
+
+  return () => {
+    mapa.off('load', desenhar);
+  };
+}, [geometria, farmacias]);
 
   return (
     <div

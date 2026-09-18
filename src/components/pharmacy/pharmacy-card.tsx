@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useTheme } from '@/context/theme-context';
 import type { Pharmacy } from '@/constants/mock-data';
 import { Colors, Radius, Spacing } from '@/constants/theme';
+import { useRouter } from 'expo-router';
 
 export type PharmacyCardProps = {
   pharmacy: Pharmacy;
@@ -15,13 +16,19 @@ export type PharmacyCardProps = {
 export function PharmacyCard({ pharmacy }: PharmacyCardProps) {
   const { colors } = useTheme();
   function handleViewRoute() {
-    const query = encodeURIComponent(pharmacy.address);
-    Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${query}`);
-  }
+  router.push({
+    pathname: '/rota',
+    params: {
+      farmaciaId: pharmacy.id,
+    },
+  });
+}
 
   function handleCall() {
     Linking.openURL(`tel:${pharmacy.phone.replace(/\D/g, '')}`);
   }
+
+  const router = useRouter();
 
   return (
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.surfaceMuted }]}>
