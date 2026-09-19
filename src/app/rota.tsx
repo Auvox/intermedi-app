@@ -1,4 +1,8 @@
-import { ScrollView, StyleSheet } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { useLocalSearchParams } from "expo-router";
 
 import { acompanharLocalizacao, type Localizacao, } from '@/services/navegacao';
@@ -11,6 +15,7 @@ import { calcularCaminhada, type Rota, type ModoLocomocao, } from '@/services/ca
 import Mapa from "@/components/map/mapa";
 import { simularPercurso } from '@/services/simulacao';
 import { calcularDistancia } from '@/services/progresso-rota';
+
 
 export default function RotaScreen() {
   const { farmaciaId } = useLocalSearchParams<{
@@ -184,6 +189,28 @@ export default function RotaScreen() {
       acompanhamentoRef.current?.remove();
     };
   }, []);
+  
+  if (navegando && rota) {
+  return (
+    <View style={styles.telaNavegacao}>
+      <Mapa
+        farmacias={farmaciasDaRota}
+        localizacao={posicaoAtual ?? rota.origem}
+        geometria={rota.geometria}
+        seguindo
+        expandido
+      />
+
+      <View style={styles.botaoVoltar}>
+        <BackButton
+          tone="dark"
+          onPress={encerrarNavegacao}
+        />
+      </View>
+    </View>
+  );
+}
+  
   return (
     <ScrollView contentContainerStyle={styles.conteudo}>
       <BackButton tone="dark" />
@@ -194,10 +221,11 @@ export default function RotaScreen() {
           <AppText>{farmacia.address}</AppText>
 
           <Mapa
-            farmacias={farmaciasDaRota}
-            localizacao={posicaoAtual ?? rota?.origem}
-            geometria={rota?.geometria}
-          />
+  farmacias={farmaciasDaRota}
+  localizacao={posicaoAtual ?? rota?.origem}
+  geometria={rota?.geometria}
+  seguindo={navegando}
+/>
           <AppText variant="h3">Como você vai?</AppText>
 
           <Button
@@ -291,4 +319,15 @@ const styles = StyleSheet.create({
     padding: 24,
     gap: 16,
   },
+  telaNavegacao: {
+  flex: 1,
+  backgroundColor: '#ffffff',
+},
+
+botaoVoltar: {
+  position: 'absolute',
+  top: 48,
+  left: 20,
+  zIndex: 10,
+},
 });

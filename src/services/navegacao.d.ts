@@ -1,6 +1,7 @@
 export type Localizacao = {
   latitude: number;
   longitude: number;
+  direcao?: number;
 };
 
 export function acompanharLocalizacao(

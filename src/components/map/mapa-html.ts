@@ -3,7 +3,12 @@ import { pharmacies } from '@/constants/mock-data';
 // Escape '<' para nomes e endereços nunca encerrarem a tag script.
 const dadosFarmacias = JSON.stringify(pharmacies).replace(/</g, '\\u003c');
 
-export const mapaHtml = `<!DOCTYPE html>
+export function criarMapaHtml(temaEscuro = false) {
+  const estiloMapa = temaEscuro
+    ? 'https://tiles.openfreemap.org/styles/dark'
+    : 'https://tiles.openfreemap.org/styles/liberty';
+
+  return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
@@ -63,7 +68,7 @@ export const mapaHtml = `<!DOCTYPE html>
       var marcadorUsuario = null;
       var mapa = new maplibregl.Map({
         container: 'mapa', center: [-46.417, -23.5459], zoom: 13,
-        style: 'https://tiles.openfreemap.org/styles/liberty'
+        style: '${estiloMapa}'
       });
       mapa.addControl(new maplibregl.NavigationControl());
      window.atualizarFarmacias = function(lista) {
@@ -95,22 +100,68 @@ export const mapaHtml = `<!DOCTYPE html>
 };
 
 window.atualizarFarmacias(null);
-      window.atualizarLocalizacao = function(localizacao) {
-        var limites = new maplibregl.LngLatBounds();
-        farmacias.forEach(function(f) { limites.extend([f.longitude, f.latitude]); });
-        if (localizacao) {
-          var ponto = [localizacao.longitude, localizacao.latitude];
-          if (!marcadorUsuario) {
-            marcadorUsuario = new maplibregl.Marker({ color: '#10b968' })
-              .setLngLat(ponto)
-              .setPopup(new maplibregl.Popup({ offset: 25 }).setText('Sua localização')).addTo(mapa);
-          }
-          marcadorUsuario.setLngLat(ponto); limites.extend(ponto);
-        } else if (marcadorUsuario) {
-          marcadorUsuario.remove(); marcadorUsuario = null;
-        }
-        if (!limites.isEmpty()) mapa.fitBounds(limites, { padding: 60, maxZoom: 15, duration: 0 });
-      };
+     window.atualizarLocalizacao = function(localizacao, seguindo) {
+  var limites = new maplibregl.LngLatBounds();
+
+  farmacias.forEach(function(farmacia) {
+    limites.extend([
+      farmacia.longitude,
+      farmacia.latitude
+    ]);
+  });
+
+  if (localizacao) {
+    var ponto = [
+      localizacao.longitude,
+      localizacao.latitude
+    ];
+
+    if (!marcadorUsuario) {
+      marcadorUsuario = new maplibregl.Marker({
+        color: '#10b968'
+      })
+        .setLngLat(ponto)
+        .setPopup(
+          new maplibregl.Popup({ offset: 25 })
+            .setText('Sua localização')
+        )
+        .addTo(mapa);
+    }
+
+    marcadorUsuario.setLngLat(ponto);
+    limites.extend(ponto);
+
+    if (seguindo) {
+      mapa.easeTo({
+        center: ponto,
+        zoom: 18,
+        pitch: 75,
+        bearing: localizacao.direcao ?? 0,
+        padding: {
+          top: 80,
+          bottom: 200,
+          left: 40,
+          right: 40
+        },
+        duration: 450,
+        essential: true
+      });
+
+      return;
+    }
+  } else if (marcadorUsuario) {
+    marcadorUsuario.remove();
+    marcadorUsuario = null;
+  }
+
+  if (!limites.isEmpty()) {
+    mapa.fitBounds(limites, {
+      padding: 60,
+      maxZoom: 15,
+      duration: 0
+    });
+  }
+};
       window.desenharRota = function(geometria) {
         try {
         window.ReactNativeWebView.postMessage(
@@ -195,3 +246,4 @@ window.atualizarFarmacias(null);
   </script>
 </body>
 </html>`;
+}
