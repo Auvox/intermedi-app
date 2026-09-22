@@ -3,8 +3,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/ui/app-text';
 import { BackButton } from '@/components/ui/back-button';
-import { CrossPatternBackground } from '@/components/ui/cross-pattern-background';
-import { Colors, Radius, Spacing } from '@/constants/theme';
+import { Wordmark } from '@/components/ui/brand-mark';
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/context/theme-context';
 
 export type AuthHeaderProps = {
   title: string;
@@ -13,12 +14,16 @@ export type AuthHeaderProps = {
 
 export function AuthHeader({ title, showBack = false }: AuthHeaderProps) {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + Spacing.lg }]}>
-      <CrossPatternBackground />
-      <View style={styles.backSlot}>{showBack && <BackButton tone="light" />}</View>
-      <AppText variant="h1" color={Colors.textOnPrimary} style={styles.title}>
+    <View style={[styles.container, { paddingTop: insets.top + Spacing.sm }]}>
+      <View style={styles.topRow}>
+        <View style={styles.backSlot}>{showBack && <BackButton tone="dark" />}</View>
+        <Wordmark height={43} />
+        <View style={styles.backSlot} />
+      </View>
+      <AppText color={colors.text} style={styles.title}>
         {title}
       </AppText>
     </View>
@@ -27,19 +32,24 @@ export function AuthHeader({ title, showBack = false }: AuthHeaderProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.primary,
-    borderBottomLeftRadius: Radius.xxl,
-    borderBottomRightRadius: Radius.xxl,
+    backgroundColor: '#F3FFF8',
     paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing.xxl,
-    overflow: 'hidden',
+    paddingBottom: Spacing.lg,
+  },
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
   },
   backSlot: {
     height: 40,
+    width: 40,
     justifyContent: 'center',
-    marginBottom: Spacing.md,
   },
   title: {
-    textAlign: 'center',
+    fontSize: 25,
+    lineHeight: 31,
+    fontWeight: '800',
+    marginTop: Spacing.xxl,
   },
 });

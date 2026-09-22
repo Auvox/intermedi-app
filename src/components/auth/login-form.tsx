@@ -10,7 +10,7 @@ import { Colors, Spacing } from "@/constants/theme";
 import { apiRequest } from "@/constants/api";
 import { type LoggedUser, useUser } from "@/context/user-context";
 
-export function LoginForm() {
+export function LoginForm({ showCreateAccount = true }: { showCreateAccount?: boolean }) {
   const router = useRouter();
   const { setUser } = useUser();
   const [email, setEmail] = useState("");
@@ -36,24 +36,31 @@ export function LoginForm() {
 
   return (
     <View style={styles.container}>
-      <TextField
-        placeholder="E-mail"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      />
-      <TextField
-        placeholder="Senha"
-        value={password}
-        onChangeText={setPassword}
-        secureToggle
-      />
+      <View style={styles.field}>
+        <AppText style={styles.label}>E-mail</AppText>
+        <TextField boxed icon="person-outline"
+          placeholder="Digite seu e-mail"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+        />
+      </View>
+      <View style={styles.field}>
+        <AppText style={styles.label}>Senha</AppText>
+        <TextField boxed icon="lock-closed-outline"
+          placeholder="Senha"
+          value={password}
+          onChangeText={setPassword}
+          secureToggle
+        />
+      </View>
 
-      <Checkbox
-        checked={rememberMe}
-        onChange={setRememberMe}
-        label="lembre de mim"
-      />
+      <View style={styles.options}>
+        <Checkbox checked={rememberMe} onChange={setRememberMe} label="Lembrar de mim" />
+        <Pressable onPress={() => router.push('/forgot-password')} accessibilityRole="button">
+          <AppText color={Colors.primaryDark} style={styles.forgotText}>Esqueceu sua senha?</AppText>
+        </Pressable>
+      </View>
 
       <Button
         title="Entrar"
@@ -62,27 +69,53 @@ export function LoginForm() {
         style={styles.submitButton}
       />
 
-      <Pressable
-        style={styles.forgotLink}
-        onPress={() => router.push("/forgot-password")}
-        accessibilityRole="button"
-      >
-        <AppText variant="link" color={Colors.primary}>
-          Esqueceu da senha ?
-        </AppText>
-      </Pressable>
+      {showCreateAccount && <>
+        <View style={styles.divider}><View style={styles.rule} /><AppText color={Colors.textMuted} style={styles.or}>ou</AppText><View style={styles.rule} /></View>
+        <Button title="Criar conta" variant="outline" onPress={() => router.push('/register/cadastro')} />
+      </>}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    gap: Spacing.xl,
+    gap: Spacing.lg,
+  },
+  field: {
+    gap: 7
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#214640'
+  },
+  options: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8
+  },
+  forgotText: {
+    fontSize: 12,
+    fontWeight: '700'
   },
   submitButton: {
-    marginTop: Spacing.sm,
+    marginTop: Spacing.lg,
+    borderRadius: 12,
   },
-  forgotLink: {
-    alignItems: "center",
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginVertical: 3
+  },
+  rule: {
+    height: 1,
+    flex: 1,
+    backgroundColor: '#D7E9DF'
+  },
+  or: {
+    fontSize: 12
   },
 });

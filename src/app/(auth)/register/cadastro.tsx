@@ -63,7 +63,7 @@ export default function CadastroScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.flex, { backgroundColor: colors.background }]}
+      style={[styles.flex, { backgroundColor: colors.primarySoft }]}
       behavior={Platform.select({
         ios: "padding",
         default: undefined,
@@ -79,44 +79,44 @@ export default function CadastroScreen() {
           <StepIndicator steps={registerSteps} currentIndex={0} />
 
           <View style={styles.form}>
-            <TextField placeholder="Nome" value={nome} onChangeText={setNome} />
+            <TextField boxed icon="person-outline" placeholder="Nome completo" value={nome} onChangeText={setNome} />
 
             <TextField
-              placeholder="CPF"
+              boxed icon="card-outline" placeholder="CPF"
               value={cpf}
               onChangeText={setCpf}
               keyboardType="numeric"
             />
 
             <TextField
-              placeholder="Telefone"
+              boxed icon="call-outline" placeholder="Telefone"
               value={telefone}
               onChangeText={setTelefone}
               keyboardType="phone-pad"
             />
 
             <TextField
-              placeholder="Medicamento frequente (opcional)"
+              boxed icon="medkit-outline" placeholder="Medicamento frequente (opcional)"
               value={remedioFrequente}
               onChangeText={setRemedioFrequente}
             />
 
             <TextField
-              placeholder="E-mail"
+              boxed icon="mail-outline" placeholder="E-mail"
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
             />
 
             <TextField
-              placeholder="Senha"
+              boxed icon="lock-closed-outline" placeholder="Senha"
               value={senha}
               onChangeText={setSenha}
               secureToggle
             />
 
             <TextField
-              placeholder="Confirme a sua Senha"
+              boxed icon="lock-closed-outline" placeholder="Confirme a sua senha"
               value={confirmaSenha}
               onChangeText={setConfirmaSenha}
               secureToggle
@@ -146,14 +146,14 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
     paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.xl,
+    paddingTop: Spacing.lg,
     paddingBottom: Spacing.xxl,
     justifyContent: "space-between",
-    gap: Spacing.xxl,
+    gap: Spacing.xl,
   },
 
   form: {
-    gap: Spacing.xl,
+    gap: Spacing.md,
   },
 
   submitButton: {

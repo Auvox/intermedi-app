@@ -3,7 +3,7 @@ import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 're
 import { AuthHeader } from '@/components/auth/auth-header';
 import { LoginForm } from '@/components/auth/login-form';
 import { registerSteps, StepIndicator } from '@/components/auth/step-indicator';
-import { Wordmark } from '@/components/ui/brand-mark';
+import { AppText } from '@/components/ui/app-text';
 import { useTheme } from '@/context/theme-context';
 import { Spacing } from '@/constants/theme';
 
@@ -11,7 +11,7 @@ export default function RegisterLoginScreen() {
   const { colors } = useTheme();
   return (
     <KeyboardAvoidingView
-      style={[styles.flex, { backgroundColor: colors.background }]}
+      style={[styles.flex, { backgroundColor: colors.primarySoft }]}
       behavior={Platform.select({ ios: 'padding', default: undefined })}>
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
         <AuthHeader title="Login" showBack />
@@ -19,11 +19,9 @@ export default function RegisterLoginScreen() {
         <View style={styles.body}>
           <StepIndicator steps={registerSteps} currentIndex={2} />
 
-          <View style={styles.logoWrapper}>
-            <Wordmark height={36} />
-          </View>
+          <AppText style={[styles.message, { color: colors.textSecondary }]}>Conta criada! Entre com seu e-mail e senha para continuar.</AppText>
 
-          <LoginForm />
+          <LoginForm showCreateAccount={false} />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -43,8 +41,5 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.xl,
     paddingBottom: Spacing.xxl,
   },
-  logoWrapper: {
-    alignItems: 'center',
-    marginVertical: Spacing.xxl,
-  },
+  message: { fontSize: 15, lineHeight: 22, marginTop: Spacing.xxl, marginBottom: Spacing.xxl },
 });

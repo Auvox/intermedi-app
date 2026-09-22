@@ -83,7 +83,7 @@ export default function EnderecoScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.flex, { backgroundColor: colors.background }]}
+      style={[styles.flex, { backgroundColor: colors.primarySoft }]}
       behavior={Platform.select({ ios: "padding", default: undefined })}
     >
       <ScrollView
@@ -97,25 +97,25 @@ export default function EnderecoScreen() {
 
           <View style={styles.form}>
             <TextField
-              placeholder="CEP"
+              boxed icon="location-outline" placeholder="CEP"
               value={cep}
               onChangeText={setCep}
               keyboardType="numeric"
             />
-            <TextField placeholder="Rua" value={rua} onChangeText={setRua} />
+            <TextField boxed icon="home-outline" placeholder="Rua" value={rua} onChangeText={setRua} />
             <TextField
-              placeholder="Número"
+              boxed icon="keypad-outline" placeholder="Número"
               value={numero}
               onChangeText={setNumero}
               keyboardType="numeric"
             />
             <TextField
-              placeholder="Bairro"
+              boxed icon="map-outline" placeholder="Bairro"
               value={bairro}
               onChangeText={setBairro}
             />
             <TextField
-              placeholder="Cidade"
+              boxed icon="business-outline" placeholder="Cidade"
               value={cidade}
               onChangeText={setCidade}
             />
@@ -126,7 +126,7 @@ export default function EnderecoScreen() {
               onSelect={setEstado}
             />
             <TextField
-              placeholder="Complemento (opcional)"
+              boxed icon="add-circle-outline" placeholder="Complemento (opcional)"
               value={complemento}
               onChangeText={setComplemento}
             />
@@ -153,13 +153,13 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
     paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.xl,
+    paddingTop: Spacing.lg,
     paddingBottom: Spacing.xxl,
     justifyContent: "space-between",
-    gap: Spacing.xxl,
+    gap: Spacing.xl,
   },
   form: {
-    gap: Spacing.xl,
+    gap: Spacing.md,
   },
   submitButton: {
     marginTop: Spacing.lg,
