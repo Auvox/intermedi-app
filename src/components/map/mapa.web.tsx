@@ -6,6 +6,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import type { Rota } from '@/services/caminhada';
 import type { FeatureCollection } from 'geojson';
 import type { Pharmacy } from '@/constants/mock-data';
+import { PREDIOS_3D, urlEstiloMapa, type EstiloMapa } from './estilos-mapa';
 
 type MapaProps = {
   localizacao?: {
@@ -14,12 +15,22 @@ type MapaProps = {
   };
    geometria?: Rota['geometria'];
    farmacias?: Pharmacy[];
+   expandido?: boolean;
+   claro?: boolean;
+   seguindo?: boolean;
+   espacoInferior?: number;
+   modelo?: EstiloMapa;
 };
 
-export default function Mapa({localizacao ,geometria, farmacias = pharmacies, }: MapaProps) {
+export default function Mapa(props: MapaProps) {
+  return <MapaConteudo key={props.modelo ?? 'automatico'} {...props} />;
+}
+
+function MapaConteudo({localizacao ,geometria, farmacias = pharmacies, expandido = false, claro = false, espacoInferior = 60, modelo, }: MapaProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapaRef = useRef<maplibregl.Map | null>(null);
   const marcadorUsuarioRef = useRef<maplibregl.Marker | null>(null);
+  const inclinacao = modelo ? (modelo === '3d' ? 60 : 0) : 55;
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -36,15 +47,25 @@ export default function Mapa({localizacao ,geometria, farmacias = pharmacies, }:
 
     const mapa = new maplibregl.Map({
       container: containerRef.current,
-      style: 'https://tiles.openfreemap.org/styles/dark',
+      style: modelo ? urlEstiloMapa(modelo) : claro ? 'https://tiles.openfreemap.org/styles/liberty' : 'https://tiles.openfreemap.org/styles/dark',
       center: [-46.417, -23.5459],
       zoom: 13,
-      pitch: 55,
+      pitch: inclinacao,
       
     });
 
     mapaRef.current = mapa;
     mapa.addControl(new maplibregl.NavigationControl());
+    if (modelo === '3d') {
+      mapa.once('load', () => {
+        const camadas = mapa.getStyle().layers;
+        camadas.filter(camada => camada.type === 'fill-extrusion').forEach(camada => {
+          mapa.setLayoutProperty(camada.id, 'visibility', 'none');
+        });
+        mapa.addSource('intermedi-predios', { type: 'vector', url: 'https://tiles.openfreemap.org/planet' });
+        mapa.addLayer(PREDIOS_3D, camadas.find(camada => camada.type === 'symbol')?.id);
+      });
+    }
 
     const limites = new maplibregl.LngLatBounds();
 
@@ -88,7 +109,7 @@ export default function Mapa({localizacao ,geometria, farmacias = pharmacies, }:
     
     if (!limites.isEmpty()) {
       mapa.fitBounds(limites, {
-        pitch: 55,
+        pitch: inclinacao,
         padding: 60,
         maxZoom: 15,
         duration: 0,
@@ -103,7 +124,7 @@ export default function Mapa({localizacao ,geometria, farmacias = pharmacies, }:
       mapa.remove();
       URL.revokeObjectURL(workerUrl);
     };
-  }, [farmacias]);
+  }, [farmacias, claro, modelo, inclinacao]);
 
   useEffect(() => {
     const mapa = mapaRef.current;
@@ -140,12 +161,12 @@ export default function Mapa({localizacao ,geometria, farmacias = pharmacies, }:
     });
 
     mapa.fitBounds(limites, {
-      pitch: 55,
+      pitch: inclinacao,
       padding: 60,
       maxZoom: 15,
       duration: 0,
     });
-  }, [localizacao, farmacias]);
+  }, [localizacao, farmacias, claro, modelo, inclinacao]);
 
   useEffect(() => {
   const mapa = mapaRef.current;
@@ -200,8 +221,8 @@ export default function Mapa({localizacao ,geometria, farmacias = pharmacies, }:
       });
 
       mapa.fitBounds(limites, {
-        pitch: 55,
-        padding: 40,
+        pitch: inclinacao,
+        padding: { top: 90, bottom: espacoInferior, left: 40, right: 40 },
         duration: 500,
       });
     }
@@ -216,15 +237,16 @@ export default function Mapa({localizacao ,geometria, farmacias = pharmacies, }:
   return () => {
     mapa.off('load', desenhar);
   };
-}, [geometria, farmacias]);
+}, [geometria, farmacias, claro, espacoInferior, modelo, inclinacao]);
 
   return (
     <div
       ref={containerRef}
       style={{
         width: '100%',
-        height: 350,
-        borderRadius: 16,
+        height: expandido ? '100%' : 350,
+        flex: expandido ? 1 : undefined,
+        borderRadius: expandido ? 0 : 16,
         overflow: 'hidden',
       }}
     />

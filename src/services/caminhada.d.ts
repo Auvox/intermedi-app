@@ -44,3 +44,10 @@ export function calcularCaminhada(
   },
   modo?: ModoLocomocao,
 ): Promise<Rota>;
+export function calcularTodasRotas(farmacia: {
+  latitude: number;
+  longitude: number;
+}): Promise<{
+  rotas: Partial<Record<ModoLocomocao, Rota>>;
+  erros: Partial<Record<ModoLocomocao, string>>;
+}>;

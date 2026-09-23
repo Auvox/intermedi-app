@@ -1,10 +1,7 @@
 import * as Location from 'expo-location';
 import { buscarRota } from './rotas';
 
-export async function calcularCaminhada(
-  farmacia,
-  modo = 'pedestrian',
-) {
+async function obterOrigem() {
   
   
   const { status } =
@@ -23,6 +20,11 @@ export async function calcularCaminhada(
     longitude: posicao.coords.longitude,
   };
 
+  return origem;
+}
+
+export async function calcularCaminhada(farmacia, modo = 'pedestrian', origem = null) {
+  origem = origem ?? await obterOrigem();
   const destino = {
     latitude: farmacia.latitude,
     longitude: farmacia.longitude,
@@ -37,4 +39,21 @@ return {
   origem,
   destino,
 };
+}
+// Uma única leitura do GPS garante a mesma origem para comparar os transportes.
+export async function calcularTodasRotas(farmacia) {
+  const origem = await obterOrigem();
+  const modos = ['pedestrian', 'auto', 'motorcycle', 'bicycle'];
+  const resultados = await Promise.allSettled(
+    modos.map(modo => calcularCaminhada(farmacia, modo, origem)),
+  );
+  const rotas = {};
+  const erros = {};
+  resultados.forEach((resultado, indice) => {
+    const modo = modos[indice];
+    if (resultado.status === 'fulfilled') rotas[modo] = resultado.value;
+    else erros[modo] = resultado.reason instanceof Error
+      ? resultado.reason.message : 'Não foi possível calcular este transporte.';
+  });
+  return { rotas, erros };
 }

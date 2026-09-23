@@ -4,6 +4,7 @@ import { WebView } from 'react-native-webview';
 import { criarMapaHtml } from './mapa-html';
 import type { Rota } from '@/services/caminhada';
 import type { Pharmacy } from '@/constants/mock-data';
+import type { EstiloMapa } from './estilos-mapa';
 
 type MapaProps = {
   localizacao?: {
@@ -14,20 +15,33 @@ type MapaProps = {
   farmacias?: Pharmacy[];
   seguindo?: boolean;
   expandido?: boolean;
+  claro?: boolean;
+  espacoInferior?: number;
+  modelo?: EstiloMapa;
 };
 
-export default function Mapa({ localizacao, geometria, farmacias, seguindo = false, expandido = false, }: MapaProps) {
+export default function Mapa(props: MapaProps) {
+  // Uma nova WebView recebe novamente os dados da rota depois de carregar o estilo.
+  return <MapaConteudo key={props.modelo ?? 'automatico'} {...props} />;
+}
+
+function MapaConteudo({ localizacao, geometria, farmacias, seguindo = false, expandido = false, claro = false, espacoInferior = 60, modelo, }: MapaProps) {
   const webviewRef = useRef<WebView>(null);
   const esquemaDeCores = useColorScheme();
-  const temaEscuro = esquemaDeCores === 'dark';
+  const temaEscuro = !claro && esquemaDeCores === 'dark';
 
   const fonte = useMemo(
     () => ({
-      html: criarMapaHtml(temaEscuro),
+      html: criarMapaHtml(temaEscuro, modelo),
     }),
-    [temaEscuro],
+    [temaEscuro, modelo],
   );
   const [pronto, setPronto] = useState(false);
+
+  useEffect(() => {
+    if (!pronto) return;
+    webviewRef.current?.injectJavaScript(`window.espacoInferior = ${espacoInferior}; true;`);
+  }, [pronto, espacoInferior]);
 
   useEffect(() => {
     if (!pronto) return;
@@ -36,15 +50,6 @@ export default function Mapa({ localizacao, geometria, farmacias, seguindo = fal
       `window.atualizarFarmacias(${JSON.stringify(farmacias ?? null).replace(/</g, '\\u003c')}); true;`,
     );
   }, [pronto, farmacias]);
-
-  useEffect(() => {
-    if (pronto) webviewRef.current?.injectJavaScript(
-      `window.atualizarLocalizacao(
-  ${JSON.stringify(localizacao ?? null)},
-  ${JSON.stringify(seguindo)}
-); true;`,
-    );
-  }, [pronto, localizacao, seguindo]);
 
   useEffect(() => {
     if (!pronto) return;
@@ -57,7 +62,16 @@ export default function Mapa({ localizacao, geometria, farmacias, seguindo = fal
     webviewRef.current?.injectJavaScript(
       `window.desenharRota(${JSON.stringify(geometria ?? null)}); true;`,
     );
-  }, [pronto, geometria]);
+  }, [pronto, geometria, espacoInferior]);
+
+  useEffect(() => {
+    if (!pronto) return;
+    // Retoma a posição atual após trocar o modelo durante a navegação.
+    // Na prévia, o enquadramento final continua mostrando toda a rota.
+    webviewRef.current?.injectJavaScript(
+      `window.atualizarLocalizacao(${JSON.stringify(localizacao ?? null)}, ${JSON.stringify(seguindo)}, ${Boolean(geometria)}); true;`,
+    );
+  }, [pronto, localizacao, seguindo, geometria, espacoInferior]);
 
   return (
     <View

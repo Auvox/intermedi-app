@@ -1,11 +1,12 @@
 import { pharmacies } from '@/constants/mock-data';
+import { PREDIOS_3D, urlEstiloMapa, type EstiloMapa } from './estilos-mapa';
 
 // Escape '<' para nomes e endereços nunca encerrarem a tag script.
 const dadosFarmacias = JSON.stringify(pharmacies).replace(/</g, '\\u003c');
 
-export function criarMapaHtml(temaEscuro = false) {
+export function criarMapaHtml(temaEscuro = false, modelo?: EstiloMapa) {
   // Escolhe o mapa de base de acordo com o tema atual do celular.
-  const estiloMapa = temaEscuro
+  const estiloMapa = modelo ? urlEstiloMapa(modelo) : temaEscuro
     ? 'https://tiles.openfreemap.org/styles/dark'
     : 'https://tiles.openfreemap.org/styles/liberty';
 
@@ -168,7 +169,8 @@ export function criarMapaHtml(temaEscuro = false) {
       // Cria o mapa usando o tema escolhido pela funcao criarMapaHtml.
       var mapa = new maplibregl.Map({
         container: 'mapa', center: [-46.417, -23.5459], zoom: 13,
-        style: '${estiloMapa}'
+        style: '${estiloMapa}',
+        pitch: ${modelo === '3d' ? 60 : 0}
       });
 
       // Paleta propria do Intermedi para os modos claro e escuro.
@@ -364,7 +366,7 @@ function atualizarTrechoRestante(localizacao) {
 }
 
      // Atualiza o marcador da pessoa e decide como posicionar a camera.
-     window.atualizarLocalizacao = function(localizacao, seguindo) {
+     window.atualizarLocalizacao = function(localizacao, seguindo, manterEnquadramento) {
   // Estes limites servem para enquadrar a pessoa e as farmacias.
   var limites = new maplibregl.LngLatBounds();
 
@@ -436,9 +438,9 @@ elementoUsuario.appendChild(setaUsuario);
   }
 
   // Fora da navegacao, mostra a pessoa e as farmacias na mesma visao.
-  if (!limites.isEmpty()) {
+  if (!manterEnquadramento && !limites.isEmpty()) {
     mapa.fitBounds(limites, {
-      padding: 60,
+      padding: { top: 90, bottom: window.espacoInferior || 60, left: 40, right: 40 },
       maxZoom: 15,
       duration: 0
     });
@@ -503,7 +505,7 @@ elementoUsuario.appendChild(setaUsuario);
     });
 
     mapa.fitBounds(limites, {
-      padding: 40,
+      padding: { top: 90, bottom: window.espacoInferior || 60, left: 40, right: 40 },
       duration: 500
     });
   }
@@ -535,7 +537,17 @@ elementoUsuario.appendChild(setaUsuario);
       });
       // Personaliza as camadas antes de liberar dados enviados pelo mapa.tsx.
       mapa.on('load', function() {
-        personalizarMapa();
+        // Os modelos escolhidos preservam suas cores originais.
+        if (${!modelo}) personalizarMapa();
+        if (${modelo === '3d'}) {
+          // Evita duplicar prédios caso o provedor já inclua extrusões.
+          mapa.getStyle().layers.forEach(function(camada) {
+            if (camada.type === 'fill-extrusion') mapa.setLayoutProperty(camada.id, 'visibility', 'none');
+          });
+          mapa.addSource('intermedi-predios', { type: 'vector', url: 'https://tiles.openfreemap.org/planet' });
+          var primeiraLegenda = mapa.getStyle().layers.find(function(camada) { return camada.type === 'symbol'; });
+          mapa.addLayer(${JSON.stringify(PREDIOS_3D)}, primeiraLegenda && primeiraLegenda.id);
+        }
         window.ReactNativeWebView.postMessage('pronto');
       });
     } catch (erro) {

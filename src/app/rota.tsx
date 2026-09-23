@@ -5,10 +5,12 @@ import { acompanharLocalizacao, type Localizacao, } from '@/services/navegacao';
 import { BackButton } from "@/components/ui/back-button";
 import { AppText } from "@/components/ui/app-text";
 import { getPharmacyById } from "@/constants/mock-data";
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { calcularCaminhada, type Rota, type ModoLocomocao, } from '@/services/caminhada';
+import { calcularTodasRotas, type Rota, type ModoLocomocao, } from '@/services/caminhada';
 import Mapa from "@/components/map/mapa";
+import { SeletorMapa } from '@/components/map/seletor-mapa';
+import { useEstiloMapa } from '@/components/map/use-estilo-mapa';
 import { simularPercurso } from '@/services/simulacao';
 import { calcularDistancia, calcularDistanciaRestante } from '@/services/progresso-rota';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -30,6 +32,7 @@ export default function RotaScreen() {
   const id = Array.isArray(farmaciaId) ? farmaciaId[0] : farmaciaId;
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { estilo: estiloMapa, escolherEstilo, erroPreferencia } = useEstiloMapa();
   const farmacia = id ? getPharmacyById(id) : undefined;
 
   const farmaciasDaRota = useMemo(
@@ -37,7 +40,10 @@ export default function RotaScreen() {
     [farmacia]
   );
 
-  const [rota, setRota] = useState<Rota | null>(null);
+  const [rotas, setRotas] = useState<Partial<Record<ModoLocomocao, Rota>>>({});
+  const [errosRotas, setErrosRotas] = useState<Partial<Record<ModoLocomocao, string>>>({});
+  const calculoRef = useRef(0);
+  const [painelAltura, setPainelAltura] = useState(360);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState("");
   const [navegando, setNavegando] = useState(false);
@@ -48,6 +54,8 @@ export default function RotaScreen() {
   const [passoAtual, setPassoAtual] = useState(0);
   const [modo, setModo] = useState<ModoLocomocao>('pedestrian');
 
+  const rota = rotas[modo] ?? null;
+  const erroExibido = erro || errosRotas[modo] || '';
   const sessaoRef = useRef(0);
 
   function escolherModo(novoModo: ModoLocomocao) {
@@ -55,39 +63,45 @@ export default function RotaScreen() {
 
     encerrarNavegacao();
     setModo(novoModo);
-    setRota(null);
     setPosicaoAtual(null);
     setPassoAtual(0);
     setErro('');
   }
-  async function calcular() {
-    if (!farmacia || carregando) return;
-
-
-
-    encerrarNavegacao();
+  const calcular = useCallback(async () => {
+    if (!farmacia) return;
+    const calculo = ++calculoRef.current;
+    sessaoRef.current += 1;
+    acompanhamentoRef.current?.remove();
+    acompanhamentoRef.current = null;
+    setNavegando(false);
+    setIniciando(false);
     setPosicaoAtual(null);
-
     setPassoAtual(0);
-
     setCarregando(true);
-    setErro("");
-    setRota(null);
-
+    setErro('');
+    setRotas({});
+    setErrosRotas({});
     try {
-      const resultado = await calcularCaminhada(farmacia, modo);
-      setRota(resultado);
+      const resultado = await calcularTodasRotas(farmacia);
+      if (calculo !== calculoRef.current) return;
+      setRotas(resultado.rotas);
+      setErrosRotas(resultado.erros);
     } catch (error) {
-      setErro(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível calcular a rota."
-      );
+      if (calculo === calculoRef.current) {
+        setErro(error instanceof Error ? error.message : 'Não foi possível calcular as rotas.');
+      }
     } finally {
-      setCarregando(false);
+      if (calculo === calculoRef.current) setCarregando(false);
     }
+  }, [farmacia]);
 
-  }
+  useEffect(() => {
+    // Sincroniza as rotas remotas com o destino, incluindo o estado de carregamento.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void calcular();
+    return () => { calculoRef.current += 1; };
+  }, [calcular]);
+
   function encerrarNavegacao() {
     sessaoRef.current += 1;
     acompanhamentoRef.current?.remove();
@@ -230,6 +244,7 @@ const tempoRestante =
         geometria={rota.geometria}
         seguindo
         expandido
+        modelo={estiloMapa}
       />
 
       <View
@@ -265,6 +280,9 @@ const tempoRestante =
           </View>
         </View>
       </View>
+      <View style={[styles.seletorNavegacao, { bottom: insets.bottom + 100 }]}>
+        <SeletorMapa estilo={estiloMapa} onChange={escolherEstilo} erro={erroPreferencia} />
+      </View>
       <View
   style={[
     styles.painelResumo,
@@ -299,25 +317,28 @@ const tempoRestante =
 }
 
   return (
-    <ScrollView
-      style={{ backgroundColor: colors.background }}
-      contentContainerStyle={[
-        styles.conteudo,
-        { paddingTop: insets.top + Spacing.md },
-      ]}>
-      <View style={styles.cabecalho}>
-        <BackButton tone="dark" />
-
-        <View style={styles.cabecalhoTexto}>
-          <AppText variant="h3">Trajeto até a unidade</AppText>
-          <AppText variant="label" numberOfLines={1}>
-            {farmacia?.name ?? 'Unidade não encontrada'}
-          </AppText>
-        </View>
+    <View style={styles.telaNavegacao}>
+      <View style={StyleSheet.absoluteFill}>
+        <Mapa
+          farmacias={farmaciasDaRota}
+          localizacao={posicaoAtual ?? rota?.origem}
+          geometria={rota?.geometria}
+          expandido
+          modelo={estiloMapa}
+          espacoInferior={painelAltura + insets.bottom + 24}
+        />
       </View>
-
+      <View style={[styles.voltarFlutuante, { top: insets.top + 12 }]}>
+        <BackButton tone="dark" />
+      </View>
+      <ScrollView
+        style={[styles.painelControles, { bottom: insets.bottom + 12, backgroundColor: colors.surface }]}
+        onLayout={event => setPainelAltura(event.nativeEvent.layout.height)}
+        contentContainerStyle={styles.conteudo}
+        showsVerticalScrollIndicator={false}>
       {farmacia ? (
         <>
+          <SeletorMapa estilo={estiloMapa} onChange={escolherEstilo} erro={erroPreferencia} />
           <View
             style={[
               styles.destino,
@@ -342,15 +363,9 @@ const tempoRestante =
             </View>
           </View>
 
-          <Mapa
-            farmacias={farmaciasDaRota}
-            localizacao={posicaoAtual ?? rota?.origem}
-            geometria={rota?.geometria}
-          />
-
           <View style={styles.secaoTitulo}>
             <AppText variant="h3">Como você vai?</AppText>
-            <AppText variant="caption">Escolha o tipo de rota</AppText>
+            <AppText variant="caption">Compare os tempos estimados</AppText>
           </View>
 
           <View style={styles.modos}>
@@ -361,7 +376,7 @@ const tempoRestante =
                 <Pressable
                   key={opcao.valor}
                   accessibilityRole="button"
-                  accessibilityState={{ selected: selecionado }}
+                  accessibilityState={{ selected: selecionado, disabled: carregando }}
                   disabled={carregando}
                   onPress={() => escolherModo(opcao.valor)}
                   style={({ pressed }) => [
@@ -388,23 +403,28 @@ const tempoRestante =
                     style={styles.modoTexto}>
                     {opcao.titulo}
                   </AppText>
+                  <AppText variant="caption" color={selecionado ? Colors.primaryDark : colors.textSecondary}>
+                    {rotas[opcao.valor]
+                      ? Math.ceil(rotas[opcao.valor]!.tempoSegundos / 60) + ' min'
+                      : carregando ? 'Calculando…' : 'Indisponível'}
+                  </AppText>
                 </Pressable>
               );
             })}
           </View>
 
-          <Button
-            title="Calcular rota"
+          {(!rota || erroExibido) && <Button
+            title="Tentar novamente"
             onPress={calcular}
             loading={carregando}
             style={styles.botaoCalcular}
-          />
+          />}
 
-          {erro ? (
+          {erroExibido ? (
             <View style={[styles.erro, { backgroundColor: colors.surfaceMuted }]}>
               <Ionicons name="alert-circle-outline" size={20} color={Colors.danger} />
               <AppText variant="label" color={Colors.danger} style={styles.erroTexto}>
-                {erro}
+                {erroExibido}
               </AppText>
             </View>
           ) : null}
@@ -469,15 +489,18 @@ const tempoRestante =
           <AppText variant="bodyBold">UBS não encontrada</AppText>
         </View>
       )}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  seletorNavegacao: { position: 'absolute', right: 16, left: 16 },
+  voltarFlutuante: { position: 'absolute', left: 16, borderRadius: 24, backgroundColor: 'white', padding: 4, elevation: 4 },
+  painelControles: { position: 'absolute', left: 12, right: 12, maxHeight: '60%', borderRadius: 20, elevation: 6, boxShadow: '0 3px 16px rgba(0,0,0,0.16)' },
   conteudo: {
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.xxxl,
-    gap: Spacing.lg,
+    padding: Spacing.md,
+    gap: Spacing.sm,
   },
   cabecalho: {
     flexDirection: 'row',
@@ -550,8 +573,8 @@ const styles = StyleSheet.create({
   resumoRota: {
     borderWidth: 1,
     borderRadius: Radius.lg,
-    padding: Spacing.lg,
-    gap: Spacing.lg,
+    padding: Spacing.md,
+    gap: Spacing.sm,
   },
   resumoDados: {
     flexDirection: 'row',
