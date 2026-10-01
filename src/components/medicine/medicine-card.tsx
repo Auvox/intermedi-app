@@ -1,3 +1,4 @@
+import { MedicinePhoto } from './medicine-photo';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -20,9 +21,7 @@ export function MedicineCard({ medicine, onPress }: MedicineCardProps) {
       accessibilityRole="button"
       accessibilityLabel={`Ver detalhes de ${medicine.name} ${medicine.dosage}`}>
       <View style={styles.topRow}>
-        <View style={styles.iconSquare}>
-          <Ionicons name="medkit" size={25} color={Colors.textOnPrimary} />
-        </View>
+        <MedicinePhoto uri={medicine.photo} name={medicine.name} />
 
         <View style={styles.info}>
           <AppText variant="bodyBold" numberOfLines={1}>
@@ -57,7 +56,7 @@ export function MedicineCard({ medicine, onPress }: MedicineCardProps) {
         <View style={styles.pharmacyRow}>
           <Ionicons name="business-outline" size={18} color={Colors.primary} />
           <AppText variant="body" numberOfLines={1} style={styles.pharmacyText}>
-            Consultar farmácias
+            Informações do medicamento
           </AppText>
         </View>
 

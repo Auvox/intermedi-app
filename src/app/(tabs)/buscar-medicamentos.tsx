@@ -1,19 +1,36 @@
-import { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
 
 import { AppHeader } from '@/components/home/app-header';
 import { MedicineCard } from '@/components/medicine/medicine-card';
 import { AppText } from '@/components/ui/app-text';
 import { TextField } from '@/components/ui/text-field';
 import { useTheme } from '@/context/theme-context';
-import { medicines } from '@/constants/mock-data';
+import type { Medicine } from '@/constants/mock-data';
+import { listarMedicamentos } from '@/services/medicamentos';
 import { Colors, Spacing } from '@/constants/theme';
 
 export default function BuscarMedicamentosScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const [busca, setBusca] = useState('');
+
+  const [medicines, setMedicines] = useState<Medicine[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [tentativa, setTentativa] = useState(0);
+  useFocusEffect(useCallback(() => {
+    let ativo = true;
+    setLoading(true);
+    setError('');
+    listarMedicamentos().then((dados) => {
+      if (ativo) setMedicines(dados);
+    }).catch((erro: unknown) => {
+      if (ativo) setError(erro instanceof Error ? erro.message : 'Erro ao carregar medicamentos.');
+    }).finally(() => { if (ativo) setLoading(false); });
+    return () => { ativo = false; };
+  }, [tentativa]));
 
   const termo = busca.trim().toLowerCase();
   const medicamentosFiltrados = medicines.filter((medicine) =>
@@ -28,7 +45,7 @@ export default function BuscarMedicamentosScreen() {
 
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
         <AppText variant="h3" color={colors.textMuted}>
-          Medicamentos perto de você
+          Medicamentos cadastrados
         </AppText>
 
         <TextField
@@ -38,7 +55,14 @@ export default function BuscarMedicamentosScreen() {
         />
 
         <View style={styles.list}>
-          {medicamentosFiltrados.map((medicine) => (
+          {loading && <ActivityIndicator accessibilityLabel="Carregando medicamentos" color={Colors.primary} />}
+          {!!error && <View style={styles.emptyState}>
+            <AppText variant="body">{error}</AppText>
+            <Pressable accessibilityRole="button" onPress={() => setTentativa((v) => v + 1)}>
+              <AppText variant="bodyBold" color={Colors.primary}>Tentar novamente</AppText>
+            </Pressable>
+          </View>}
+          {!loading && !error && medicamentosFiltrados.map((medicine) => (
             <MedicineCard
               key={medicine.id}
               medicine={medicine}
@@ -51,7 +75,7 @@ export default function BuscarMedicamentosScreen() {
             />
           ))}
 
-          {medicamentosFiltrados.length === 0 && (
+          {!loading && !error && medicamentosFiltrados.length === 0 && (
             <View style={styles.emptyState}>
               <View style={[styles.emptyIcon, { backgroundColor: colors.primarySoft }]}>
                 <AppText variant="h3" color={Colors.primary}>

@@ -1,61 +1,47 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { TextField } from '@/components/ui/text-field';
 import { AppHeader } from '@/components/home/app-header';
-import { PharmacyCard } from '@/components/pharmacy/pharmacy-card';
+import { PharmacyPhoto } from '@/components/pharmacy/pharmacy-photo';
 import { AppText } from '@/components/ui/app-text';
 import { useTheme } from '@/context/theme-context';
-import { pharmacies } from '@/constants/mock-data';
-import { Spacing } from '@/constants/theme';
+import { listarFarmacias, enderecoFarmacia } from '@/services/farmacias';
+import { useApiResource } from '@/hooks/use-api-resource';
+import { Radius, Spacing } from '@/constants/theme';
 
 export default function FarmaciasScreen() {
   const { colors } = useTheme();
+  const router = useRouter();
   const [busca, setBusca] = useState('');
-
-  const farmaciasFiltradas = pharmacies.filter((pharmacy) => {
-  const termo = busca.toLowerCase();
-
-  return (
-    pharmacy.name.toLowerCase().includes(termo) ||
-    pharmacy.address.toLowerCase().includes(termo)
-  );
-});
-  return (
-    <View style={[styles.flex, { backgroundColor: colors.background }]}>
-      <AppHeader address="Etec Guaianases" />
-
-      <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
-        <AppText variant="h3" color={colors.textMuted}>
-          Farmácias perto de você
-        </AppText>
-        
-        <TextField
-          placeholder="Buscar por nome ou endereço"
-          value={busca}
-          onChangeText={setBusca}
-        />
-
-        <View style={styles.list}>
-          {farmaciasFiltradas.map((pharmacy) => (
-            <PharmacyCard key={pharmacy.id} pharmacy={pharmacy} />
-          ))}
-        </View>
-      </ScrollView>
-    </View>
-  );
+  const { data, loading, error, reload } = useApiResource(listarFarmacias);
+  const normalizar = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const termo = normalizar(busca.trim());
+  const farmacias = (data ?? []).filter(f => normalizar(`${f.nomeFarmacia} ${enderecoFarmacia(f)}`).includes(termo));
+  return <View style={[styles.flex, { backgroundColor: colors.background }]}>
+    <AppHeader address="Etec Guaianases" />
+    <ScrollView contentContainerStyle={styles.content}>
+      <AppText variant="h3">Farmácias cadastradas</AppText>
+      <TextField placeholder="Buscar por nome ou endereço" value={busca} onChangeText={setBusca} />
+      {loading && <ActivityIndicator color={colors.primary} accessibilityLabel="Carregando farmácias" />}
+      {!!error && <View><AppText>{error}</AppText><Pressable accessibilityRole="button" onPress={reload}><AppText color={colors.primary}>Tentar novamente</AppText></Pressable></View>}
+      {!loading && !error && farmacias.length === 0 && <AppText>Nenhuma farmácia encontrada.</AppText>}
+      {!loading && !error && farmacias.map(f => <Pressable key={f.idFarmacia} accessibilityRole="button" accessibilityLabel={`Ver estoque de ${f.nomeFarmacia}`}
+        onPress={() => router.push({ pathname: '/farmacia/[id]', params: { id: String(f.idFarmacia) } })}
+        style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.surfaceMuted }]}>
+        <View style={styles.row}><PharmacyPhoto photo={f.fotoFarmacia} name={f.nomeFarmacia} /><View style={styles.info}>
+          <AppText variant="bodyBold">{f.nomeFarmacia}</AppText><AppText variant="label">{enderecoFarmacia(f)}</AppText>
+        </View></View>
+        {!!f.telFarmacia && <AppText>Telefone: {f.telFarmacia}</AppText>}
+        {!!f.emailFarmacia && <AppText>E-mail: {f.emailFarmacia}</AppText>}
+        {!!f.cnesFarmacia && <AppText variant="label">CNES: {f.cnesFarmacia}</AppText>}
+        <AppText variant="bodyBold" color={colors.primary}>Ver medicamentos e quantidades →</AppText>
+      </Pressable>)}
+    </ScrollView>
+  </View>;
 }
-
 const styles = StyleSheet.create({
-  flex: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.xl,
-    paddingBottom: Spacing.xxxl,
-    gap: Spacing.lg,
-  },
-  list: {
-    gap: Spacing.lg,
-  },
+  flex: { flex: 1 }, content: { padding: Spacing.xl, gap: Spacing.lg, paddingBottom: Spacing.xxxl },
+  card: { padding: Spacing.lg, gap: Spacing.sm, borderRadius: Radius.lg, borderWidth: 1 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md }, info: { flex: 1, gap: Spacing.sm },
 });

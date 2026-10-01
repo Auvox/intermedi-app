@@ -63,6 +63,8 @@ export const pharmacies: Pharmacy[] = [
 ];
 
 export type Medicine = {
+  photo?: string | null;
+  details?: { label: string; value: string }[];
   id: string;
   name: string;
   dosage: string;
