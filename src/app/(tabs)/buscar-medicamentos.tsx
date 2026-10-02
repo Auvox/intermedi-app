@@ -2,6 +2,10 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 
+import * as ImagePicker from 'expo-image-picker';
+import { Button } from '@/components/ui/button';
+import { buscarMedicamentosPorFoto } from '@/services/busca-foto';
+
 import { AppHeader } from '@/components/home/app-header';
 import { MedicineCard } from '@/components/medicine/medicine-card';
 import { AppText } from '@/components/ui/app-text';
@@ -15,6 +19,11 @@ export default function BuscarMedicamentosScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const [busca, setBusca] = useState('');
+
+  const [lendoFoto, setLendoFoto] = useState(false);
+  const [textoReconhecido, setTextoReconhecido] = useState('');
+  const [erroFoto, setErroFoto] = useState('');
+  const [resultadosFoto, setResultadosFoto] = useState<Medicine[] | null>(null);
 
   const [medicines, setMedicines] = useState<Medicine[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,11 +42,56 @@ export default function BuscarMedicamentosScreen() {
   }, [tentativa]));
 
   const termo = busca.trim().toLowerCase();
-  const medicamentosFiltrados = medicines.filter((medicine) =>
-    [medicine.name, medicine.dosage, medicine.category].some((value) =>
-      value.toLowerCase().includes(termo),
-    ),
+
+  const medicamentosFiltrados = resultadosFoto ?? medicines.filter(
+    (medicine) =>
+      [medicine.name, medicine.dosage, medicine.category].some(
+        (value) => value.toLowerCase().includes(termo),
+      ),
   );
+
+  const carregandoLista = resultadosFoto === null && loading;
+  const erroLista = resultadosFoto === null ? error : '';
+
+  async function buscarPorFoto(origem: 'camera' | 'galeria' = 'camera') {
+    if (lendoFoto) return;
+
+    setLendoFoto(true);
+    setErroFoto('');
+
+    try {
+      if (origem === 'camera') {
+        const permissao = await ImagePicker.requestCameraPermissionsAsync();
+        if (!permissao.granted) {
+          setErroFoto('Permita o acesso à câmera para fotografar a embalagem.');
+          return;
+        }
+      }
+
+      const opcoes: ImagePicker.ImagePickerOptions = {
+        mediaTypes: ['images'], quality: 1, allowsEditing: true,
+      };
+      const captura = origem === 'camera'
+        ? await ImagePicker.launchCameraAsync({ ...opcoes, cameraType: ImagePicker.CameraType.back })
+        : await ImagePicker.launchImageLibraryAsync(opcoes);
+
+      if (captura.canceled || !captura.assets[0]) return;
+
+      const resultado = await buscarMedicamentosPorFoto(captura.assets[0]);
+
+      setTextoReconhecido(resultado.textoReconhecido);
+      setResultadosFoto(resultado.medicamentos);
+      setBusca('');
+    } catch (erro) {
+      setErroFoto(
+        erro instanceof Error
+          ? erro.message
+          : 'Não foi possível pesquisar pela foto.',
+      );
+    } finally {
+      setLendoFoto(false);
+    }
+  }
 
   return (
     <View style={[styles.flex, { backgroundColor: colors.background }]}>
@@ -51,18 +105,64 @@ export default function BuscarMedicamentosScreen() {
         <TextField
           placeholder="Buscar por nome ou categoria"
           value={busca}
-          onChangeText={setBusca}
+          onChangeText={(texto) => {
+            setBusca(texto);
+            setResultadosFoto(null);
+            setErroFoto('');
+          }}
         />
 
+        <Button
+          title={lendoFoto ? 'Lendo embalagem…' : 'Buscar por foto'}
+          onPress={() => buscarPorFoto('camera')}
+          loading={lendoFoto}
+          disabled={lendoFoto}
+        />
+
+        <Button title="Escolher foto da galeria" variant="outline"
+          onPress={() => buscarPorFoto('galeria')} disabled={lendoFoto} />
+        <AppText variant="label">
+          Após escolher a foto, recorte a região do nome do medicamento antes de confirmar.
+        </AppText>
+
+        {!!erroFoto && (
+          <AppText variant="label" color={Colors.danger}>
+            {erroFoto}
+          </AppText>
+        )}
+
+        {!!textoReconhecido && (
+          <View>
+            <AppText variant="bodyBold">Texto reconhecido:</AppText>
+            <AppText variant="label" numberOfLines={4}>{textoReconhecido}</AppText>
+            <AppText variant="label">
+              Confira o nome e a dosagem. Você pode corrigir a busca no campo acima.
+            </AppText>
+          </View>
+        )}
+
+        {resultadosFoto !== null && (
+          <Button
+            title="Voltar à busca normal"
+            variant="outline"
+            onPress={() => {
+              setResultadosFoto(null);
+              setTextoReconhecido('');
+              setErroFoto('');
+              setBusca('');
+            }}
+          />
+        )}
+
         <View style={styles.list}>
-          {loading && <ActivityIndicator accessibilityLabel="Carregando medicamentos" color={Colors.primary} />}
-          {!!error && <View style={styles.emptyState}>
-            <AppText variant="body">{error}</AppText>
+          {carregandoLista && <ActivityIndicator accessibilityLabel="Carregando medicamentos" color={Colors.primary} />}
+          {!!erroLista && <View style={styles.emptyState}>
+            <AppText variant="body">{erroLista}</AppText>
             <Pressable accessibilityRole="button" onPress={() => setTentativa((v) => v + 1)}>
               <AppText variant="bodyBold" color={Colors.primary}>Tentar novamente</AppText>
             </Pressable>
           </View>}
-          {!loading && !error && medicamentosFiltrados.map((medicine) => (
+          {!carregandoLista && !erroLista && medicamentosFiltrados.map((medicine) => (
             <MedicineCard
               key={medicine.id}
               medicine={medicine}
@@ -75,7 +175,7 @@ export default function BuscarMedicamentosScreen() {
             />
           ))}
 
-          {!loading && !error && medicamentosFiltrados.length === 0 && (
+          {!carregandoLista && !erroLista && medicamentosFiltrados.length === 0 && (
             <View style={styles.emptyState}>
               <View style={[styles.emptyIcon, { backgroundColor: colors.primarySoft }]}>
                 <AppText variant="h3" color={Colors.primary}>
