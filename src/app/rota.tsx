@@ -4,7 +4,8 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { acompanharLocalizacao, type Localizacao, } from '@/services/navegacao';
 import { BackButton } from "@/components/ui/back-button";
 import { AppText } from "@/components/ui/app-text";
-import { getPharmacyById } from "@/constants/mock-data";
+import { buscarFarmacia, prepararFarmaciasParaMapa } from '@/services/farmacias';
+import { useApiResource } from '@/hooks/use-api-resource';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { calcularTodasRotas, type Rota, type ModoLocomocao, } from '@/services/caminhada';
@@ -33,7 +34,14 @@ export default function RotaScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { estilo: estiloMapa, escolherEstilo, erroPreferencia } = useEstiloMapa();
-  const farmacia = id ? getPharmacyById(id) : undefined;
+  const carregarFarmacia = useCallback(async () => {
+    if (!id) throw new Error('Selecione uma farmácia para ver a rota.');
+    const registro = await buscarFarmacia(id);
+    const destino = prepararFarmaciasParaMapa([registro])[0];
+    if (!destino) throw new Error('Esta farmácia ainda não possui coordenadas para calcular a rota.');
+    return destino;
+  }, [id]);
+  const { data: farmacia, loading: carregandoFarmacia, error: erroFarmacia, reload: recarregarFarmacia } = useApiResource(carregarFarmacia);
 
   const farmaciasDaRota = useMemo(
     () => (farmacia ? [farmacia] : []),
@@ -55,7 +63,7 @@ export default function RotaScreen() {
   const [modo, setModo] = useState<ModoLocomocao>('pedestrian');
 
   const rota = rotas[modo] ?? null;
-  const erroExibido = erro || errosRotas[modo] || '';
+  const erroExibido = erroFarmacia || erro || errosRotas[modo] || '';
   const sessaoRef = useRef(0);
 
   function escolherModo(novoModo: ModoLocomocao) {
@@ -68,7 +76,14 @@ export default function RotaScreen() {
     setErro('');
   }
   const calcular = useCallback(async () => {
-    if (!farmacia) return;
+    if (!farmacia) {
+      calculoRef.current += 1;
+      setRotas({});
+      setErrosRotas({});
+      setErro('');
+      setCarregando(false);
+      return;
+    }
     const calculo = ++calculoRef.current;
     sessaoRef.current += 1;
     acompanhamentoRef.current?.remove();
@@ -415,8 +430,8 @@ const tempoRestante =
 
           {(!rota || erroExibido) && <Button
             title="Tentar novamente"
-            onPress={calcular}
-            loading={carregando}
+            onPress={farmacia ? calcular : recarregarFarmacia}
+            loading={carregando || carregandoFarmacia}
             style={styles.botaoCalcular}
           />}
 

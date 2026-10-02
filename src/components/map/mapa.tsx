@@ -3,7 +3,7 @@ import { StyleSheet, View, useColorScheme } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { criarMapaHtml } from './mapa-html';
 import type { Rota } from '@/services/caminhada';
-import type { Pharmacy } from '@/constants/mock-data';
+import type { FarmaciaMapa } from '@/services/farmacias';
 import type { EstiloMapa } from './estilos-mapa';
 
 type MapaProps = {
@@ -12,7 +12,7 @@ type MapaProps = {
     longitude: number;
   };
   geometria?: Rota['geometria'];
-  farmacias?: Pharmacy[];
+  farmacias?: FarmaciaMapa[];
   seguindo?: boolean;
   expandido?: boolean;
   claro?: boolean;

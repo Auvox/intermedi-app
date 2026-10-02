@@ -5,7 +5,7 @@ import { pharmacies } from '@/constants/mock-data';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { Rota } from '@/services/caminhada';
 import type { FeatureCollection } from 'geojson';
-import type { Pharmacy } from '@/constants/mock-data';
+import type { FarmaciaMapa } from '@/services/farmacias';
 import { PREDIOS_3D, urlEstiloMapa, type EstiloMapa } from './estilos-mapa';
 
 type MapaProps = {
@@ -13,8 +13,9 @@ type MapaProps = {
     latitude: number;
     longitude: number;
   };
+   
    geometria?: Rota['geometria'];
-   farmacias?: Pharmacy[];
+   farmacias?: FarmaciaMapa[];
    expandido?: boolean;
    claro?: boolean;
    seguindo?: boolean;
@@ -22,11 +23,13 @@ type MapaProps = {
    modelo?: EstiloMapa;
 };
 
+const FARMACIAS_VAZIAS: FarmaciaMapa[] = [];
+
 export default function Mapa(props: MapaProps) {
   return <MapaConteudo key={props.modelo ?? 'automatico'} {...props} />;
 }
 
-function MapaConteudo({localizacao ,geometria, farmacias = pharmacies, expandido = false, claro = false, espacoInferior = 60, modelo, }: MapaProps) {
+function MapaConteudo({localizacao ,geometria, farmacias = FARMACIAS_VAZIAS, expandido = false, claro = false, espacoInferior = 60, modelo, }: MapaProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapaRef = useRef<maplibregl.Map | null>(null);
   const marcadorUsuarioRef = useRef<maplibregl.Marker | null>(null);

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, View } from 'react-native';
@@ -12,10 +12,13 @@ import { useTheme } from '@/context/theme-context';
 import { currentLocation, savedAddresses } from '@/constants/mock-data';
 import { Colors, Spacing } from '@/constants/theme';
 import Mapa from '@/components/map/mapa';
+import { listarFarmacias, prepararFarmaciasParaMapa, type FarmaciaMapa, } from '@/services/farmacias';
 
 export default function EnderecoPickerScreen() {
   const { colors } = useTheme();
   const router = useRouter();
+  const [farmaciasDoMapa, setFarmaciasDoMapa] = useState<FarmaciaMapa[]>([]);
+  const [avisoFarmacias, setAvisoFarmacias] = useState('Carregando farmácias...');
   const [selectedId, setSelectedId] = useState('casa');
   const [search, setSearch] = useState('');
   const [coordenadas, setCoordenadas] = useState('');
@@ -31,24 +34,24 @@ export default function EnderecoPickerScreen() {
   async function usarLocalizacaoAtual() {
     try {
       setCoordenadas('Buscando sua localização...');
-  
+
       const { status } =
         await Location.requestForegroundPermissionsAsync();
-  
+
       if (status !== 'granted') {
         setCoordenadas('Permita o acesso à localização nas configurações do dispositivo ou navegador.');
         return;
       }
-  
+
       const posicao = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
       });
-  
+
       setLocalizacao({
         latitude: posicao.coords.latitude,
         longitude: posicao.coords.longitude,
       });
-  
+
       setCoordenadas('Localização encontrada.');
     } catch {
       setCoordenadas(
@@ -56,7 +59,35 @@ export default function EnderecoPickerScreen() {
       );
     }
   }
+  useEffect(() => {
+    let ativo = true;
 
+    async function carregarFarmacias() {
+      try {
+        const farmacias = await listarFarmacias();
+        const lista = prepararFarmaciasParaMapa(farmacias);
+
+        if (!ativo) return;
+
+        setFarmaciasDoMapa(lista);
+        setAvisoFarmacias(
+          lista.length === 0
+            ? 'Nenhuma farmácia com localização disponível.'
+            : '',
+        );
+      } catch {
+        if (ativo) {
+          setAvisoFarmacias('Não foi possível carregar as farmácias.');
+        }
+      }
+    }
+
+    carregarFarmacias();
+
+    return () => {
+      ativo = false;
+    };
+  }, []);
   return (
     <View style={[styles.flex, { backgroundColor: colors.background }]}>
       <AppHeader />
@@ -72,7 +103,16 @@ export default function EnderecoPickerScreen() {
           Onde você quer encontrar o seu remédio?
         </AppText>
 
-        <Mapa localizacao={localizacao} />
+        <Mapa
+          localizacao={localizacao}
+          farmacias={farmaciasDoMapa}
+        />
+
+        {avisoFarmacias ? (
+          <AppText variant="label" color={colors.textSecondary}>
+            {avisoFarmacias}
+          </AppText>
+        ) : null}
 
         <TextField
           placeholder="Buscar endereço e número"
@@ -81,19 +121,19 @@ export default function EnderecoPickerScreen() {
         />
 
         <View style={styles.list}>
-        <AddressListItem
-  icon="locate-outline"
-  label={currentLocation.label}
-  address={currentLocation.address}
-  onPress={usarLocalizacaoAtual}
-/>
+          <AddressListItem
+            icon="locate-outline"
+            label={currentLocation.label}
+            address={currentLocation.address}
+            onPress={usarLocalizacaoAtual}
+          />
 
-{coordenadas ? (
-  <AppText variant="label" color={colors.textSecondary}>
-    {coordenadas}
-  </AppText>
-) : null}
-          
+          {coordenadas ? (
+            <AppText variant="label" color={colors.textSecondary}>
+              {coordenadas}
+            </AppText>
+          ) : null}
+
           {savedAddresses.map((address) => (
             <AddressListItem
               key={address.id}

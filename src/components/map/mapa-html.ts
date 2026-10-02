@@ -1,8 +1,7 @@
-import { pharmacies } from '@/constants/mock-data';
 import { PREDIOS_3D, urlEstiloMapa, type EstiloMapa } from './estilos-mapa';
 
 // Escape '<' para nomes e endereços nunca encerrarem a tag script.
-const dadosFarmacias = JSON.stringify(pharmacies).replace(/</g, '\\u003c');
+const dadosFarmacias = '[]';
 
 export function criarMapaHtml(temaEscuro = false, modelo?: EstiloMapa) {
   // Escolhe o mapa de base de acordo com o tema atual do celular.
