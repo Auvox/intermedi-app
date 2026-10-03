@@ -20,7 +20,7 @@ export default function PerfilScreen() {
       <AppHeader address="Etec Guaianases" />
 
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
-        <View style={styles.profileCard}>
+        <View style={[styles.profileCard, { backgroundColor: colors.primary }]}>
           <View style={styles.avatar}>
             {profileImage ? (
               <Image source={{ uri: profileImage }} style={styles.avatarImage} />
@@ -28,7 +28,7 @@ export default function PerfilScreen() {
               <Ionicons name="person" size={28} color={Colors.textOnPrimary} />
             )}
           </View>
-          <AppText variant="h3" color={Colors.textOnPrimary}>
+          <AppText variant="h3" color={Colors.textOnPrimary} style={{ flex: 1 }}>
             Olá,{' '}
             <AppText variant="h2" color={Colors.textOnPrimary}>
               {user?.nome?.trim() || 'usuário'}!
@@ -37,6 +37,12 @@ export default function PerfilScreen() {
         </View>
 
         <View style={[styles.menuGroup, { borderColor: colors.surfaceMuted }]}>
+          <ProfileMenuItem
+            icon="accessibility-outline"
+            title="Acessibilidade"
+            subtitle="Tamanho do texto e alto contraste"
+            onPress={() => router.push('/acessibilidade')}
+          />
           <ProfileMenuItem
             icon="moon-outline"
             title="Modo escuro"

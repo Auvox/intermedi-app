@@ -19,8 +19,9 @@ export type AppTextProps = TextProps & {
   color?: string;
 };
 
-export function AppText({ variant = 'body', color, style, ...rest }: AppTextProps) {
-  const { colors } = useTheme();
+export function AppText({ variant = 'body', color, style, numberOfLines, ...rest }: AppTextProps) {
+  const { colors, textScale } = useTheme();
+  const resolved = StyleSheet.flatten([styles[variant], style]);
   const defaultColor =
     variant === 'label' || variant === 'caption'
       ? colors.textMuted
@@ -30,7 +31,10 @@ export function AppText({ variant = 'body', color, style, ...rest }: AppTextProp
           ? colors.primary
           : colors.text;
 
-  return <Text style={[styles[variant], { color: color ?? defaultColor }, style]} {...rest} />;
+  return <Text {...rest} numberOfLines={textScale > 1 ? undefined : numberOfLines} style={[styles[variant], { color: color ?? defaultColor }, style, {
+    fontSize: (resolved.fontSize ?? FontSize.md) * textScale,
+    lineHeight: (resolved.lineHeight ?? (resolved.fontSize ?? FontSize.md) * 1.4) * textScale,
+  }]} />;
 }
 
 const styles = StyleSheet.create({

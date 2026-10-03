@@ -16,7 +16,7 @@ export function MedicineCard({ medicine, onPress }: MedicineCardProps) {
   const { colors } = useTheme();
   return (
     <Pressable
-      style={({ pressed }) => [styles.card, { backgroundColor: colors.surface, borderColor: colors.surfaceMuted }, pressed && styles.cardPressed]}
+      style={({ pressed }) => [styles.card, { backgroundColor: colors.surface, borderColor: colors.border }, pressed && styles.cardPressed]}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={`Ver detalhes de ${medicine.name} ${medicine.dosage}`}>
@@ -31,8 +31,8 @@ export function MedicineCard({ medicine, onPress }: MedicineCardProps) {
             {medicine.dosage}
           </AppText>
           <View style={styles.categoryRow}>
-            <Ionicons name="pricetag-outline" size={14} color={Colors.primary} />
-            <AppText variant="label" color={Colors.primary} numberOfLines={1}>
+            <Ionicons name="pricetag-outline" size={14} color={colors.primaryDark} />
+            <AppText variant="label" color={colors.primaryDark} numberOfLines={1}>
               {medicine.category}
             </AppText>
           </View>
@@ -54,7 +54,7 @@ export function MedicineCard({ medicine, onPress }: MedicineCardProps) {
 
       <View style={styles.bottomRow}>
         <View style={styles.pharmacyRow}>
-          <Ionicons name="business-outline" size={18} color={Colors.primary} />
+          <Ionicons name="business-outline" size={18} color={colors.primaryDark} />
           <AppText variant="body" numberOfLines={1} style={styles.pharmacyText}>
             Informações do medicamento
           </AppText>

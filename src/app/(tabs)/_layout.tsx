@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { getApiAssetUrl } from '@/constants/api';
 import { useUser } from '@/context/user-context';
+import { useTheme } from '@/context/theme-context';
 
 type TabIconProps = {
   focused: boolean;
@@ -49,6 +50,7 @@ function ProfileTabIcon({ focused }: { focused: boolean }) {
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
+  const { colors, textScale } = useTheme();
   const { user, loading } = useUser();
   if (loading) return null;
   if (!user?.token) return <Redirect href="/login" />;
@@ -58,16 +60,16 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: Colors.textOnPrimary,
-        tabBarInactiveTintColor: 'rgba(255,255,255,0.75)',
+        tabBarInactiveTintColor: colors.textOnPrimary,
         tabBarStyle: {
-          backgroundColor: Colors.primary,
+          backgroundColor: colors.primary,
           borderTopWidth: 0,
-          height: 64 + insets.bottom,
+          height: 64 + 20 * (textScale - 1) + insets.bottom,
           paddingTop: Spacing.sm,
           paddingBottom: insets.bottom,
         },
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 12 * textScale,
           fontWeight: '700',
         },
       }}>

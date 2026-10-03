@@ -28,7 +28,7 @@ export function EditableProfileField({
   placeholder = 'Não informado',
   ...inputProps
 }: EditableProfileFieldProps) {
-  const { colors } = useTheme();
+  const { colors, textScale } = useTheme();
 
   return (
     <View
@@ -49,7 +49,8 @@ export function EditableProfileField({
           value={value}
           placeholder={placeholder}
           placeholderTextColor={colors.textMuted}
-          style={[styles.input, { color: colors.text }]}
+          accessibilityLabel={label}
+          style={[styles.input, { color: colors.text, fontSize: FontSize.sm * textScale }]}
           {...inputProps}
         />
       </View>

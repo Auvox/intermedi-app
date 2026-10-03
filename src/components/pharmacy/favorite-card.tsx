@@ -15,7 +15,7 @@ export type FavoriteCardProps = {
 export function FavoriteCard({ pharmacy, favorited = true, onToggleFavorite }: FavoriteCardProps) {
   const { colors } = useTheme();
   return (
-    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.surfaceMuted }]}>
+    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={styles.iconSquare}>
         <Ionicons name="location" size={26} color={Colors.textOnPrimary} />
       </View>
@@ -28,8 +28,8 @@ export function FavoriteCard({ pharmacy, favorited = true, onToggleFavorite }: F
           {pharmacy.address}
         </AppText>
         <View style={styles.hoursRow}>
-          <Ionicons name="time-outline" size={14} color={Colors.primary} />
-          <AppText variant="label" color={Colors.primary}>
+          <Ionicons name="time-outline" size={14} color={colors.primaryDark} />
+          <AppText variant="label" color={colors.primaryDark}>
             {pharmacy.hours}
           </AppText>
           <View style={styles.dot} />

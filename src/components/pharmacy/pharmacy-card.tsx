@@ -31,7 +31,7 @@ export function PharmacyCard({ pharmacy }: PharmacyCardProps) {
   const router = useRouter();
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.surfaceMuted }]}>
+    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={styles.topRow}>
         <View style={styles.iconSquare}>
           <Ionicons name="location" size={26} color={Colors.textOnPrimary} />
@@ -45,8 +45,8 @@ export function PharmacyCard({ pharmacy }: PharmacyCardProps) {
             {pharmacy.address}
           </AppText>
           <View style={styles.hoursRow}>
-            <Ionicons name="time-outline" size={14} color={Colors.primary} />
-            <AppText variant="label" color={Colors.primary}>
+            <Ionicons name="time-outline" size={14} color={colors.primaryDark} />
+            <AppText variant="label" color={colors.primaryDark}>
               {pharmacy.hours}
             </AppText>
             <View style={styles.dot} />
@@ -68,7 +68,7 @@ export function PharmacyCard({ pharmacy }: PharmacyCardProps) {
           onPress={handleCall}
           accessibilityRole="button"
           accessibilityLabel={`Ligar para ${pharmacy.name}`}>
-          <Ionicons name="call" size={18} color={Colors.primary} />
+          <Ionicons name="call" size={18} color={colors.primaryDark} />
           <AppText variant="body" color={colors.text}>
             {pharmacy.phone}
           </AppText>

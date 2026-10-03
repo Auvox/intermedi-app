@@ -12,12 +12,13 @@ export type TextFieldProps = TextInputProps & {
 
 export function TextField({ secureToggle = false, secureTextEntry, style, ...rest }: TextFieldProps) {
   const [hidden, setHidden] = useState(secureToggle);
-  const { colors } = useTheme();
+  const { colors, textScale } = useTheme();
+  const resolved = StyleSheet.flatten([styles.input, style]);
 
   return (
     <View style={[styles.wrapper, { borderBottomColor: colors.border }]}>
       <TextInput
-        style={[styles.input, { color: colors.text }, style]}
+        style={[styles.input, { color: colors.text }, style, { fontSize: (resolved.fontSize ?? FontSize.md) * textScale }]}
         placeholderTextColor={colors.textMuted}
         secureTextEntry={secureToggle ? hidden : secureTextEntry}
         autoCapitalize="none"

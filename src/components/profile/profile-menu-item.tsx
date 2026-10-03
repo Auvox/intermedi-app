@@ -35,7 +35,7 @@ export function ProfileMenuItem({ icon, title, subtitle, showWarning, showThemeS
       <AppText variant="bodyBold">{title}</AppText>
 
       {subtitle && (
-        <AppText variant="label" numberOfLines={1}>
+        <AppText variant="label">
           {subtitle}
         </AppText>
       )}
@@ -43,6 +43,7 @@ export function ProfileMenuItem({ icon, title, subtitle, showWarning, showThemeS
 
     {showThemeSwitch && (
       <Switch
+        accessibilityLabel="Modo escuro"
         value={isDark}
         onValueChange={setIsDark}
         trackColor={{ false: colors.border, true: colors.primaryBorder }}

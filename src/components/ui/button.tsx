@@ -1,6 +1,7 @@
 import { ActivityIndicator, Pressable, StyleSheet, type PressableProps } from 'react-native';
 
 import { AppText } from '@/components/ui/app-text';
+import { useTheme } from '@/context/theme-context';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 
 export type ButtonVariant = 'solid' | 'outline' | 'ghost' | 'solidLight' | 'outlineLight';
@@ -21,6 +22,11 @@ export function Button({
   disabled,
   ...rest
 }: ButtonProps) {
+  const { colors } = useTheme();
+  const textColor: Record<ButtonVariant, string> = {
+    solid: colors.textOnPrimary, outline: colors.primaryDark, ghost: colors.primaryDark,
+    solidLight: colors.primary, outlineLight: colors.textOnPrimary,
+  };
   return (
     <Pressable
       accessibilityRole="button"
@@ -32,6 +38,8 @@ export function Button({
         variant === 'ghost' && styles.ghost,
         variant === 'solidLight' && styles.solidLight,
         variant === 'outlineLight' && styles.outlineLight,
+        variant === 'solid' && { backgroundColor: colors.primary },
+        variant === 'outline' && { borderColor: colors.primaryDark },
         fullWidth && styles.fullWidth,
         pressed && styles.pressed,
         (disabled || loading) && styles.disabled,
@@ -49,13 +57,6 @@ export function Button({
   );
 }
 
-const textColor: Record<ButtonVariant, string> = {
-  solid: Colors.textOnPrimary,
-  outline: Colors.primary,
-  ghost: Colors.primary,
-  solidLight: Colors.primary,
-  outlineLight: Colors.textOnPrimary,
-};
 
 const styles = StyleSheet.create({
   base: {
