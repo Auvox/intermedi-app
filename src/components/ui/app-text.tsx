@@ -72,8 +72,8 @@ const styles = StyleSheet.create({
     fontSize: FontSize.md,
     lineHeight: 20,
     fontWeight: '800',
-    textTransform: 'uppercase',
-    letterSpacing: 0.3,
+    textTransform: 'none',
+    letterSpacing: 0,
   },
   caption: {
     fontSize: FontSize.xs,

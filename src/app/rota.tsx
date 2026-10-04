@@ -226,110 +226,110 @@ export default function RotaScreen() {
   }, []);
 
   const distanciaRestante =
-  rota && posicaoAtual
-    ? Math.min(
+    rota && posicaoAtual
+      ? Math.min(
         rota.distanciaMetros,
         calcularDistanciaRestante(
           rota.geometria,
           posicaoAtual,
         ),
       )
-    : rota?.distanciaMetros ?? 0;
+      : rota?.distanciaMetros ?? 0;
 
-const proporcaoRestante =
-  rota && rota.distanciaMetros > 0
-    ? distanciaRestante / rota.distanciaMetros
-    : 0;
+  const proporcaoRestante =
+    rota && rota.distanciaMetros > 0
+      ? distanciaRestante / rota.distanciaMetros
+      : 0;
 
-const tempoRestante =
-  rota
-    ? Math.max(
+  const tempoRestante =
+    rota
+      ? Math.max(
         0,
         rota.tempoSegundos * proporcaoRestante,
       )
-    : 0;
+      : 0;
 
- if (navegando && rota) {
-  return (
-    <View style={styles.telaNavegacao}>
+  if (navegando && rota) {
+    return (
+      <View style={styles.telaNavegacao}>
 
-      <Mapa
-        farmacias={farmaciasDaRota}
-        localizacao={posicaoAtual ?? rota.origem}
-        geometria={rota.geometria}
-        seguindo
-        expandido
-        modelo={estiloMapa}
-      />
+        <Mapa
+          farmacias={farmaciasDaRota}
+          localizacao={posicaoAtual ?? rota.origem}
+          geometria={rota.geometria}
+          seguindo
+          expandido
+          modelo={estiloMapa}
+        />
 
-      <View
-        style={[
-          styles.topoNavegacao,
-          { paddingTop: insets.top + 12 },
-        ]}>
-        <View style={styles.painelInstrucao}>
-          <BackButton
-            tone="light"
-            onPress={encerrarNavegacao}
-          />
+        <View
+          style={[
+            styles.topoNavegacao,
+            { paddingTop: insets.top + 12 },
+          ]}>
+          <View style={styles.painelInstrucao}>
+            <BackButton
+              tone="light"
+              onPress={encerrarNavegacao}
+            />
 
-          <View style={styles.textosInstrucao}>
-            {rota.passos[passoAtual] ? (
-              <>
-                <AppText style={styles.instrucaoAtual}>
-                  {rota.passos[passoAtual].instrucao}
-                </AppText>
-
-                {rota.passos[passoAtual + 1] ? (
-                  <AppText style={styles.proximaInstrucao}>
-                    Depois: {rota.passos[passoAtual + 1].instrucao}
+            <View style={styles.textosInstrucao}>
+              {rota.passos[passoAtual] ? (
+                <>
+                  <AppText style={styles.instrucaoAtual}>
+                    {rota.passos[passoAtual].instrucao}
                   </AppText>
-                ) : (
-                  <AppText style={styles.proximaInstrucao}>
-                    Você está chegando ao destino
-                  </AppText>
-                )}
-              </>
 
-            ) : null}
+                  {rota.passos[passoAtual + 1] ? (
+                    <AppText style={styles.proximaInstrucao}>
+                      Depois: {rota.passos[passoAtual + 1].instrucao}
+                    </AppText>
+                  ) : (
+                    <AppText style={styles.proximaInstrucao}>
+                      Você está chegando ao destino
+                    </AppText>
+                  )}
+                </>
+
+              ) : null}
+            </View>
+          </View>
+        </View>
+        <View style={[styles.seletorNavegacao, { bottom: insets.bottom + 100 }]}>
+          <SeletorMapa estilo={estiloMapa} onChange={escolherEstilo} erro={erroPreferencia} />
+        </View>
+        <View
+          style={[
+            styles.painelResumo,
+            { paddingBottom: insets.bottom + 12 },
+          ]}>
+          <View style={styles.itemResumo}>
+            <AppText style={styles.valorResumo}>
+              {Math.ceil(tempoRestante / 60)} min
+            </AppText>
+
+            <AppText style={styles.rotuloResumo}>
+              Tempo restante
+            </AppText>
+          </View>
+
+          <View style={styles.separadorResumo} />
+
+          <View style={styles.itemResumo}>
+            <AppText style={styles.valorResumo}>
+              {distanciaRestante >= 1000
+                ? `${(distanciaRestante / 1000).toFixed(1)} km`
+                : `${Math.round(distanciaRestante)} m`}
+            </AppText>
+
+            <AppText style={styles.rotuloResumo}>
+              Distância restante
+            </AppText>
           </View>
         </View>
       </View>
-      <View style={[styles.seletorNavegacao, { bottom: insets.bottom + 100 }]}>
-        <SeletorMapa estilo={estiloMapa} onChange={escolherEstilo} erro={erroPreferencia} />
-      </View>
-      <View
-  style={[
-    styles.painelResumo,
-    { paddingBottom: insets.bottom + 12 },
-  ]}>
-  <View style={styles.itemResumo}>
-    <AppText style={styles.valorResumo}>
-      {Math.ceil(tempoRestante / 60)} min
-    </AppText>
-
-    <AppText style={styles.rotuloResumo}>
-      Tempo restante
-    </AppText>
-  </View>
-
-  <View style={styles.separadorResumo} />
-
-  <View style={styles.itemResumo}>
-    <AppText style={styles.valorResumo}>
-      {distanciaRestante >= 1000
-        ? `${(distanciaRestante / 1000).toFixed(1)} km`
-        : `${Math.round(distanciaRestante)} m`}
-    </AppText>
-
-    <AppText style={styles.rotuloResumo}>
-      Distância restante
-    </AppText>
-  </View>
-</View>
-    </View>
-  );
-}
+    );
+  }
 
   return (
     <View style={styles.telaNavegacao}>
@@ -351,159 +351,159 @@ const tempoRestante =
         onLayout={event => setPainelAltura(event.nativeEvent.layout.height)}
         contentContainerStyle={styles.conteudo}
         showsVerticalScrollIndicator={false}>
-      {farmacia ? (
-        <>
-          <SeletorMapa estilo={estiloMapa} onChange={escolherEstilo} erro={erroPreferencia} />
-          <View
-            style={[
-              styles.destino,
-              {
-                backgroundColor: colors.surface,
-                borderColor: colors.border,
-              },
-            ]}>
-            <View style={styles.destinoIcone}>
-              <Ionicons
-                name="medical"
-                size={22}
-                color={Colors.textOnPrimary}
-              />
-            </View>
-
-            <View style={styles.destinoTexto}>
-              <AppText variant="bodyBold">{farmacia.name}</AppText>
-              <AppText variant="label" numberOfLines={2}>
-                {farmacia.address}
-              </AppText>
-            </View>
-          </View>
-
-          <View style={styles.secaoTitulo}>
-            <AppText variant="h3">Como você vai?</AppText>
-            <AppText variant="caption">Compare os tempos estimados</AppText>
-          </View>
-
-          <View style={styles.modos}>
-            {OPCOES_MODO.map((opcao) => {
-              const selecionado = modo === opcao.valor;
-
-              return (
-                <Pressable
-                  key={opcao.valor}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: selecionado, disabled: carregando }}
-                  disabled={carregando}
-                  onPress={() => escolherModo(opcao.valor)}
-                  style={({ pressed }) => [
-                    styles.modo,
-                    {
-                      backgroundColor: selecionado
-                        ? colors.primarySoft
-                        : colors.surface,
-                      borderColor: selecionado
-                        ? Colors.primary
-                        : colors.border,
-                    },
-                    pressed && styles.pressionado,
-                    carregando && styles.desabilitado,
-                  ]}>
-                  <MaterialCommunityIcons
-                    name={opcao.icone}
-                    size={21}
-                    color={selecionado ? Colors.primary : colors.textSecondary}
-                  />
-                  <AppText
-                    variant="caption"
-                    color={selecionado ? Colors.primary : colors.textSecondary}
-                    style={styles.modoTexto}>
-                    {opcao.titulo}
-                  </AppText>
-                  <AppText variant="caption" color={selecionado ? Colors.primaryDark : colors.textSecondary}>
-                    {rotas[opcao.valor]
-                      ? Math.ceil(rotas[opcao.valor]!.tempoSegundos / 60) + ' min'
-                      : carregando ? 'Calculando…' : 'Indisponível'}
-                  </AppText>
-                </Pressable>
-              );
-            })}
-          </View>
-
-          {(!rota || erroExibido) && <Button
-            title="Tentar novamente"
-            onPress={farmacia ? calcular : recarregarFarmacia}
-            loading={carregando || carregandoFarmacia}
-            style={styles.botaoCalcular}
-          />}
-
-          {erroExibido ? (
-            <View style={[styles.erro, { backgroundColor: colors.surfaceMuted }]}>
-              <Ionicons name="alert-circle-outline" size={20} color={Colors.danger} />
-              <AppText variant="label" color={Colors.danger} style={styles.erroTexto}>
-                {erroExibido}
-              </AppText>
-            </View>
-          ) : null}
-
-          {rota ? (
+        {farmacia ? (
+          <>
+            <SeletorMapa estilo={estiloMapa} onChange={escolherEstilo} erro={erroPreferencia} />
             <View
               style={[
-                styles.resumoRota,
+                styles.destino,
                 {
                   backgroundColor: colors.surface,
                   borderColor: colors.border,
                 },
               ]}>
-              <View style={styles.resumoDados}>
-                <View style={styles.resumoItem}>
-                  <Ionicons name="time-outline" size={21} color={Colors.primary} />
-                  <View>
-                    <AppText variant="bodyBold">
-                      {Math.ceil(rota.tempoSegundos / 60)} min
-                    </AppText>
-                    <AppText variant="caption">Tempo estimado</AppText>
-                  </View>
-                </View>
-
-                <View style={[styles.resumoDivisor, { backgroundColor: colors.border }]} />
-
-                <View style={styles.resumoItem}>
-                  <Ionicons name="navigate-outline" size={21} color={Colors.primary} />
-                  <View>
-                    <AppText variant="bodyBold">
-                      {(rota.distanciaMetros / 1000).toFixed(1)} km
-                    </AppText>
-                    <AppText variant="caption">Distância</AppText>
-                  </View>
-                </View>
+              <View style={styles.destinoIcone}>
+                <Ionicons
+                  name="medical"
+                  size={22}
+                  color={Colors.textOnPrimary}
+                />
               </View>
 
-              <View style={styles.acoesRota}>
-                <Button
-                  title="Iniciar"
-                  loading={iniciando}
-                  onPress={iniciarNavegacao}
-                  fullWidth={false}
-                  style={styles.acaoRota}
-                />
-
-                <Button
-                  title="Simular"
-                  variant="outline"
-                  onPress={iniciarSimulacao}
-                  disabled={iniciando}
-                  fullWidth={false}
-                  style={styles.acaoRota}
-                />
+              <View style={styles.destinoTexto}>
+                <AppText variant="bodyBold">{farmacia.name}</AppText>
+                <AppText variant="label" numberOfLines={2}>
+                  {farmacia.address}
+                </AppText>
               </View>
             </View>
-          ) : null}
-        </>
-      ) : (
-        <View style={[styles.vazio, { backgroundColor: colors.surface }]}>
-          <Ionicons name="location-outline" size={32} color={colors.textMuted} />
-          <AppText variant="bodyBold">UBS não encontrada</AppText>
-        </View>
-      )}
+
+            <View style={styles.secaoTitulo}>
+              <AppText variant="h3">Como você vai?</AppText>
+              <AppText variant="caption">Compare os tempos estimados</AppText>
+            </View>
+
+            <View style={styles.modos}>
+              {OPCOES_MODO.map((opcao) => {
+                const selecionado = modo === opcao.valor;
+
+                return (
+                  <Pressable
+                    key={opcao.valor}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: selecionado, disabled: carregando }}
+                    disabled={carregando}
+                    onPress={() => escolherModo(opcao.valor)}
+                    style={({ pressed }) => [
+                      styles.modo,
+                      {
+                        backgroundColor: selecionado
+                          ? colors.primarySoft
+                          : colors.surface,
+                        borderColor: selecionado
+                          ? Colors.primary
+                          : colors.border,
+                      },
+                      pressed && styles.pressionado,
+                      carregando && styles.desabilitado,
+                    ]}>
+                    <MaterialCommunityIcons
+                      name={opcao.icone}
+                      size={21}
+                      color={selecionado ? colors.primaryDark : colors.textSecondary}
+                    />
+                    <AppText
+                      variant="caption"
+                      color={selecionado ? colors.primaryDark : colors.textSecondary}
+                      style={styles.modoTexto}>
+                      {opcao.titulo}
+                    </AppText>
+                    <AppText variant="caption" color={selecionado ? Colors.primaryDark : colors.textSecondary}>
+                      {rotas[opcao.valor]
+                        ? Math.ceil(rotas[opcao.valor]!.tempoSegundos / 60) + ' min'
+                        : carregando ? 'Calculando…' : 'Indisponível'}
+                    </AppText>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            {(!rota || erroExibido) && <Button
+              title="Tentar novamente"
+              onPress={farmacia ? calcular : recarregarFarmacia}
+              loading={carregando || carregandoFarmacia}
+              style={styles.botaoCalcular}
+            />}
+
+            {erroExibido ? (
+              <View style={[styles.erro, { backgroundColor: colors.surfaceMuted }]}>
+                <Ionicons name="alert-circle-outline" size={20} color={Colors.danger} />
+                <AppText variant="label" color={Colors.danger} style={styles.erroTexto}>
+                  {erroExibido}
+                </AppText>
+              </View>
+            ) : null}
+
+            {rota ? (
+              <View
+                style={[
+                  styles.resumoRota,
+                  {
+                    backgroundColor: colors.surface,
+                    borderColor: colors.border,
+                  },
+                ]}>
+                <View style={styles.resumoDados}>
+                  <View style={styles.resumoItem}>
+                    <Ionicons name="time-outline" size={21} color={colors.primaryDark} />
+                    <View>
+                      <AppText variant="bodyBold">
+                        {Math.ceil(rota.tempoSegundos / 60)} min
+                      </AppText>
+                      <AppText variant="caption">Tempo estimado</AppText>
+                    </View>
+                  </View>
+
+                  <View style={[styles.resumoDivisor, { backgroundColor: colors.border }]} />
+
+                  <View style={styles.resumoItem}>
+                    <Ionicons name="navigate-outline" size={21} color={colors.primaryDark} />
+                    <View>
+                      <AppText variant="bodyBold">
+                        {(rota.distanciaMetros / 1000).toFixed(1)} km
+                      </AppText>
+                      <AppText variant="caption">Distância</AppText>
+                    </View>
+                  </View>
+                </View>
+
+                <View style={styles.acoesRota}>
+                  <Button
+                    title="Iniciar"
+                    loading={iniciando}
+                    onPress={iniciarNavegacao}
+                    fullWidth={false}
+                    style={styles.acaoRota}
+                  />
+
+                  <Button
+                    title="Simular"
+                    variant="outline"
+                    onPress={iniciarSimulacao}
+                    disabled={iniciando}
+                    fullWidth={false}
+                    style={styles.acaoRota}
+                  />
+                </View>
+              </View>
+            ) : null}
+          </>
+        ) : (
+          <View style={[styles.vazio, { backgroundColor: colors.surface }]}>
+            <Ionicons name="location-outline" size={32} color={colors.textMuted} />
+            <AppText variant="bodyBold">UBS não encontrada</AppText>
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -512,7 +512,7 @@ const tempoRestante =
 const styles = StyleSheet.create({
   seletorNavegacao: { position: 'absolute', right: 16, left: 16 },
   voltarFlutuante: { position: 'absolute', left: 16, borderRadius: 24, backgroundColor: 'white', padding: 4, elevation: 4 },
-  painelControles: { position: 'absolute', left: 12, right: 12, maxHeight: '60%', borderRadius: 20, elevation: 6, boxShadow: '0 3px 16px rgba(0,0,0,0.16)' },
+  painelControles: { position: 'absolute', left: 12, right: 12, maxHeight: '60%', borderRadius: 28, elevation: 6, boxShadow: '0 3px 16px rgba(0,0,0,0.16)' },
   conteudo: {
     padding: Spacing.md,
     gap: Spacing.sm,
@@ -622,88 +622,88 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   telaNavegacao: {
-  flex: 1,
-  backgroundColor: '#ffffff',
-},
-
-topoNavegacao: {
-  position: 'absolute',
-  top: 0,
-  left: 16,
-  right: 16,
-  zIndex: 10,
-  flexDirection: 'row',
-  alignItems: 'flex-start',
-  gap: 12,
-},
-
-painelInstrucao: {
-  flex: 1,
-  padding: 16,
-  borderRadius: 16,
-  backgroundColor: '#10b968',
-  flexDirection: 'row',
-  alignItems: 'center',
-  gap: 12,
-  shadowColor: '#000000',
-  shadowOffset: {
-    width: 0,
-    height: 3,
+    flex: 1,
+    backgroundColor: '#ffffff',
   },
-  shadowOpacity: 0.25,
-  shadowRadius: 6,
-  elevation: 6,
-},
 
-textosInstrucao: {
-  flex: 1,
-},
+  topoNavegacao: {
+    position: 'absolute',
+    top: 0,
+    left: 16,
+    right: 16,
+    zIndex: 10,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
 
-instrucaoAtual: {
-  color: '#ffffff',
-  fontSize: 18,
-  fontWeight: '700',
-},
+  painelInstrucao: {
+    flex: 1,
+    padding: 16,
+    borderRadius: 16,
+    backgroundColor: '#10b968',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 6,
+  },
 
-proximaInstrucao: {
-  color: 'rgba(255,255,255,0.85)',
-  fontSize: 13,
-  marginTop: 6,
-},
-painelResumo: {
-  position: 'absolute',
-  left: 0,
-  right: 0,
-  bottom: 0,
-  paddingTop: 14,
-  paddingHorizontal: 24,
-  backgroundColor: 'rgba(20,20,20,0.92)',
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-around',
-},
+  textosInstrucao: {
+    flex: 1,
+  },
 
-itemResumo: {
-  flex: 1,
-  alignItems: 'center',
-},
+  instrucaoAtual: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: '700',
+  },
 
-valorResumo: {
-  color: '#ffffff',
-  fontSize: 20,
-  fontWeight: '700',
-},
+  proximaInstrucao: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 13,
+    marginTop: 6,
+  },
+  painelResumo: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingTop: 14,
+    paddingHorizontal: 24,
+    backgroundColor: 'rgba(20,20,20,0.92)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
 
-rotuloResumo: {
-  color: 'rgba(255,255,255,0.7)',
-  fontSize: 12,
-  marginTop: 2,
-},
+  itemResumo: {
+    flex: 1,
+    alignItems: 'center',
+  },
 
-separadorResumo: {
-  width: 1,
-  height: 34,
-  backgroundColor: 'rgba(255,255,255,0.25)',
-},
+  valorResumo: {
+    color: '#ffffff',
+    fontSize: 20,
+    fontWeight: '700',
+  },
+
+  rotuloResumo: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 12,
+    marginTop: 2,
+  },
+
+  separadorResumo: {
+    width: 1,
+    height: 34,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+  },
 
 });

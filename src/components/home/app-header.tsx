@@ -6,6 +6,8 @@ import { useState } from 'react';
 import { AppText } from '@/components/ui/app-text';
 import { Wordmark } from '@/components/ui/brand-mark';
 import { useTheme } from '@/context/theme-context';
+import { useUser } from '@/context/user-context';
+import { formatUserAddress } from '@/utils/user-address';
 import { Colors, Spacing, Radius } from '@/constants/theme';
 
 
@@ -14,24 +16,29 @@ export type AppHeaderProps = {
 };
 
 export function AppHeader({ address }: AppHeaderProps) {
+  const { user } = useUser();
+  const displayedAddress = address ?? (formatUserAddress(user) || 'Endereço não cadastrado');
+  const fullAddress = address ?? (formatUserAddress(user, true) || 'Endereço não cadastrado');
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [searchModalVisible, setSearchModalVisible] = useState(false);
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + Spacing.md, borderBottomColor: colors.surfaceMuted, backgroundColor: colors.surface }]}>
+    <View style={[styles.container, { paddingTop: insets.top + Spacing.md, borderBottomColor: colors.surfaceMuted, backgroundColor: isDark ? '#103F2D' : '#146B58' }]}>
       <View style={styles.left}>
-        <Wordmark height={22} />
-        {address && (
+        <Wordmark height={32} variant="light" />
+        {displayedAddress && (
           <Pressable
             style={styles.addressButton}
             onPress={() => router.push('/endereco-picker')}
-            accessibilityRole="button">
-            <AppText variant="label" numberOfLines={1} style={styles.addressText}>
-              {address}
+            accessibilityRole="button"
+            accessibilityLabel={`Endereço: ${fullAddress}. Ver endereços.`}>
+            <Ionicons name="location" size={18} color="#FFFFFF" />
+            <AppText color="#FFFFFF" variant="label" numberOfLines={1} style={styles.addressText}>
+              {displayedAddress}
             </AppText>
-            <Ionicons name="chevron-down" size={14} color={colors.textMuted} />
+            <Ionicons name="chevron-down" size={14} color="#FFFFFF" />
           </Pressable>
         )}
       </View>
@@ -42,7 +49,7 @@ export function AppHeader({ address }: AppHeaderProps) {
           onPress={() => setSearchModalVisible(true)}
           accessibilityRole="button"
           accessibilityLabel="Buscar">
-          <Ionicons name="search" size={22} color={Colors.primary} />
+          <Ionicons name="search" size={22} color="#FFFFFF" />
         </Pressable>
         <Pressable
           hitSlop={8}
@@ -50,7 +57,7 @@ export function AppHeader({ address }: AppHeaderProps) {
           onPress={() => router.push('/notificacoes')}
           accessibilityRole="button"
           accessibilityLabel="Notificações">
-          <Ionicons name="notifications" size={22} color={Colors.primary} />
+          <Ionicons name="notifications" size={22} color="#FFFFFF" />
           <View style={styles.badge} />
         </Pressable>
       </View>
@@ -89,7 +96,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.md,
     borderBottomWidth: 1,
   },

@@ -31,7 +31,7 @@ export function Button({
     <Pressable
       accessibilityRole="button"
       disabled={disabled || loading}
-      style={({ pressed }) => [
+      style={(state) => [
         styles.base,
         variant === 'solid' && styles.solid,
         variant === 'outline' && styles.outline,
@@ -41,9 +41,9 @@ export function Button({
         variant === 'solid' && { backgroundColor: colors.primary },
         variant === 'outline' && { borderColor: colors.primaryDark },
         fullWidth && styles.fullWidth,
-        pressed && styles.pressed,
+        state.pressed && styles.pressed,
         (disabled || loading) && styles.disabled,
-        typeof style === 'function' ? undefined : style,
+        typeof style === 'function' ? style(state) : style,
       ]}
       {...rest}>
       {loading ? (
@@ -64,7 +64,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: Spacing.lg,
     paddingHorizontal: Spacing.xl,
-    borderRadius: Radius.md,
+    borderRadius: Radius.lg,
+    minHeight: 48,
   },
   fullWidth: {
     alignSelf: 'stretch',

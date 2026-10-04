@@ -1,6 +1,5 @@
-import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SectionHeader } from '@/components/ui/section-header';
 import { AppText } from '@/components/ui/app-text';
 import { MaxContentWidth } from '@/constants/theme';
 import { useTheme, type TextSize } from '@/context/theme-context';
@@ -12,13 +11,10 @@ const options: { value: TextSize; label: string }[] = [
 ];
 
 export default function AccessibilityScreen() {
-  const router = useRouter();
   const { colors, textSize, setTextSize, highContrast, setHighContrast } = useTheme();
-  return <SafeAreaView style={[styles.page, { backgroundColor: colors.background }]}>
+  return <View style={[styles.page, { backgroundColor: colors.background }]}>
+    <SectionHeader title="Acessibilidade" />
     <ScrollView contentContainerStyle={styles.content}>
-      <Pressable accessibilityRole="button" accessibilityLabel="Voltar ao perfil" onPress={() => router.back()} style={styles.back}>
-        <AppText variant="link" color={colors.primaryDark}>Voltar</AppText>
-      </Pressable>
       <AppText variant="h2">Acessibilidade</AppText>
       <AppText color={colors.textSecondary}>Ajuste a leitura do aplicativo. Suas escolhas são salvas neste dispositivo.</AppText>
       <AppText variant="h3">Tamanho do texto</AppText>
@@ -42,7 +38,7 @@ export default function AccessibilityScreen() {
         <AppText variant="caption">O tamanho e as cores mudam assim que você escolhe uma opção.</AppText>
       </View>
     </ScrollView>
-  </SafeAreaView>;
+  </View>;
 }
 
 const styles = StyleSheet.create({

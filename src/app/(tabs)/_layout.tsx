@@ -4,6 +4,7 @@ import { Tabs } from 'expo-router/js-tabs';
 import { Image, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { LoadingScreen } from '@/components/ui/loading-screen';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { getApiAssetUrl } from '@/constants/api';
 import { useUser } from '@/context/user-context';
@@ -52,19 +53,22 @@ export default function TabsLayout() {
   const insets = useSafeAreaInsets();
   const { colors, textScale } = useTheme();
   const { user, loading } = useUser();
-  if (loading) return null;
+  if (loading) return <LoadingScreen />;
   if (!user?.token) return <Redirect href="/login" />;
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
+        sceneStyle: { backgroundColor: colors.background },
         tabBarActiveTintColor: Colors.textOnPrimary,
         tabBarInactiveTintColor: colors.textOnPrimary,
         tabBarStyle: {
-          backgroundColor: colors.primary,
+          backgroundColor: '#146B58',
+          borderTopLeftRadius: 24,
+          borderTopRightRadius: 24,
           borderTopWidth: 0,
-          height: 64 + 20 * (textScale - 1) + insets.bottom,
+          height: 76 + 20 * (textScale - 1) + insets.bottom,
           paddingTop: Spacing.sm,
           paddingBottom: insets.bottom,
         },

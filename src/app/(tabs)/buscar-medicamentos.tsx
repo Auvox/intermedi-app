@@ -8,6 +8,7 @@ import { buscarMedicamentosPorFoto } from '@/services/busca-foto';
 
 import { AppHeader } from '@/components/home/app-header';
 import { MedicineCard } from '@/components/medicine/medicine-card';
+import { ScreenHero } from '@/components/ui/screen-hero';
 import { AppText } from '@/components/ui/app-text';
 import { TextField } from '@/components/ui/text-field';
 import { useTheme } from '@/context/theme-context';
@@ -21,7 +22,6 @@ export default function BuscarMedicamentosScreen() {
   const [busca, setBusca] = useState('');
 
   const [lendoFoto, setLendoFoto] = useState(false);
-  const [textoReconhecido, setTextoReconhecido] = useState('');
   const [erroFoto, setErroFoto] = useState('');
   const [resultadosFoto, setResultadosFoto] = useState<Medicine[] | null>(null);
 
@@ -79,7 +79,6 @@ export default function BuscarMedicamentosScreen() {
 
       const resultado = await buscarMedicamentosPorFoto(captura.assets[0]);
 
-      setTextoReconhecido(resultado.textoReconhecido);
       setResultadosFoto(resultado.medicamentos);
       setBusca('');
     } catch (erro) {
@@ -95,32 +94,32 @@ export default function BuscarMedicamentosScreen() {
 
   return (
     <View style={[styles.flex, { backgroundColor: colors.background }]}>
-      <AppHeader address="Etec Guaianases" />
+      <AppHeader />
 
       <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
-        <AppText variant="h3" color={colors.textMuted}>
-          Medicamentos cadastrados
-        </AppText>
+        <ScreenHero title="Remédios" subtitle="Encontre o medicamento que você precisa." icon="medkit-outline">
 
-        <TextField
-          placeholder="Buscar por nome ou categoria"
-          value={busca}
-          onChangeText={(texto) => {
-            setBusca(texto);
-            setResultadosFoto(null);
-            setErroFoto('');
-          }}
-        />
+          <TextField
+            icon="search-outline"
+            trailingIcon="camera-outline"
+            trailingLabel="Fotografar medicamento"
+            trailingLoading={lendoFoto}
+            onTrailingPress={() => buscarPorFoto('camera')}
+            placeholder="Buscar por nome ou categoria"
+            value={busca}
+            onChangeText={(texto) => {
+              setBusca(texto);
+              setResultadosFoto(null);
+              setErroFoto('');
+            }}
+          />
 
-        <Button
-          title={lendoFoto ? 'Lendo embalagem…' : 'Buscar por foto'}
-          onPress={() => buscarPorFoto('camera')}
-          loading={lendoFoto}
-          disabled={lendoFoto}
-        />
+        </ScreenHero>
 
-        <Button title="Escolher foto da galeria" variant="outline"
-          onPress={() => buscarPorFoto('galeria')} disabled={lendoFoto} />
+        <AppText variant="h3">Medicamentos disponíveis</AppText>
+
+<Button title="Escolher foto da galeria" variant="ghost" onPress={() => buscarPorFoto('galeria')} disabled={lendoFoto} />
+        {lendoFoto && <AppText accessibilityLiveRegion="polite" variant="label">Lendo embalagem…</AppText>}
         <AppText variant="label">
           Após escolher a foto, recorte a região do nome do medicamento antes de confirmar.
         </AppText>
@@ -131,23 +130,12 @@ export default function BuscarMedicamentosScreen() {
           </AppText>
         )}
 
-        {!!textoReconhecido && (
-          <View>
-            <AppText variant="bodyBold">Texto reconhecido:</AppText>
-            <AppText variant="label" numberOfLines={4}>{textoReconhecido}</AppText>
-            <AppText variant="label">
-              Confira o nome e a dosagem. Você pode corrigir a busca no campo acima.
-            </AppText>
-          </View>
-        )}
-
         {resultadosFoto !== null && (
           <Button
             title="Voltar à busca normal"
             variant="outline"
             onPress={() => {
               setResultadosFoto(null);
-              setTextoReconhecido('');
               setErroFoto('');
               setBusca('');
             }}

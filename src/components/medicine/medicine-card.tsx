@@ -1,3 +1,5 @@
+import { FavoriteButton } from '@/components/ui/favorite-button';
+import { useFavorites } from '@/context/favorites-context';
 import { MedicinePhoto } from './medicine-photo';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -14,59 +16,64 @@ export type MedicineCardProps = {
 
 export function MedicineCard({ medicine, onPress }: MedicineCardProps) {
   const { colors } = useTheme();
+  const favorites = useFavorites();
   return (
-    <Pressable
-      style={({ pressed }) => [styles.card, { backgroundColor: colors.surface, borderColor: colors.border }, pressed && styles.cardPressed]}
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={`Ver detalhes de ${medicine.name} ${medicine.dosage}`}>
-      <View style={styles.topRow}>
-        <MedicinePhoto uri={medicine.photo} name={medicine.name} />
+    <View style={[styles.card, { boxShadow: '0 4px 16px rgba(20,63,50,0.08)', backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <Pressable
+        style={({ pressed }) => [styles.cardContent, pressed && styles.cardPressed]}
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={`Ver detalhes de ${medicine.name} ${medicine.dosage}`}>
+        <View style={styles.topRow}>
+          <MedicinePhoto uri={medicine.photo} name={medicine.name} />
 
-        <View style={styles.info}>
-          <AppText variant="bodyBold" numberOfLines={1}>
-            {medicine.name}
-          </AppText>
-          <AppText variant="label" numberOfLines={1}>
-            {medicine.dosage}
-          </AppText>
-          <View style={styles.categoryRow}>
-            <Ionicons name="pricetag-outline" size={14} color={colors.primaryDark} />
-            <AppText variant="label" color={colors.primaryDark} numberOfLines={1}>
-              {medicine.category}
+          <View style={styles.info}>
+            <AppText variant="bodyBold" numberOfLines={1}>
+              {medicine.name}
+            </AppText>
+            <AppText variant="label" numberOfLines={1}>
+              {medicine.dosage}
+            </AppText>
+            <View style={styles.categoryRow}>
+              <Ionicons name="pricetag-outline" size={14} color={colors.primaryDark} />
+              <AppText variant="label" color={colors.primaryDark} numberOfLines={1}>
+                {medicine.category}
+              </AppText>
+            </View>
+          </View>
+
+          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+        </View>
+
+        <View style={styles.statusRow}>
+          <View style={[styles.statusBadge, { backgroundColor: colors.primarySoft }]}>
+            <View style={styles.statusDot} />
+            <AppText variant="caption" color={colors.primaryDark}>
+              Disponível para consulta
             </AppText>
           </View>
         </View>
 
-        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-      </View>
+        <View style={[styles.divider, { backgroundColor: colors.surfaceMuted }]} />
 
-      <View style={styles.statusRow}>
-        <View style={[styles.statusBadge, { backgroundColor: colors.primarySoft }]}>
-          <View style={styles.statusDot} />
-          <AppText variant="caption" color={colors.primaryDark}>
-            Disponível para consulta
-          </AppText>
+        <View style={styles.bottomRow}>
+          <View style={styles.pharmacyRow}>
+            <Ionicons name="business-outline" size={18} color={colors.primaryDark} />
+            <AppText variant="caption" numberOfLines={2} style={styles.pharmacyText}>
+              Consultar detalhes
+            </AppText>
+          </View>
+
+          <View style={[styles.detailButton, { backgroundColor: colors.primary }]}>
+            <AppText variant="button" style={styles.detailButtonText}>
+              Ver detalhes
+            </AppText>
+          </View>
         </View>
-      </View>
-
-      <View style={[styles.divider, { backgroundColor: colors.surfaceMuted }]} />
-
-      <View style={styles.bottomRow}>
-        <View style={styles.pharmacyRow}>
-          <Ionicons name="business-outline" size={18} color={colors.primaryDark} />
-          <AppText variant="body" numberOfLines={1} style={styles.pharmacyText}>
-            Informações do medicamento
-          </AppText>
-        </View>
-
-        <View style={styles.detailButton}>
-          <AppText variant="button" style={styles.detailButtonText}>
-            Ver detalhes
-          </AppText>
-        </View>
-      </View>
-    </Pressable>
+      </Pressable>
+<View style={styles.favorite}><FavoriteButton selected={favorites.medicines.some(m => m.id === medicine.id)} disabled={!favorites.ready}
+        label={favorites.medicines.some(m => m.id === medicine.id) ? 'Remover medicamento dos favoritos' : 'Salvar medicamento nos favoritos'} onPress={() => favorites.toggleMedicine(medicine)} /></View>
+    </View>
   );
 }
 
@@ -77,6 +84,8 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     gap: Spacing.md,
   },
+  cardContent: { gap: Spacing.md },
+  favorite: { position: 'absolute', top: 8, right: 8 },
   cardPressed: {
     opacity: 0.82,
   },
@@ -84,7 +93,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.md,
-    paddingRight: Spacing.sm,
+    paddingRight: 40,
   },
   iconSquare: {
     width: 52,

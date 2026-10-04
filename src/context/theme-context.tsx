@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from 'expo-router';
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { LoadingScreen } from '@/components/ui/loading-screen';
 import { Colors, DarkColors } from '@/constants/theme';
 export const TextSizes = { standard: 1, large: 1.2, extraLarge: 1.4 } as const;
 export type TextSize = keyof typeof TextSizes;
@@ -46,7 +48,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       primaryBorder: isDark ? '#83F5B7' : '#006B3B', danger: isDark ? '#FF9D9D' : '#B91C1C' };
   }, [isDark, highContrast]);
   const value = useMemo(() => ({ colors, isDark, setIsDark, highContrast, setHighContrast, textSize, setTextSize, textScale: TextSizes[textSize] }), [colors, isDark, highContrast, textSize]);
-  return <ThemeContext.Provider value={value}>{ready ? children : null}</ThemeContext.Provider>;
+  const navigationTheme = useMemo(() => ({
+    ...(isDark ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(isDark ? DarkTheme.colors : DefaultTheme.colors),
+      background: colors.background,
+      card: colors.surface,
+      text: colors.text,
+      border: colors.border,
+      primary: colors.primary,
+    },
+  }), [isDark, colors]);
+  return <ThemeContext.Provider value={value}>
+    {ready ? <NavigationThemeProvider value={navigationTheme}>{children}</NavigationThemeProvider> : <LoadingScreen />}
+  </ThemeContext.Provider>;
 }
 export function useTheme() {
   const context = useContext(ThemeContext);

@@ -9,13 +9,16 @@ import { AppText } from '@/components/ui/app-text';
 import { BackButton } from '@/components/ui/back-button';
 import { TextField } from '@/components/ui/text-field';
 import { useTheme } from '@/context/theme-context';
-import { currentLocation, savedAddresses } from '@/constants/mock-data';
+import { useUser } from '@/context/user-context';
+import { formatUserAddress } from '@/utils/user-address';
 import { Colors, Spacing } from '@/constants/theme';
 import Mapa from '@/components/map/mapa';
 import { listarFarmacias, prepararFarmaciasParaMapa, type FarmaciaMapa, } from '@/services/farmacias';
 
 export default function EnderecoPickerScreen() {
   const { colors } = useTheme();
+  const { user } = useUser();
+  const registeredAddress = formatUserAddress(user, true);
   const router = useRouter();
   const [farmaciasDoMapa, setFarmaciasDoMapa] = useState<FarmaciaMapa[]>([]);
   const [avisoFarmacias, setAvisoFarmacias] = useState('Carregando farmácias...');
@@ -123,8 +126,8 @@ export default function EnderecoPickerScreen() {
         <View style={styles.list}>
           <AddressListItem
             icon="locate-outline"
-            label={currentLocation.label}
-            address={currentLocation.address}
+            label="Localização atual"
+            address="Use a localização do dispositivo"
             onPress={usarLocalizacaoAtual}
           />
 
@@ -134,17 +137,15 @@ export default function EnderecoPickerScreen() {
             </AppText>
           ) : null}
 
-          {savedAddresses.map((address) => (
+          {registeredAddress ? (
             <AddressListItem
-              key={address.id}
-              icon={address.icon}
-              label={address.label}
-              address={address.address}
-              selected={selectedId === address.id}
-              showMenu
-              onPress={() => selectAndReturn(address.id)}
+              icon="home-outline"
+              label="Endereço cadastrado"
+              address={registeredAddress}
+              selected={selectedId === 'casa'}
+              onPress={() => selectAndReturn('casa')}
             />
-          ))}
+          ) : <AppText color={colors.textSecondary}>Você ainda não tem um endereço cadastrado.</AppText>}
         </View>
       </ScrollView>
     </View>

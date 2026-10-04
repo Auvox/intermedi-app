@@ -12,6 +12,7 @@ import { AuthHeader } from "@/components/auth/auth-header";
 import { useRegisterData } from "@/components/auth/context-login";
 import { registerSteps, StepIndicator } from "@/components/auth/step-indicator";
 import { Button } from "@/components/ui/button";
+import { AppText } from '@/components/ui/app-text';
 import { TextField } from "@/components/ui/text-field";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/context/theme-context";
@@ -21,6 +22,7 @@ export default function CadastroScreen() {
   const { colors } = useTheme();
   const { registerData, setRegisterData } = useRegisterData();
 
+  const [stage, setStage] = useState(0);
   const [nome, setNome] = useState(registerData.nome);
   const [cpf, setCpf] = useState(registerData.cpf);
   const [telefone, setTelefone] = useState(registerData.telefone);
@@ -73,59 +75,65 @@ export default function CadastroScreen() {
         style={styles.flex}
         contentContainerStyle={styles.scrollContent}
       >
-        <AuthHeader title="Criar Conta" showBack />
+        <AuthHeader title={stage === 0 ? "Como você se chama e qual é o seu e-mail?" : "Agora, vamos proteger a sua conta!"} showBack />
 
         <View style={styles.body}>
-          <StepIndicator steps={registerSteps} currentIndex={0} />
+          <StepIndicator steps={registerSteps} currentIndex={stage} />
 
+          <AppText variant="label" style={{ textAlign: 'center' }}>{stage === 0 ? 'Usaremos essas informações para identificar seu perfil e enviar suas atualizações.' : 'Confira seus dados e escolha uma senha para acessar sua conta.'}</AppText>
           <View style={styles.form}>
-            <TextField placeholder="Nome" value={nome} onChangeText={setNome} />
+            {stage === 0 ? <>
+              <TextField label="Nome completo" icon="person" placeholder="ex: João da Silva" autoCapitalize="words" value={nome} onChangeText={setNome} />
+              <TextField label="E-mail" icon="mail-outline" placeholder="ex: joaodasilva@gmail.com" value={email} onChangeText={setEmail} keyboardType="email-address" />
+            </> : <>
 
-            <TextField
-              placeholder="CPF"
-              value={cpf}
-              onChangeText={setCpf}
-              keyboardType="numeric"
-            />
+              <TextField
+                label="CPF" icon="document-text-outline" placeholder="ex: 123.456.789-10"
+                value={cpf}
+                onChangeText={setCpf}
+                keyboardType="numeric"
+              />
 
-            <TextField
-              placeholder="Telefone"
-              value={telefone}
-              onChangeText={setTelefone}
-              keyboardType="phone-pad"
-            />
+              <TextField
+                label="Telefone" icon="call" placeholder="ex: (11) 91234-5678"
+                value={telefone}
+                onChangeText={setTelefone}
+                keyboardType="phone-pad"
+              />
 
-            <TextField
-              placeholder="Medicamento frequente (opcional)"
-              value={remedioFrequente}
-              onChangeText={setRemedioFrequente}
-            />
+              <TextField
+                label="Medicamento frequente (opcional)"
+                placeholder="Nome do medicamento"
+                value={remedioFrequente}
+                onChangeText={setRemedioFrequente}
+              />
 
-            <TextField
-              placeholder="E-mail"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-            />
+              <TextField
+                label="Senha" icon="lock-closed" placeholder="Sua senha"
+                value={senha}
+                onChangeText={setSenha}
+                secureToggle
+              />
 
-            <TextField
-              placeholder="Senha"
-              value={senha}
-              onChangeText={setSenha}
-              secureToggle
-            />
-
-            <TextField
-              placeholder="Confirme a sua Senha"
-              value={confirmaSenha}
-              onChangeText={setConfirmaSenha}
-              secureToggle
-            />
+              <TextField
+                label="Confirme sua senha" icon="lock-closed-outline" placeholder="Repita sua senha"
+                value={confirmaSenha}
+                onChangeText={setConfirmaSenha}
+                secureToggle
+              />
+            </>}
           </View>
 
+          {stage === 1 && <Button title="Voltar aos dados pessoais" variant="ghost" onPress={() => setStage(0)} />}
+
           <Button
-            title="Próxima etapa"
-            onPress={handleNextStep}
+            title="Continuar"
+            onPress={() => {
+              if (stage === 0) {
+                if (!nome.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { alert('Informe seu nome e um e-mail válido.'); return; }
+                setStage(1);
+              } else handleNextStep();
+            }}
             style={styles.submitButton}
           />
         </View>

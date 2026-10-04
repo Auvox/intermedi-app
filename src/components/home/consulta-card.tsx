@@ -26,7 +26,8 @@ export function ConsultaCard({
     <View
       style={[
         styles.card,
-        { backgroundColor: colors.surface, borderColor: colors.surfaceMuted },
+        { boxShadow: '0 4px 16px rgba(20,63,50,0.08)' },
+        { backgroundColor: colors.surface, borderColor: colors.border },
         highlighted && styles.cardHighlighted,
       ]}
     >
@@ -38,10 +39,10 @@ export function ConsultaCard({
       />
 
       <View style={styles.row}>
-        <View style={styles.iconSquare}>
+        <View style={[styles.iconSquare, { backgroundColor: colors.primarySoft }]}>
           <PillIcon
             size={28}
-            color={Colors.textOnPrimary}
+            color={colors.primaryDark}
           />
         </View>
 
@@ -77,7 +78,7 @@ export function ConsultaCard({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: Radius.lg,
+    borderRadius: 24,
     borderWidth: 1,
     padding: Spacing.lg,
     gap: Spacing.md,

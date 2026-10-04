@@ -1,117 +1,25 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppHeader } from '@/components/home/app-header';
 import { CategoryCarousel } from '@/components/home/category-carousel';
 import { ConsultaCard } from '@/components/home/consulta-card';
+import { ScreenHero } from '@/components/ui/screen-hero';
 import { AppText } from '@/components/ui/app-text';
 import { useTheme } from '@/context/theme-context';
+import { useUser } from '@/context/user-context';
 import { categories, medicines } from '@/constants/mock-data';
-import { Colors, Spacing } from '@/constants/theme';
-
-type UsuarioLogado = {
-  nome?: string;
-};
-
-function getGreeting() {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Bom dia';
-  if (hour < 18) return 'Boa tarde';
-  return 'Boa noite';
-}
-
 export default function InicioScreen() {
-  const router = useRouter();
-  const { colors } = useTheme();
-  const [nomeUsuario, setNomeUsuario] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function carregarUsuario() {
-      try {
-        const usuarioSalvo = await AsyncStorage.getItem('usuario');
-
-        if (!usuarioSalvo) return;
-
-        const usuario: UsuarioLogado = JSON.parse(usuarioSalvo);
-        const nome = usuario.nome?.trim();
-
-        if (nome) {
-          setNomeUsuario(nome);
-        }
-      } catch (error) {
-        console.error('Erro ao carregar o usuário salvo:', error);
-      }
-    }
-
-    carregarUsuario();
-  }, []);
-
-  return (
-    <View style={[styles.flex, { backgroundColor: colors.background }]}>
-      <AppHeader address="Etec Guaianases" />
-
-      <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
-        <View style={styles.section}>
-          <AppText variant="h2">
-            {getGreeting()}
-            {nomeUsuario ? (
-              <AppText variant="h2" color={Colors.primary}>
-                {`, ${nomeUsuario}!`}
-              </AppText>
-            ) : (
-              '!'
-            )}
-          </AppText>
-          <AppText variant="body" color={colors.textSecondary}>
-            Encontre medicamentos perto de você!
-          </AppText>
-        </View>
-
-        <View style={styles.section}>
-          <AppText variant="h3" color={colors.textMuted} style={styles.sectionTitle}>
-            Categorias Principais
-          </AppText>
-          <CategoryCarousel categories={categories} />
-        </View>
-
-        <View style={styles.section}>
-          <AppText variant="h3" color={colors.textMuted} style={styles.sectionTitle}>
-            Últimas Consultas
-          </AppText>
-          <View style={styles.consultaList}>
-            {medicines.map((medicine, index) => (
-              <ConsultaCard
-                key={medicine.id}
-                medicine={medicine}
-                highlighted={index === medicines.length - 1}
-                onConsultar={() =>
-                  router.push({ pathname: '/medicamento/[id]', params: { id: medicine.id } })
-                }
-              />
-            ))}
-          </View>
-        </View>
-      </ScrollView>
-    </View>
-  );
+const router = useRouter(); const { colors } = useTheme(); const { user } = useUser();
+  return <View style={[styles.page, { backgroundColor: colors.background }]}><AppHeader /><ScrollView contentContainerStyle={styles.content}>
+    <ScreenHero title={'Olá! ' + (user?.nome?.trim().split(' ')[0] || 'Bem-vindo')} subtitle="Busque o que você necessita." icon="bandage-outline">
+      <Pressable accessibilityRole="button" accessibilityLabel="Buscar medicamentos" onPress={() => router.push('/buscar-medicamentos')} style={[styles.search, { backgroundColor: colors.surface }]}><AppText variant="label">Buscar medicamento ou categoria</AppText><AppText color={colors.primaryDark}>⌕</AppText></Pressable>
+    </ScreenHero>
+    <View style={styles.heading}><AppText variant="h3">Categorias principais</AppText><Pressable accessibilityRole="button" onPress={() => router.push('/buscar-medicamentos')}><AppText variant="caption" color={colors.primaryDark}>Ver medicamentos →</AppText></Pressable></View>
+    <CategoryCarousel categories={categories} />
+    <View style={[styles.rule, { backgroundColor: colors.primary }]} />
+    <AppText variant="h3">Consultas de medicamentos</AppText>
+    <AppText variant="caption">Explore os medicamentos para consultar seus detalhes.</AppText>
+    {medicines.map(m => <ConsultaCard key={m.id} medicine={m} onConsultar={() => router.push({ pathname: '/medicamento/[id]', params: { id: m.id } })} />)}
+  </ScrollView></View>;
 }
-
-const styles = StyleSheet.create({
-  flex: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.xl,
-    paddingBottom: Spacing.xxxl,
-    gap: Spacing.xxl,
-  },
-  section: {
-    gap: Spacing.md,
-  },
-  sectionTitle: {},
-  consultaList: {
-    gap: Spacing.lg,
-  },
-});
+const styles = StyleSheet.create({ page: { flex: 1 }, content: { padding: 18, gap: 16, paddingBottom: 32 }, heading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }, search: { borderRadius: 24, paddingHorizontal: 14, paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 }, rule: { height: 4, width: '100%', borderRadius: 2 } });

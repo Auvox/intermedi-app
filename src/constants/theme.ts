@@ -3,19 +3,19 @@ import '@/global.css';
 import { Platform } from 'react-native';
 
 export const Colors = {
-  primary: '#12B76A',
-  primaryDark: '#0C8F53',
-  primaryDarker: '#096D40',
-  primarySoft: '#E7F8EF',
+  primary: '#00B963',
+  primaryDark: '#16865E',
+  primaryDarker: '#146B58',
+  primarySoft: '#E2F2EC',
   primaryBorder: '#BEEBD3',
 
   background: '#FFFFFF',
   surface: '#FFFFFF',
   surfaceMuted: '#F5F6F8',
 
-  text: '#1A1D1F',
+  text: '#143F32',
   textSecondary: '#6B7280',
-  textMuted: '#9AA1AB',
+  textMuted: '#64786F',
   textOnPrimary: '#FFFFFF',
 
   border: '#E7E9EC',
@@ -31,8 +31,8 @@ export const Colors = {
 
 export const DarkColors = {
   primary: '#12B76A',
-  primaryDark: '#0C8F53',
-  primaryDarker: '#096D40',
+  primaryDark: '#75D7AB',
+  primaryDarker: '#A3EBC9',
   primarySoft: '#123D2A',
   primaryBorder: '#245A40',
 

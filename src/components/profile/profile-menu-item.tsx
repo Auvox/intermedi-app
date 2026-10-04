@@ -18,52 +18,52 @@ export type ProfileMenuItemProps = {
 export function ProfileMenuItem({ icon, title, subtitle, showWarning, showThemeSwitch, onPress }: ProfileMenuItemProps) {
   const { colors, isDark, setIsDark } = useTheme();
   return (
-  <Pressable
-    style={[styles.row, { borderBottomColor: colors.surfaceMuted }]}
-    onPress={onPress}
-    accessibilityRole="button"
-  >
-    <View style={[styles.iconCircle, { backgroundColor: colors.surfaceMuted }]}>
-      <Ionicons
-        name={icon}
-        size={20}
-        color={colors.text}
-      />
-    </View>
+    <Pressable
+      style={[styles.row, { borderColor: colors.border, backgroundColor: colors.surface }]}
+      onPress={onPress}
+      accessibilityRole="button"
+    >
+      <View style={[styles.iconCircle, { backgroundColor: colors.surfaceMuted }]}>
+        <Ionicons
+          name={icon}
+          size={20}
+          color={colors.primaryDark}
+        />
+      </View>
 
-    <View style={styles.info}>
-      <AppText variant="bodyBold">{title}</AppText>
+      <View style={styles.info}>
+        <AppText variant="bodyBold">{title}</AppText>
 
-      {subtitle && (
-        <AppText variant="label">
-          {subtitle}
-        </AppText>
+        {subtitle && (
+          <AppText variant="label">
+            {subtitle}
+          </AppText>
+        )}
+      </View>
+
+      {showThemeSwitch && (
+        <Switch
+          accessibilityLabel="Modo escuro"
+          value={isDark}
+          onValueChange={setIsDark}
+          trackColor={{ false: colors.border, true: colors.primaryBorder }}
+          thumbColor={isDark ? colors.primary : colors.textMuted}
+        />
       )}
-    </View>
 
-    {showThemeSwitch && (
-      <Switch
-        accessibilityLabel="Modo escuro"
-        value={isDark}
-        onValueChange={setIsDark}
-        trackColor={{ false: colors.border, true: colors.primaryBorder }}
-        thumbColor={isDark ? colors.primary : colors.textMuted}
-      />
-    )}
+      {showWarning && (
+        <Ionicons
+          name="warning"
+          size={18}
+          color={colors.warning}
+        />
+      )}
 
-    {showWarning && (
-      <Ionicons
-        name="warning"
-        size={18}
-        color={colors.warning}
-      />
-    )}
-
-    {!showThemeSwitch && (
-      <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-    )}
-  </Pressable>
-);
+      {!showThemeSwitch && (
+        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      )}
+    </Pressable>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -73,7 +73,9 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
     paddingVertical: Spacing.lg,
     paddingHorizontal: Spacing.xl,
-    borderBottomWidth: 1,
+    borderWidth: 1,
+    borderRadius: 22,
+    minHeight: 76,
   },
   iconCircle: {
     width: 40,

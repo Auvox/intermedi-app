@@ -37,7 +37,7 @@ export default function MedicamentoScreen() {
   if (!medicine) {
     return (
       <View style={[styles.flex, { backgroundColor: colors.background }]}>
-        <AppHeader address="R. das Flores, 123" />
+        <AppHeader />
         <View style={styles.notFound}>
           <BackButton tone="dark" />
           <AppText variant="body">{loading ? 'Carregando medicamento…' : error || 'Medicamento não encontrado.'}</AppText>
@@ -55,7 +55,7 @@ export default function MedicamentoScreen() {
 
   return (
     <View style={[styles.flex, { backgroundColor: colors.background }]}>
-      <AppHeader address="Etec Guaianases" />
+      <AppHeader />
 
       <View style={styles.subHeader}>
         <BackButton tone="dark" />
@@ -65,20 +65,23 @@ export default function MedicamentoScreen() {
         <View style={styles.subHeaderSpacer} />
       </View>
 
-      <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}><MedicinePhoto uri={medicine.photo} name={medicine.name} large />
+      <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
+        <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}><MedicinePhoto uri={medicine.photo} name={medicine.name} />
+          <View style={{ flex: 1 }}><AppText variant="h3" color={colors.primaryDark}>{medicine.name} {medicine.dosage}</AppText><AppText variant="label">{medicine.category}</AppText></View>
+        </View>
         <View style={styles.section}>
-          <AppText variant="label">Dosagem</AppText>
-          <View style={[styles.readonlyBox, { backgroundColor: colors.surfaceMuted }]}>
-            <AppText variant="bodyBold" color={colors.textMuted}>
+          <AppText variant="bodyBold">Dosagem</AppText>
+          <View style={[styles.readonlyBox, { backgroundColor: colors.primarySoft }]}>
+            <AppText variant="bodyBold" color={colors.textSecondary}>
               {medicine.dosage}
             </AppText>
           </View>
         </View>
 
         <View style={styles.section}>
-          <AppText variant="label">Descrição</AppText>
+          <AppText variant="h3">Descrição</AppText>
           <View style={[styles.readonlyBox, styles.descriptionBox, { backgroundColor: colors.surfaceMuted }]}>
-            <AppText variant="body" color={colors.textMuted}>
+            <AppText variant="body" color={colors.textSecondary}>
               {medicine.description}
             </AppText>
           </View>
@@ -93,8 +96,8 @@ export default function MedicamentoScreen() {
           </View>
         ))}
         <View style={styles.section}>
-          <AppText variant="h3" color={colors.textMuted}>
-            Disponibilidade
+          <AppText variant="h3" color={colors.textSecondary}>
+            Farmácias disponíveis
           </AppText>
           <View style={styles.list}>{/^\d+$/.test(id) && <AppText variant="body">Disponibilidade por farmácia não informada.</AppText>}
             {pharmacies.map((pharmacy) => (
