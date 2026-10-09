@@ -7,6 +7,9 @@ import type { FarmaciaMapa } from '@/services/farmacias';
 import type { EstiloMapa } from './estilos-mapa';
 
 type MapaProps = {
+  onSelectFarmacia?: (id: string) => void;
+  enquadrarFarmacias?: boolean;
+  centralizarUsuario?: boolean;
   localizacao?: {
     latitude: number;
     longitude: number;
@@ -25,7 +28,7 @@ export default function Mapa(props: MapaProps) {
   return <MapaConteudo key={props.modelo ?? 'automatico'} {...props} />;
 }
 
-function MapaConteudo({ localizacao, geometria, farmacias, seguindo = false, expandido = false, claro = false, espacoInferior = 60, modelo, }: MapaProps) {
+function MapaConteudo({ localizacao, geometria, farmacias, seguindo = false, expandido = false, claro = false, espacoInferior = 60, modelo, onSelectFarmacia, enquadrarFarmacias = false, centralizarUsuario = false, }: MapaProps) {
   const webviewRef = useRef<WebView>(null);
   const esquemaDeCores = useColorScheme();
   const temaEscuro = !claro && esquemaDeCores === 'dark';
@@ -47,9 +50,9 @@ function MapaConteudo({ localizacao, geometria, farmacias, seguindo = false, exp
     if (!pronto) return;
 
     webviewRef.current?.injectJavaScript(
-      `window.atualizarFarmacias(${JSON.stringify(farmacias ?? null).replace(/</g, '\\u003c')}); true;`,
+      `window.selecionarFarmacia = ${Boolean(onSelectFarmacia)}; window.enquadrarFarmacias = ${enquadrarFarmacias}; window.atualizarFarmacias(${JSON.stringify(farmacias ?? null).replace(/</g, '\\u003c')}); true;`,
     );
-  }, [pronto, farmacias]);
+  }, [pronto, farmacias, enquadrarFarmacias, onSelectFarmacia]);
 
   useEffect(() => {
     if (!pronto) return;
@@ -69,9 +72,9 @@ function MapaConteudo({ localizacao, geometria, farmacias, seguindo = false, exp
     // Retoma a posição atual após trocar o modelo durante a navegação.
     // Na prévia, o enquadramento final continua mostrando toda a rota.
     webviewRef.current?.injectJavaScript(
-      `window.atualizarLocalizacao(${JSON.stringify(localizacao ?? null)}, ${JSON.stringify(seguindo)}, ${Boolean(geometria)}); true;`,
+      `window.atualizarLocalizacao(${JSON.stringify(localizacao ?? null)}, ${JSON.stringify(seguindo)}, ${Boolean(geometria)}, ${centralizarUsuario}); true;`,
     );
-  }, [pronto, localizacao, seguindo, geometria, espacoInferior]);
+  }, [pronto, localizacao, seguindo, geometria, espacoInferior, centralizarUsuario]);
 
   return (
     <View
@@ -87,7 +90,12 @@ function MapaConteudo({ localizacao, geometria, farmacias, seguindo = false, exp
         scrollEnabled={false}
         onLoadStart={() => setPronto(false)}
         onMessage={({ nativeEvent }) => {
-          console.log('Mensagem do mapa:', nativeEvent.data);
+          if (nativeEvent.data.startsWith('{')) {
+            try {
+              const message = JSON.parse(nativeEvent.data);
+              if (message.type === 'farmacia' && typeof message.id === 'string') onSelectFarmacia?.(message.id);
+            } catch { /* Ignore messages that are not marker selections. */ }
+          }
 
           if (nativeEvent.data === 'pronto') {
             setPronto(true);

@@ -1,5 +1,6 @@
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { PharmacyMap } from '@/components/home/pharmacy-map';
 import { AppHeader } from '@/components/home/app-header';
 import { CategoryCarousel } from '@/components/home/category-carousel';
 import { ConsultaCard } from '@/components/home/consulta-card';
@@ -12,8 +13,9 @@ export default function InicioScreen() {
 const router = useRouter(); const { colors } = useTheme(); const { user } = useUser();
   return <View style={[styles.page, { backgroundColor: colors.background }]}><AppHeader /><ScrollView contentContainerStyle={styles.content}>
     <ScreenHero title={'Olá! ' + (user?.nome?.trim().split(' ')[0] || 'Bem-vindo')} subtitle="Busque o que você necessita." icon="bandage-outline">
-      <Pressable accessibilityRole="button" accessibilityLabel="Buscar medicamentos" onPress={() => router.push('/buscar-medicamentos')} style={[styles.search, { backgroundColor: colors.surface }]}><AppText variant="label">Buscar medicamento ou categoria</AppText><AppText color={colors.primaryDark}>⌕</AppText></Pressable>
+      <Pressable accessibilityRole="button" accessibilityLabel="Buscar medicamentos" onPress={() => router.push({ pathname: '/pesquisa', params: { origem: 'home' } })} style={[styles.search, { backgroundColor: colors.surface }]}><AppText variant="label">Buscar medicamento ou categoria</AppText><AppText color={colors.primaryDark}>⌕</AppText></Pressable>
     </ScreenHero>
+    <PharmacyMap />
     <View style={styles.heading}><AppText variant="h3">Categorias principais</AppText><Pressable accessibilityRole="button" onPress={() => router.push('/buscar-medicamentos')}><AppText variant="caption" color={colors.primaryDark}>Ver medicamentos →</AppText></Pressable></View>
     <CategoryCarousel categories={categories} />
     <View style={[styles.rule, { backgroundColor: colors.primary }]} />

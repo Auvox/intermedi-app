@@ -1,3 +1,4 @@
+import { ICONE_FARMACIA, ICONE_USUARIO } from './marcadores-mapa';
 import { PREDIOS_3D, urlEstiloMapa, type EstiloMapa } from './estilos-mapa';
 
 // Escape '<' para nomes e endereços nunca encerrarem a tag script.
@@ -36,67 +37,12 @@ export function criarMapaHtml(temaEscuro = false, modelo?: EstiloMapa) {
     .maplibregl-ctrl-top-right { display: none; }
 
 
-    /* Circulo que representa a localizacao atual da pessoa. */
-
-    .marcador-usuario {
-  width: 42px;
-  height: 42px;
-  border: 3px solid white;
-  border-radius: 50%;
-  background: rgba(16, 185, 104, 0.22);
-  box-shadow:
-    0 3px 10px rgba(0, 0, 0, 0.3),
-    0 0 0 10px rgba(16, 185, 104, 0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-
-/* Seta verde colocada dentro do marcador da pessoa. */
-
-.seta-usuario {
-  width: 0;
-  height: 0;
-  border-left: 9px solid transparent;
-  border-right: 9px solid transparent;
-  border-bottom: 24px solid #10b968;
-  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
-  transform: translateY(-2px);
-}
-
-/* Circulo verde usado para representar uma farmacia ou UBS. */
-.marcador-farmacia {
-  width: 38px;
-  height: 38px;
-  border: 3px solid white;
-  border-radius: 50%;
-  background: #10b968;
-  box-shadow: 0 3px 9px rgba(0, 0, 0, 0.3);
-  position: relative;
-}
-
-/* As duas barras abaixo formam a cruz branca do marcador. */
-.marcador-farmacia::before,
-.marcador-farmacia::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  border-radius: 2px;
-  background: white;
-  transform: translate(-50%, -50%);
-}
-
-.marcador-farmacia::before {
-  width: 20px;
-  height: 6px;
-}
-
-.marcador-farmacia::after {
-  width: 6px;
-  height: 20px;
-}
+    .marcador-farmacia { width: 44px; height: 48px; cursor: pointer; }
+    .marcador-usuario { width: 52px; height: 52px; }
+    .marcador-farmacia svg, .marcador-usuario svg {
+      display: block; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .28));
+    }
+    .marcador-farmacia:focus-visible { outline: 3px solid #087f48; outline-offset: 3px; border-radius: 10px; }
   </style>
 </head>
 <body>
@@ -271,21 +217,37 @@ export function criarMapaHtml(temaEscuro = false, modelo?: EstiloMapa) {
 
     conteudo.append(titulo, endereco);
 
-    // Cria o icone verde com a cruz definido no CSS.
+    // Mostra um prédio de saúde com cruz e janelas.
     var elementoMarcador = document.createElement('div');
     elementoMarcador.className = 'marcador-farmacia';
+    elementoMarcador.innerHTML = ${JSON.stringify(ICONE_FARMACIA)};
+    elementoMarcador.setAttribute('role', 'button');
+    elementoMarcador.setAttribute('aria-label', 'Ver ' + farmacia.name);
+    elementoMarcador.tabIndex = 0;
+    function selecionar() {
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'farmacia', id: String(farmacia.id) }));
+    }
+    elementoMarcador.addEventListener('click', selecionar);
+    elementoMarcador.addEventListener('keydown', function(evento) {
+      if (evento.key === 'Enter' || evento.key === ' ') { evento.preventDefault(); selecionar(); }
+    });
 
     return new maplibregl.Marker({
   element: elementoMarcador,
-  anchor: 'center'
+  anchor: 'bottom'
 })
       .setLngLat([farmacia.longitude, farmacia.latitude])
       .setPopup(
-        new maplibregl.Popup({ offset: 25 })
+        window.selecionarFarmacia ? null : new maplibregl.Popup({ offset: 25 })
           .setDOMContent(conteudo)
       )
       .addTo(mapa);
   });
+  if (window.enquadrarFarmacias && farmacias.length) {
+    var limitesFarmacias = new maplibregl.LngLatBounds();
+    farmacias.forEach(function(farmacia) { limitesFarmacias.extend([farmacia.longitude, farmacia.latitude]); });
+    mapa.fitBounds(limitesFarmacias, { padding: 50, maxZoom: 15, duration: 0 });
+  }
 };
 
 // Desenha os marcadores iniciais assim que o mapa e criado.
@@ -365,7 +327,7 @@ function atualizarTrechoRestante(localizacao) {
 }
 
      // Atualiza o marcador da pessoa e decide como posicionar a camera.
-     window.atualizarLocalizacao = function(localizacao, seguindo, manterEnquadramento) {
+     window.atualizarLocalizacao = function(localizacao, seguindo, manterEnquadramento, centralizarUsuario) {
   // Estes limites servem para enquadrar a pessoa e as farmacias.
   var limites = new maplibregl.LngLatBounds();
 
@@ -388,10 +350,8 @@ function atualizarTrechoRestante(localizacao) {
       var elementoUsuario = document.createElement('div');
 elementoUsuario.className = 'marcador-usuario';
 
-var setaUsuario = document.createElement('div');
-setaUsuario.className = 'seta-usuario';
+elementoUsuario.innerHTML = ${JSON.stringify(ICONE_USUARIO)};
 
-elementoUsuario.appendChild(setaUsuario);
 
      marcadorUsuario = new maplibregl.Marker({
   element: elementoUsuario,
@@ -409,6 +369,10 @@ elementoUsuario.appendChild(setaUsuario);
     marcadorUsuario.setLngLat(ponto);
     limites.extend(ponto);
 
+    if (centralizarUsuario) {
+      mapa.easeTo({ center: ponto, zoom: 13.5, pitch: 0, bearing: 0, duration: 500 });
+      return;
+    }
     // Durante a navegacao, aproxima, inclina e gira a camera como no Waze.
     if (seguindo) {
       atualizarTrechoRestante(localizacao);

@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { FavoriteButton } from '@/components/ui/favorite-button';
 import { useFavorites } from '@/context/favorites-context';
 import { MedicinePhoto } from './medicine-photo';
@@ -17,34 +19,25 @@ export type MedicineCardProps = {
 export function MedicineCard({ medicine, onPress }: MedicineCardProps) {
   const { colors } = useTheme();
   const favorites = useFavorites();
+  const [expanded, setExpanded] = useState(false);
   return (
     <View style={[styles.card, { boxShadow: '0 4px 16px rgba(20,63,50,0.08)', backgroundColor: colors.surface, borderColor: colors.border }]}>
       <Pressable
         style={({ pressed }) => [styles.cardContent, pressed && styles.cardPressed]}
-        onPress={onPress}
+        onPress={() => setExpanded(value => !value)}
+        accessibilityState={{ expanded }}
         accessibilityRole="button"
         accessibilityLabel={`Ver detalhes de ${medicine.name} ${medicine.dosage}`}>
         <View style={styles.topRow}>
           <MedicinePhoto uri={medicine.photo} name={medicine.name} />
-
-          <View style={styles.info}>
-            <AppText variant="bodyBold" numberOfLines={1}>
-              {medicine.name}
-            </AppText>
-            <AppText variant="label" numberOfLines={1}>
-              {medicine.dosage}
-            </AppText>
-            <View style={styles.categoryRow}>
-              <Ionicons name="pricetag-outline" size={14} color={colors.primaryDark} />
-              <AppText variant="label" color={colors.primaryDark} numberOfLines={1}>
-                {medicine.category}
-              </AppText>
-            </View>
-          </View>
-
-          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+          <AppText variant="bodyBold" style={styles.info}>{medicine.name}</AppText>
+          <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={20} color={colors.textSecondary} />
         </View>
-
+      </Pressable>
+      {expanded && <View style={styles.cardContent}>
+        <View style={styles.topRow}>
+          <View style={styles.info}><AppText variant="label">{medicine.dosage}</AppText><AppText variant="label" color={colors.primaryDark}>{medicine.category}</AppText></View>
+        </View>
         <View style={styles.statusRow}>
           <View style={[styles.statusBadge, { backgroundColor: colors.primarySoft }]}>
             <View style={styles.statusDot} />
@@ -56,21 +49,9 @@ export function MedicineCard({ medicine, onPress }: MedicineCardProps) {
 
         <View style={[styles.divider, { backgroundColor: colors.surfaceMuted }]} />
 
-        <View style={styles.bottomRow}>
-          <View style={styles.pharmacyRow}>
-            <Ionicons name="business-outline" size={18} color={colors.primaryDark} />
-            <AppText variant="caption" numberOfLines={2} style={styles.pharmacyText}>
-              Consultar detalhes
-            </AppText>
-          </View>
+        <Button title="Ver detalhes" onPress={onPress} />
+      </View>}
 
-          <View style={[styles.detailButton, { backgroundColor: colors.primary }]}>
-            <AppText variant="button" style={styles.detailButtonText}>
-              Ver detalhes
-            </AppText>
-          </View>
-        </View>
-      </Pressable>
 <View style={styles.favorite}><FavoriteButton selected={favorites.medicines.some(m => m.id === medicine.id)} disabled={!favorites.ready}
         label={favorites.medicines.some(m => m.id === medicine.id) ? 'Remover medicamento dos favoritos' : 'Salvar medicamento nos favoritos'} onPress={() => favorites.toggleMedicine(medicine)} /></View>
     </View>
@@ -90,6 +71,7 @@ const styles = StyleSheet.create({
     opacity: 0.82,
   },
   topRow: {
+    minHeight: 68,
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.md,

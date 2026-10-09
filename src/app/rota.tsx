@@ -418,7 +418,7 @@ export default function RotaScreen() {
                       style={styles.modoTexto}>
                       {opcao.titulo}
                     </AppText>
-                    <AppText variant="caption" color={selecionado ? Colors.primaryDark : colors.textSecondary}>
+                    <AppText variant="caption" color={selecionado ? colors.primaryDark : colors.textSecondary}>
                       {rotas[opcao.valor]
                         ? Math.ceil(rotas[opcao.valor]!.tempoSegundos / 60) + ' min'
                         : carregando ? 'Calculando…' : 'Indisponível'}

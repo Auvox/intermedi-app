@@ -1,7 +1,7 @@
+import { ICONE_FARMACIA, ICONE_USUARIO } from './marcadores-mapa';
 import { useEffect, useRef } from 'react';
 import * as maplibregl from 'maplibre-gl';
 
-import { pharmacies } from '@/constants/mock-data';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { Rota } from '@/services/caminhada';
 import type { FeatureCollection } from 'geojson';
@@ -9,6 +9,9 @@ import type { FarmaciaMapa } from '@/services/farmacias';
 import { PREDIOS_3D, urlEstiloMapa, type EstiloMapa } from './estilos-mapa';
 
 type MapaProps = {
+  onSelectFarmacia?: (id: string) => void;
+  enquadrarFarmacias?: boolean;
+  centralizarUsuario?: boolean;
   localizacao?: {
     latitude: number;
     longitude: number;
@@ -29,7 +32,9 @@ export default function Mapa(props: MapaProps) {
   return <MapaConteudo key={props.modelo ?? 'automatico'} {...props} />;
 }
 
-function MapaConteudo({localizacao ,geometria, farmacias = FARMACIAS_VAZIAS, expandido = false, claro = false, espacoInferior = 60, modelo, }: MapaProps) {
+function MapaConteudo({localizacao ,geometria, farmacias = FARMACIAS_VAZIAS, expandido = false, claro = false, espacoInferior = 60, modelo, onSelectFarmacia, centralizarUsuario = false, }: MapaProps) {
+  const selecionarRef = useRef(onSelectFarmacia);
+  useEffect(() => { selecionarRef.current = onSelectFarmacia; }, [onSelectFarmacia]);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapaRef = useRef<maplibregl.Map | null>(null);
   const marcadorUsuarioRef = useRef<maplibregl.Marker | null>(null);
@@ -53,6 +58,7 @@ function MapaConteudo({localizacao ,geometria, farmacias = FARMACIAS_VAZIAS, exp
       style: modelo ? urlEstiloMapa(modelo) : claro ? 'https://tiles.openfreemap.org/styles/liberty' : 'https://tiles.openfreemap.org/styles/dark',
       center: [-46.417, -23.5459],
       zoom: 13,
+      attributionControl: { compact: true },
       pitch: inclinacao,
       
     });
@@ -94,9 +100,12 @@ function MapaConteudo({localizacao ,geometria, farmacias = FARMACIAS_VAZIAS, exp
       const popup = new maplibregl.Popup({ offset: 25 })
         .setDOMContent(conteudo);
 
-      const marcador = new maplibregl.Marker({ color: '#2563eb' })
+      const icone = document.createElement('div');
+      icone.innerHTML = ICONE_FARMACIA;
+      icone.style.cssText = 'width:44px;height:48px;cursor:pointer;filter:drop-shadow(0 2px 3px rgba(0,0,0,.28))';
+      const marcador = new maplibregl.Marker({ element: icone, anchor: 'bottom' })
         .setLngLat(coordenadas)
-        .setPopup(popup)
+        .setPopup(selecionarRef.current ? null : popup)
         .addTo(mapa);
 
       marcador.getElement().setAttribute(
@@ -104,6 +113,16 @@ function MapaConteudo({localizacao ,geometria, farmacias = FARMACIAS_VAZIAS, exp
         `Ver ${farmacia.name}`,
       );
 
+      const elemento = marcador.getElement();
+      elemento.setAttribute('role', 'button');
+      elemento.tabIndex = 0;
+      elemento.addEventListener('click', () => selecionarRef.current?.(farmacia.id));
+      elemento.addEventListener('keydown', event => {
+        if (selecionarRef.current && (event.key === 'Enter' || event.key === ' ')) {
+          event.preventDefault();
+          selecionarRef.current(farmacia.id);
+        }
+      });
       limites.extend(coordenadas);
 
       return marcador;
@@ -139,8 +158,11 @@ function MapaConteudo({localizacao ,geometria, farmacias = FARMACIAS_VAZIAS, exp
     ];
 
     if (!marcadorUsuarioRef.current) {
+      const icone = document.createElement('div');
+      icone.innerHTML = ICONE_USUARIO;
+      icone.style.cssText = 'width:52px;height:52px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.28))';
       marcadorUsuarioRef.current = new maplibregl.Marker({
-        color: '#10b968',
+        element: icone, anchor: 'center',
       })
         .setLngLat(coordenadas)
         .setPopup(
@@ -154,6 +176,10 @@ function MapaConteudo({localizacao ,geometria, farmacias = FARMACIAS_VAZIAS, exp
     }
 
  
+    if (centralizarUsuario) {
+      mapa.easeTo({ center: coordenadas, zoom: 13.5, pitch: 0, bearing: 0, duration: 500 });
+      return;
+    }
     const limites = new maplibregl.LngLatBounds(
       coordenadas,
       coordenadas,
@@ -169,7 +195,7 @@ function MapaConteudo({localizacao ,geometria, farmacias = FARMACIAS_VAZIAS, exp
       maxZoom: 15,
       duration: 0,
     });
-  }, [localizacao, farmacias, claro, modelo, inclinacao]);
+  }, [localizacao, farmacias, claro, modelo, inclinacao, centralizarUsuario]);
 
   useEffect(() => {
   const mapa = mapaRef.current;

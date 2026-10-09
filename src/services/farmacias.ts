@@ -87,3 +87,25 @@ export function prepararFarmaciasParaMapa(
     }];
   });
 }
+
+export type FarmaciaComMedicamento = { farmacia: Farmacia; quantidade: number };
+export async function listarFarmaciasComMedicamento(idRemedio: string) {
+  const farmacias = await listarFarmacias();
+  const disponiveis: FarmaciaComMedicamento[] = [];
+  let falhas = 0;
+  // Limita as consultas simultâneas para não sobrecarregar a API.
+  for (let inicio = 0; inicio < farmacias.length; inicio += 4) {
+    const grupo = farmacias.slice(inicio, inicio + 4);
+    const respostas = await Promise.allSettled(grupo.map(async farmacia => {
+      const { estoque } = await consultarEstoqueFarmacia(String(farmacia.idFarmacia));
+      const quantidade = estoque.filter(item => String(item.idRemedio) === idRemedio && item.quantidade > 0 && !item.vencido).reduce((total, item) => total + item.quantidade, 0);
+      return { farmacia, quantidade };
+    }));
+    respostas.forEach(resposta => {
+      if (resposta.status === 'rejected') falhas++;
+      else if (resposta.value.quantidade > 0) disponiveis.push(resposta.value);
+    });
+  }
+  if (farmacias.length > 0 && falhas === farmacias.length) throw new Error('Não foi possível consultar o estoque das farmácias.');
+  return { disponiveis, consultaIncompleta: falhas > 0 };
+}

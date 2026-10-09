@@ -42,7 +42,7 @@ export const DarkColors = {
 
   text: '#F3F4F4',
   textSecondary: '#A7B0AA',
-  textMuted: '#737D77',
+  textMuted: '#B0BBB4',
   textOnPrimary: '#FFFFFF',
 
   border: '#29312D',

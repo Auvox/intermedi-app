@@ -11,6 +11,7 @@ export type ButtonProps = PressableProps & {
   variant?: ButtonVariant;
   loading?: boolean;
   fullWidth?: boolean;
+  compact?: boolean;
 };
 
 export function Button({
@@ -18,6 +19,7 @@ export function Button({
   variant = 'solid',
   loading = false,
   fullWidth = true,
+  compact = false,
   style,
   disabled,
   ...rest
@@ -41,6 +43,7 @@ export function Button({
         variant === 'solid' && { backgroundColor: colors.primary },
         variant === 'outline' && { borderColor: colors.primaryDark },
         fullWidth && styles.fullWidth,
+        compact && styles.compact,
         state.pressed && styles.pressed,
         (disabled || loading) && styles.disabled,
         typeof style === 'function' ? style(state) : style,
@@ -49,7 +52,7 @@ export function Button({
       {loading ? (
         <ActivityIndicator color={textColor[variant]} />
       ) : (
-        <AppText variant="button" color={textColor[variant]}>
+        <AppText variant="button" color={textColor[variant]} style={compact ? styles.compactText : undefined}>
           {title}
         </AppText>
       )}
@@ -67,6 +70,8 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
     minHeight: 48,
   },
+  compact: { minHeight: 44, paddingVertical: 10, paddingHorizontal: Spacing.md, borderRadius: Radius.md },
+  compactText: { fontSize: 14, lineHeight: 20, textAlign: 'center' },
   fullWidth: {
     alignSelf: 'stretch',
   },
