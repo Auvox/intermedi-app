@@ -22,10 +22,10 @@ import { Spacing } from '@/constants/theme';
 
 export default function BuscarMedicamentosScreen() {
   const router = useRouter();
-  const { filtro, origem } = useLocalSearchParams<{ filtro?: string; origem?: string }>();
+  const { filtro, origem, busca: buscaInicial } = useLocalSearchParams<{ filtro?: string; origem?: string; busca?: string }>();
   const { user, loading: loadingUser } = useUser();
   const { colors } = useTheme();
-  const [busca, setBusca] = useState('');
+  const [busca, setBusca] = useState(buscaInicial ?? '');
   const [filter, setFilter] = useState<'all' | 'medicines' | 'pharmacies'>(filtro === 'pharmacies' ? 'pharmacies' : filtro === 'medicines' ? 'medicines' : 'all');
   const [recent, setRecent] = useState<string[]>([]);
   const [historyReady, setHistoryReady] = useState(false);
