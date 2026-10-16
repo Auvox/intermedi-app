@@ -22,7 +22,7 @@ export function SelectField({ placeholder, value, options, onSelect }: SelectFie
 
   return (
     <>
-      <Pressable style={[styles.wrapper, { borderColor: colors.border, backgroundColor: colors.surfaceMuted }]} onPress={() => setOpen(true)} accessibilityRole="button">
+      <Pressable style={[styles.wrapper, { borderColor: colors.border, backgroundColor: colors.surface }]} onPress={() => setOpen(true)} accessibilityRole="button">
         <AppText variant="body" color={value ? colors.text : colors.textMuted}>
           {value ?? placeholder}
         </AppText>
@@ -66,10 +66,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderRadius: 16,
-    paddingHorizontal: 12,
-    minHeight: 50,
+    paddingHorizontal: 16,
+    minHeight: 54,
     paddingVertical: Spacing.md,
   },
   backdrop: {

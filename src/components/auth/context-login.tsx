@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
+import type { MascotId } from "@/components/ui/mascot";
 
 export type RegisterData = {
   nome: string;
@@ -8,6 +9,14 @@ export type RegisterData = {
   senha: string;
   confirmaSenha: string;
   remedioFrequente: string;
+  cep: string;
+  rua: string;
+  numero: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  complemento: string;
+  mascote: MascotId;
 };
 
 const initialRegisterData: RegisterData = {
@@ -18,6 +27,14 @@ const initialRegisterData: RegisterData = {
   senha: "",
   confirmaSenha: "",
   remedioFrequente: "",
+  cep: "",
+  rua: "",
+  numero: "",
+  bairro: "",
+  cidade: "",
+  estado: "",
+  complemento: "",
+  mascote: "broto",
 };
 
 type RegisterContextData = {
@@ -30,8 +47,8 @@ const RegisterContext = createContext<RegisterContextData | undefined>(
   undefined,
 );
 
-// Guarda os dados preenchidos na 1ª etapa (cadastro) para que a 2ª etapa
-// (endereço) consiga enviar tudo junto numa única requisição.
+// Guarda os dados de todas as etapas do cadastro para que a última (mascote)
+// envie tudo junto numa única requisição.
 export function RegisterProvider({ children }: { children: ReactNode }) {
   const [registerData, setRegisterDataState] =
     useState<RegisterData>(initialRegisterData);

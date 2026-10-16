@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LoadingScreen, LOADING_CYCLE_MS } from '@/components/ui/loading-screen';
 import { TextField } from "@/components/ui/text-field";
-import { Colors, Spacing } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
 import { apiRequest } from "@/constants/api";
 import { type LoggedUser, useUser } from "@/context/user-context";
 
@@ -44,25 +44,34 @@ export function LoginForm() {
       <TextField
         label="E-mail"
         icon="mail-outline"
-        placeholder="ex: joaodasilva@gmail.com"
+        placeholder="ex: joao@gmail.com"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
       />
       <TextField
         label="Senha"
-        icon="lock-closed"
-        placeholder="Sua senha"
+        icon="lock-closed-outline"
+        placeholder="Digite sua senha"
         value={password}
         onChangeText={setPassword}
         secureToggle
       />
 
-      <Checkbox
-        checked={rememberMe}
-        onChange={setRememberMe}
-        label="lembre de mim"
-      />
+      <View style={styles.options}>
+        <Checkbox
+          checked={rememberMe}
+          onChange={setRememberMe}
+          label="Lembrar de mim"
+        />
+        <Pressable
+          onPress={() => router.push("/forgot-password")}
+          accessibilityRole="button"
+          hitSlop={8}
+        >
+          <AppText variant="link">Esqueceu a senha?</AppText>
+        </Pressable>
+      </View>
 
       <Button
         title="Entrar"
@@ -70,29 +79,22 @@ export function LoginForm() {
         onPress={handleSubmit}
         style={styles.submitButton}
       />
-
-      <Pressable
-        style={styles.forgotLink}
-        onPress={() => router.push("/forgot-password")}
-        accessibilityRole="button"
-      >
-        <AppText variant="link" color={Colors.primary}>
-          Esqueceu da senha ?
-        </AppText>
-      </Pressable>
-      <Pressable accessibilityRole="button" onPress={() => router.push('/register/cadastro')} style={{ alignItems: 'center', padding: 12 }}><AppText variant="label">Não tem uma conta ainda? <AppText variant="link">Criar</AppText></AppText></Pressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    gap: Spacing.xl,
+    gap: Spacing.lg,
+  },
+  options: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
   },
   submitButton: {
     marginTop: Spacing.sm,
-  },
-  forgotLink: {
-    alignItems: "center",
   },
 });

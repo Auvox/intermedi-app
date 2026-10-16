@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -7,19 +8,27 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AuthHeader } from "@/components/auth/auth-header";
 import { useRegisterData } from "@/components/auth/context-login";
-import { registerSteps, StepIndicator } from "@/components/auth/step-indicator";
 import { Button } from "@/components/ui/button";
 import { AppText } from '@/components/ui/app-text';
 import { TextField } from "@/components/ui/text-field";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/context/theme-context";
 
+const PASSWORD_RULES = [
+  { label: 'Mínimo 8 caracteres', test: (s: string) => s.length >= 8 },
+  { label: 'Uma letra maiúscula', test: (s: string) => /[A-Z]/.test(s) },
+  { label: 'Uma letra minúscula', test: (s: string) => /[a-z]/.test(s) },
+  { label: 'Um caractere especial (&, @, !)', test: (s: string) => /[^A-Za-z0-9\s]/.test(s) },
+];
+
 export default function CadastroScreen() {
   const router = useRouter();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const { registerData, setRegisterData } = useRegisterData();
 
   const [stage, setStage] = useState(0);
@@ -28,36 +37,27 @@ export default function CadastroScreen() {
   const [telefone, setTelefone] = useState(registerData.telefone);
   const [email, setEmail] = useState(registerData.email);
   const [senha, setSenha] = useState(registerData.senha);
-  const [confirmaSenha, setConfirmaSenha] = useState(
-    registerData.confirmaSenha,
-  );
-  const [remedioFrequente, setRemedioFrequente] = useState(
-    registerData.remedioFrequente,
-  );
 
   function handleNextStep() {
     // Validação dos campos obrigatórios
-    if (!nome || !cpf || !email || !senha) {
-      alert("Preencha os dados obrigatórios, por favor.");
+    if (!cpf.trim() || !senha) {
+      alert("Preencha CPF e senha, por favor.");
+      return;
+    }
+    if (!PASSWORD_RULES.every(rule => rule.test(senha))) {
+      alert("A senha precisa cumprir todos os requisitos.");
       return;
     }
 
-    // Confirmação da senha
-    if (senha !== confirmaSenha) {
-      alert("As senhas não coincidem!");
-      return;
-    }
-
-    // Apenas guarda os dados da 1ª etapa no contexto. A requisição só
-    // acontece de fato quando o usuário finalizar a 2ª etapa (endereço).
+    // Apenas guarda os dados no contexto. A requisição só acontece de fato
+    // quando o usuário finalizar a última etapa (mascote).
     setRegisterData({
-      nome,
+      nome: nome.trim(),
       cpf,
       telefone,
-      email,
+      email: email.trim(),
       senha,
-      confirmaSenha,
-      remedioFrequente,
+      confirmaSenha: senha,
     });
 
     router.push("/register/endereco");
@@ -73,58 +73,33 @@ export default function CadastroScreen() {
     >
       <ScrollView
         style={styles.flex}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + Spacing.xl }]}
+        keyboardShouldPersistTaps="handled"
       >
-        <AuthHeader title={stage === 0 ? "Como você se chama e qual é o seu e-mail?" : "Agora, vamos proteger a sua conta!"} showBack />
+        <AuthHeader step={stage + 1} title={stage === 0 ? "Como você se chama e qual é o seu e-mail?" : "Agora, vamos proteger a sua conta!"}
+          onBack={() => stage === 1 ? setStage(0) : router.canGoBack() ? router.back() : router.replace('/welcome')} />
 
         <View style={styles.body}>
-          <StepIndicator steps={registerSteps} currentIndex={stage} />
-
-          <AppText variant="label" style={{ textAlign: 'center' }}>{stage === 0 ? 'Usaremos essas informações para identificar seu perfil e enviar suas atualizações.' : 'Confira seus dados e escolha uma senha para acessar sua conta.'}</AppText>
+          <AppText variant="label">{stage === 0 ? 'Usamos esses dados para identificar seu perfil e enviar suas atualizações.' : 'Seu CPF e telefone garantem a segurança dos seus pedidos e receitas.'}</AppText>
           <View style={styles.form}>
             {stage === 0 ? <>
-              <TextField label="Nome completo" icon="person" placeholder="ex: João da Silva" autoCapitalize="words" value={nome} onChangeText={setNome} />
-              <TextField label="E-mail" icon="mail-outline" placeholder="ex: joaodasilva@gmail.com" value={email} onChangeText={setEmail} keyboardType="email-address" />
+              <TextField label="Nome completo" icon="person-outline" placeholder="ex: João da Silva" autoCapitalize="words" value={nome} onChangeText={setNome} />
+              <TextField label="E-mail" icon="mail-outline" placeholder="ex: joao@gmail.com" value={email} onChangeText={setEmail} keyboardType="email-address" />
             </> : <>
-
-              <TextField
-                label="CPF" icon="document-text-outline" placeholder="ex: 123.456.789-10"
-                value={cpf}
-                onChangeText={setCpf}
-                keyboardType="numeric"
-              />
-
-              <TextField
-                label="Telefone" icon="call" placeholder="ex: (11) 91234-5678"
-                value={telefone}
-                onChangeText={setTelefone}
-                keyboardType="phone-pad"
-              />
-
-              <TextField
-                label="Medicamento frequente (opcional)"
-                placeholder="Nome do medicamento"
-                value={remedioFrequente}
-                onChangeText={setRemedioFrequente}
-              />
-
-              <TextField
-                label="Senha" icon="lock-closed" placeholder="Sua senha"
-                value={senha}
-                onChangeText={setSenha}
-                secureToggle
-              />
-
-              <TextField
-                label="Confirme sua senha" icon="lock-closed-outline" placeholder="Repita sua senha"
-                value={confirmaSenha}
-                onChangeText={setConfirmaSenha}
-                secureToggle
-              />
+              <TextField label="CPF" icon="document-outline" placeholder="ex: 123.456.789-10" value={cpf} onChangeText={setCpf} keyboardType="numeric" />
+              <TextField label="Telefone" icon="call-outline" placeholder="ex: (11) 91234-5678" value={telefone} onChangeText={setTelefone} keyboardType="phone-pad" />
+              <TextField label="Senha" icon="lock-closed-outline" placeholder="Crie uma senha" value={senha} onChangeText={setSenha} secureToggle />
+              <View style={styles.rules} accessibilityLabel="Requisitos da senha">
+                {PASSWORD_RULES.map(rule => {
+                  const ok = rule.test(senha);
+                  return <View key={rule.label} style={styles.rule}>
+                    <Ionicons name="checkmark-circle" size={18} color={ok ? colors.primaryBright : colors.textMuted} />
+                    <AppText variant="label" color={ok ? colors.primaryDark : colors.textMuted}>{rule.label}</AppText>
+                  </View>;
+                })}
+              </View>
             </>}
           </View>
-
-          {stage === 1 && <Button title="Voltar aos dados pessoais" variant="ghost" onPress={() => setStage(0)} />}
 
           <Button
             title="Continuar"
@@ -155,16 +130,17 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.xl,
-    paddingBottom: Spacing.xxl,
-    justifyContent: "space-between",
-    gap: Spacing.xxl,
-  },
-
-  form: {
     gap: Spacing.xl,
   },
 
+  form: {
+    gap: Spacing.lg,
+  },
+
+  rules: { gap: 4, marginTop: -4 },
+  rule: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+
   submitButton: {
-    marginTop: Spacing.lg,
+    marginTop: 'auto',
   },
 });

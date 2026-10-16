@@ -25,6 +25,7 @@ export function LoadingScreen({ message }: { message?: string }) {
   }));
 
   return <View style={styles.page} accessibilityRole="progressbar" accessibilityLabel={message ?? 'Carregando aplicativo'}>
+    <View pointerEvents="none" style={styles.circle} />
     <View style={styles.logo}>
       <Image source={require('../../../assets/images/brand/loading-logo-text.png')} resizeMode="contain" style={[styles.logo, styles.frame]} />
       <Svg width={236} height={157} viewBox="0 0 280 185" style={styles.frame}>
@@ -41,7 +42,8 @@ export function LoadingScreen({ message }: { message?: string }) {
   </View>;
 }
 const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: '#00B963', alignItems: 'center', justifyContent: 'center' },
+  page: { flex: 1, backgroundColor: '#1D7150', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  circle: { position: 'absolute', width: 440, height: 440, borderRadius: 220, right: -210, top: -190, backgroundColor: '#22895C' },
   logo: { width: 236, height: 157 },
   frame: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 },
   indicator: { position: 'absolute', bottom: '8%', alignItems: 'center', gap: 16, paddingHorizontal: 24 },

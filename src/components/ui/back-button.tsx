@@ -2,10 +2,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 
-import { Colors, Radius } from '@/constants/theme';
+import { Radius, Shadow } from '@/constants/theme';
 import { useTheme } from '@/context/theme-context';
 
 export type BackButtonProps = {
+  // light: sobre o cabeçalho verde; dark: sobre fundo claro.
   tone?: 'light' | 'dark';
   onPress?: () => void;
 };
@@ -22,13 +23,13 @@ export function BackButton({ tone = 'light', onPress }: BackButtonProps) {
       onPress={onPress ?? (() => (router.canGoBack() ? router.back() : router.replace('/')))}
       style={({ pressed }) => [
         styles.button,
-        tone === 'light' ? styles.light : { backgroundColor: colors.primarySoft },
+        tone === 'light' ? styles.light : [{ backgroundColor: colors.surface }, Shadow],
         pressed && styles.pressed,
       ]}>
       <Ionicons
         name="chevron-back"
         size={22}
-        color={tone === 'light' ? Colors.textOnPrimary : colors.primary}
+        color={tone === 'light' ? '#FFFFFF' : colors.text}
       />
     </Pressable>
   );
@@ -36,14 +37,14 @@ export function BackButton({ tone = 'light', onPress }: BackButtonProps) {
 
 const styles = StyleSheet.create({
   button: {
-    width: 40,
-    height: 40,
+    width: 46,
+    height: 46,
     borderRadius: Radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
   },
   light: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.16)',
   },
   pressed: {
     opacity: 0.7,

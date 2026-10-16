@@ -2,10 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from 'expo-router';
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { LoadingScreen } from '@/components/ui/loading-screen';
-import { Colors, DarkColors } from '@/constants/theme';
+import { Colors, DarkColors, type ThemeColors } from '@/constants/theme';
 export const TextSizes = { standard: 1, large: 1.2, extraLarge: 1.4 } as const;
 export type TextSize = keyof typeof TextSizes;
-type ThemeColors = { [Key in keyof typeof Colors]: string };
 type ThemeContextData = {
   colors: ThemeColors; isDark: boolean; setIsDark: (value: boolean) => void;
   highContrast: boolean; setHighContrast: (value: boolean) => void;

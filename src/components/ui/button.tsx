@@ -1,10 +1,11 @@
-import { ActivityIndicator, Pressable, StyleSheet, type PressableProps } from 'react-native';
+import type { ReactNode } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, View, type PressableProps } from 'react-native';
 
 import { AppText } from '@/components/ui/app-text';
 import { useTheme } from '@/context/theme-context';
-import { Colors, Radius, Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 
-export type ButtonVariant = 'solid' | 'outline' | 'ghost' | 'solidLight' | 'outlineLight';
+export type ButtonVariant = 'solid' | 'outline' | 'ghost' | 'solidLight' | 'outlineLight' | 'danger' | 'soft' | 'warning';
 
 export type ButtonProps = PressableProps & {
   title: string;
@@ -12,6 +13,7 @@ export type ButtonProps = PressableProps & {
   loading?: boolean;
   fullWidth?: boolean;
   compact?: boolean;
+  icon?: ReactNode;
 };
 
 export function Button({
@@ -20,28 +22,32 @@ export function Button({
   loading = false,
   fullWidth = true,
   compact = false,
+  icon,
   style,
   disabled,
   ...rest
 }: ButtonProps) {
   const { colors } = useTheme();
-  const textColor: Record<ButtonVariant, string> = {
-    solid: colors.textOnPrimary, outline: colors.primaryDark, ghost: colors.primaryDark,
-    solidLight: colors.primary, outlineLight: colors.textOnPrimary,
+  const palette: Record<ButtonVariant, { bg: string; fg: string; border?: string }> = {
+    solid: { bg: colors.primary, fg: colors.textOnPrimary },
+    outline: { bg: colors.surface, fg: colors.text, border: colors.border },
+    ghost: { bg: 'transparent', fg: colors.primaryDark },
+    solidLight: { bg: '#FFFFFF', fg: '#0E6B50' },
+    outlineLight: { bg: 'transparent', fg: '#FFFFFF', border: 'rgba(255,255,255,0.6)' },
+    danger: { bg: colors.dangerSoft, fg: colors.danger },
+    soft: { bg: colors.primarySoft, fg: colors.primaryDark },
+    warning: { bg: colors.warningSoft, fg: colors.warningText },
   };
+  const { bg, fg, border } = palette[variant];
   return (
     <Pressable
       accessibilityRole="button"
       disabled={disabled || loading}
       style={(state) => [
         styles.base,
-        variant === 'solid' && styles.solid,
-        variant === 'outline' && styles.outline,
+        { backgroundColor: bg },
+        border ? { borderWidth: 1.5, borderColor: border } : null,
         variant === 'ghost' && styles.ghost,
-        variant === 'solidLight' && styles.solidLight,
-        variant === 'outlineLight' && styles.outlineLight,
-        variant === 'solid' && { backgroundColor: colors.primary },
-        variant === 'outline' && { borderColor: colors.primaryDark },
         fullWidth && styles.fullWidth,
         compact && styles.compact,
         state.pressed && styles.pressed,
@@ -50,50 +56,38 @@ export function Button({
       ]}
       {...rest}>
       {loading ? (
-        <ActivityIndicator color={textColor[variant]} />
+        <ActivityIndicator color={fg} />
       ) : (
-        <AppText variant="button" color={textColor[variant]} style={compact ? styles.compactText : undefined}>
-          {title}
-        </AppText>
+        <View style={styles.content}>
+          {icon}
+          <AppText variant="button" color={fg} style={compact ? styles.compactText : styles.text}>
+            {title}
+          </AppText>
+        </View>
       )}
     </Pressable>
   );
 }
 
-
 const styles = StyleSheet.create({
   base: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: Spacing.lg,
+    paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.xl,
-    borderRadius: Radius.lg,
-    minHeight: 48,
+    borderRadius: 18,
+    minHeight: 58,
   },
-  compact: { minHeight: 44, paddingVertical: 10, paddingHorizontal: Spacing.md, borderRadius: Radius.md },
+  content: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
+  text: { textAlign: 'center' },
+  compact: { minHeight: 44, paddingVertical: 8, paddingHorizontal: Spacing.lg, borderRadius: Radius.md },
   compactText: { fontSize: 14, lineHeight: 20, textAlign: 'center' },
   fullWidth: {
     alignSelf: 'stretch',
   },
-  solid: {
-    backgroundColor: Colors.primary,
-  },
-  outline: {
-    backgroundColor: 'transparent',
-    borderWidth: 1.5,
-    borderColor: Colors.primary,
-  },
   ghost: {
-    backgroundColor: 'transparent',
     paddingVertical: Spacing.sm,
-  },
-  solidLight: {
-    backgroundColor: Colors.textOnPrimary,
-  },
-  outlineLight: {
-    backgroundColor: 'transparent',
-    borderWidth: 1.5,
-    borderColor: Colors.textOnPrimary,
+    minHeight: 44,
   },
   pressed: {
     opacity: 0.85,

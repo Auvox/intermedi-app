@@ -1,4 +1,3 @@
-import { apiRequest } from "@/constants/api";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -8,15 +7,14 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AuthHeader } from "@/components/auth/auth-header";
 import { useRegisterData } from "@/components/auth/context-login";
-import { registerSteps, StepIndicator } from "@/components/auth/step-indicator";
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/select-field";
 import { TextField } from "@/components/ui/text-field";
 import { AppText } from "@/components/ui/app-text";
-import { LoadingScreen } from '@/components/ui/loading-screen';
 import { buscarEnderecoPorCep, type CepAddress } from "@/services/cep";
 import { brazilianStates } from "@/constants/mock-data";
 import { Spacing } from "@/constants/theme";
@@ -25,23 +23,23 @@ import { useTheme } from "@/context/theme-context";
 export default function EnderecoScreen() {
   const router = useRouter();
   const { colors } = useTheme();
-  const { registerData, resetRegisterData } = useRegisterData();
+  const insets = useSafeAreaInsets();
+  const { registerData, setRegisterData } = useRegisterData();
 
-  const [cep, setCep] = useState("");
-  const [rua, setRua] = useState("");
-  const [numero, setNumero] = useState("");
-  const [bairro, setBairro] = useState("");
-  const [cidade, setCidade] = useState("");
-  const [estado, setEstado] = useState<string | undefined>(undefined);
-  const [complemento, setComplemento] = useState("");
+  const [cep, setCep] = useState(registerData.cep);
+  const [rua, setRua] = useState(registerData.rua);
+  const [numero, setNumero] = useState(registerData.numero);
+  const [bairro, setBairro] = useState(registerData.bairro);
+  const [cidade, setCidade] = useState(registerData.cidade);
+  const [estado, setEstado] = useState<string | undefined>(registerData.estado || undefined);
+  const [complemento, setComplemento] = useState(registerData.complemento);
 
-  const [submitting, setSubmitting] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
   const [cepMessage, setCepMessage] = useState("");
   const [cepError, setCepError] = useState(false);
   const [lookupAttempt, setLookupAttempt] = useState(0);
   const editedFields = useRef(new Set<keyof CepAddress>());
-  const currentCep = useRef("");
+  const currentCep = useRef(registerData.cep);
 
   function handleCepChange(value: string) {
     const digits = value.replace(/\D/g, '').slice(0, 8);
@@ -55,7 +53,7 @@ export default function EnderecoScreen() {
   }
 
   useEffect(() => {
-    if (cep.length !== 8) return;
+    if (cep.length !== 8 || (lookupAttempt === 0 && cep === registerData.cep && registerData.rua)) return;
     let active = true;
     const controller = new AbortController();
     const timer = setTimeout(async () => {
@@ -69,8 +67,8 @@ export default function EnderecoScreen() {
         if (!editedFields.current.has('cidade')) setCidade(address.cidade);
         if (!editedFields.current.has('estado')) setEstado(address.estado);
         setCepMessage(address.rua && address.bairro
-          ? 'Endereço encontrado. Confira os dados e informe o número e o complemento, se houver.'
-          : 'Cidade e estado encontrados. Complete e confira os demais campos do endereço.');
+          ? 'Endereço encontrado. Informe o número e o complemento, se houver.'
+          : 'Cidade e estado encontrados. Complete os demais campos.');
       } catch (error) {
         if (!active || currentCep.current !== cep) return;
         setCepError(true);
@@ -80,59 +78,24 @@ export default function EnderecoScreen() {
       }
     }, 350);
     return () => { active = false; clearTimeout(timer); controller.abort(); };
+    // registerData só serve para não repetir a busca ao voltar para esta etapa.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cep, lookupAttempt]);
 
-  async function handleRegister() {
-    if (submitting || cepLoading) return;
+  function handleContinue() {
+    if (cepLoading) return;
     if (!/^\d{8}$/.test(cep)) {
       alert('Informe um CEP com 8 números.');
       return;
     }
     // Validação dos campos obrigatórios do endereço
-    if (!cep || !rua || !numero || !bairro || !cidade || !estado) {
+    if (!rua || !numero || !bairro || !cidade || !estado) {
       alert("Preencha os dados de endereço, por favor.");
       return;
     }
-
-    setSubmitting(true);
-    try {
-      // Só aqui, na 2ª etapa, a requisição acontece — com os dados da 1ª
-      // etapa (guardados no contexto) e os dados de endereço juntos.
-      await apiRequest('/api/auth/register', {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          nomePaciente: registerData.nome,
-          cpfPaciente: registerData.cpf,
-          telPaciente: registerData.telefone,
-          emailPaciente: registerData.email,
-          senhaPaciente: registerData.senha,
-          medicamentoFrequentePaciente: registerData.remedioFrequente,
-
-          cepPaciente: cep,
-          ruaPaciente: rua,
-          numeroPaciente: numero,
-          bairroPaciente: bairro,
-          cidadePaciente: cidade,
-          estadoPaciente: estado,
-          complementoPaciente: complemento,
-        }),
-      });
-
-
-      resetRegisterData();
-
-      router.replace("/register/login");
-    } catch (error) {
-      console.error("Erro ao conectar com o backend:", error);
-
-      alert(error instanceof Error ? error.message : 'Não foi possível cadastrar.');
-    } finally { setSubmitting(false); }
+    setRegisterData({ cep, rua, numero, bairro, cidade, estado, complemento });
+    router.push("/register/mascote");
   }
-
-  if (submitting) return <LoadingScreen message="Criando sua conta…" />;
 
   return (
     <KeyboardAvoidingView
@@ -141,17 +104,17 @@ export default function EnderecoScreen() {
     >
       <ScrollView
         style={styles.flex}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + Spacing.xl }]}
+        keyboardShouldPersistTaps="handled"
       >
-        <AuthHeader title="Qual é o seu endereço?" showBack />
+        <AuthHeader step={3} title="Qual é o seu endereço?" />
 
         <View style={styles.body}>
-          <StepIndicator steps={registerSteps} currentIndex={2} />
-
-          <AppText variant="label" style={{ textAlign: 'center' }}>Digite o seu CEP para preenchermos sua localização automaticamente.</AppText>
+          <AppText variant="label">Digite o CEP e preenchemos o resto automaticamente.</AppText>
           <View style={styles.form}>
             <TextField
               label="CEP"
+              icon="location-outline"
               placeholder="ex: 01001-000"
               accessibilityLabel="CEP"
               value={cep.length > 5 ? `${cep.slice(0, 5)}-${cep.slice(5)}` : cep}
@@ -162,50 +125,53 @@ export default function EnderecoScreen() {
             {(cepLoading || cepMessage.length > 0) && <AppText
               accessibilityLiveRegion="polite"
               color={cepError ? colors.danger : colors.textSecondary}
-              variant="label">
+              variant="caption">
               {cepLoading ? 'Buscando endereço…' : cepMessage}
             </AppText>}
-            {cepError && !cepLoading && <Button title="Tentar buscar CEP novamente" variant="outline"
+            {cepError && !cepLoading && <Button title="Tentar buscar CEP novamente" variant="outline" compact
               onPress={() => { setCepLoading(true); setLookupAttempt(value => value + 1); }} />}
-            <TextField accessibilityLabel="Rua" label="Endereço" placeholder="ex: Av. Paulista" value={rua} onChangeText={value => { editedFields.current.add('rua'); setRua(value); }} />
-            <TextField
-              label="Número"
-              placeholder="ex: 123"
-              value={numero}
-              onChangeText={setNumero}
-              keyboardType="numeric"
-            />
+            <TextField accessibilityLabel="Rua" label="Endereço" icon="map-outline" placeholder="ex: Av. Paulista" value={rua} onChangeText={value => { editedFields.current.add('rua'); setRua(value); }} />
+            <View style={styles.row}>
+              <View style={styles.flex}>
+                <TextField label="Número" icon="location-outline" placeholder="ex: 123" value={numero} onChangeText={setNumero} keyboardType="numeric" />
+              </View>
+              <View style={styles.flex}>
+                <TextField label="Complemento" placeholder="Opcional" value={complemento} onChangeText={setComplemento} />
+              </View>
+            </View>
             <TextField
               label="Bairro"
+              icon="business-outline"
               placeholder="Seu bairro"
               value={bairro}
               accessibilityLabel="Bairro"
               onChangeText={value => { editedFields.current.add('bairro'); setBairro(value); }}
             />
-            <TextField
-              label="Cidade"
-              placeholder="Sua cidade"
-              value={cidade}
-              accessibilityLabel="Cidade"
-              onChangeText={value => { editedFields.current.add('cidade'); setCidade(value); }}
-            />
-            <SelectField
-              placeholder="Estado"
-              value={estado}
-              options={brazilianStates}
-              onSelect={value => { editedFields.current.add('estado'); setEstado(value); }}
-            />
-            <TextField
-              label="Complemento (opcional)"
-              placeholder="ex: Apto 42, bloco B"
-              value={complemento}
-              onChangeText={setComplemento}
-            />
+            <View style={styles.row}>
+              <View style={styles.city}>
+                <TextField
+                  label="Cidade / Estado"
+                  icon="location-outline"
+                  placeholder="Sua cidade"
+                  value={cidade}
+                  accessibilityLabel="Cidade"
+                  onChangeText={value => { editedFields.current.add('cidade'); setCidade(value); }}
+                />
+              </View>
+              <View style={styles.state}>
+                <SelectField
+                  placeholder="UF"
+                  value={estado}
+                  options={brazilianStates}
+                  onSelect={value => { editedFields.current.add('estado'); setEstado(value); }}
+                />
+              </View>
+            </View>
           </View>
 
           <Button
-            title="Cadastrar"
-            onPress={handleRegister} loading={submitting} disabled={cepLoading}
+            title="Continuar"
+            onPress={handleContinue} disabled={cepLoading}
             style={styles.submitButton}
           />
         </View>
@@ -225,14 +191,15 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.xl,
-    paddingBottom: Spacing.xxl,
-    justifyContent: "space-between",
-    gap: Spacing.xxl,
-  },
-  form: {
     gap: Spacing.xl,
   },
+  form: {
+    gap: Spacing.lg,
+  },
+  row: { flexDirection: 'row', gap: Spacing.md, alignItems: 'flex-end' },
+  city: { flex: 2.2 },
+  state: { flex: 1 },
   submitButton: {
-    marginTop: Spacing.lg,
+    marginTop: 'auto',
   },
 });

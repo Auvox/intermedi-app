@@ -1,143 +1,67 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { FavoriteButton } from '@/components/ui/favorite-button';
-import { useFavorites } from '@/context/favorites-context';
-import { MedicinePhoto } from './medicine-photo';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { FavoriteButton } from '@/components/ui/favorite-button';
 import { AppText } from '@/components/ui/app-text';
+import { Tag } from '@/components/ui/surface';
+import { useFavorites } from '@/context/favorites-context';
 import { useTheme } from '@/context/theme-context';
 import type { Medicine } from '@/constants/mock-data';
-import { Colors, Radius, Spacing } from '@/constants/theme';
+import { Shadow, Spacing } from '@/constants/theme';
+import { medicineTitle, pillKind, primaryTone, requiresPrescription, splitCategories } from '@/utils/medicine-style';
+import { MedicineThumb } from './medicine-thumb';
 
 export type MedicineCardProps = {
   medicine: Medicine;
   onPress: () => void;
+  // Quantas farmácias têm estoque (undefined enquanto consulta).
+  pharmacyCount?: number;
+  showFavorite?: boolean;
 };
 
-export function MedicineCard({ medicine, onPress }: MedicineCardProps) {
+export function MedicineCard({ medicine, onPress, pharmacyCount, showFavorite = false }: MedicineCardProps) {
   const { colors } = useTheme();
   const favorites = useFavorites();
-  const [expanded, setExpanded] = useState(false);
+  const favorite = favorites.medicines.some(m => m.id === medicine.id);
+  const prescription = requiresPrescription(medicine);
+  const subtitle = splitCategories(medicine.category).join(' · ') || 'Sem categoria';
   return (
-    <View style={[styles.card, { boxShadow: '0 4px 16px rgba(20,63,50,0.08)', backgroundColor: colors.surface, borderColor: colors.border }]}>
+    // O coração fica ao lado (não dentro) do botão do cartão para funcionar também na web.
+    <View style={[styles.card, { backgroundColor: colors.surface }, Shadow]}>
       <Pressable
-        style={({ pressed }) => [styles.cardContent, pressed && styles.cardPressed]}
-        onPress={() => setExpanded(value => !value)}
-        accessibilityState={{ expanded }}
+        style={({ pressed }) => [styles.open, pressed && styles.pressed]}
+        onPress={onPress}
         accessibilityRole="button"
-        accessibilityLabel={`Ver detalhes de ${medicine.name} ${medicine.dosage}`}>
-        <View style={styles.topRow}>
-          <MedicinePhoto uri={medicine.photo} name={medicine.name} />
-          <AppText variant="bodyBold" style={styles.info}>{medicine.name}</AppText>
-          <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={20} color={colors.textSecondary} />
-        </View>
-      </Pressable>
-      {expanded && <View style={styles.cardContent}>
-        <View style={styles.topRow}>
-          <View style={styles.info}><AppText variant="label">{medicine.dosage}</AppText><AppText variant="label" color={colors.primaryDark}>{medicine.category}</AppText></View>
-        </View>
-        <View style={styles.statusRow}>
-          <View style={[styles.statusBadge, { backgroundColor: colors.primarySoft }]}>
-            <View style={styles.statusDot} />
-            <AppText variant="caption" color={colors.primaryDark}>
-              Disponível para consulta
-            </AppText>
+        accessibilityLabel={`Ver detalhes de ${medicineTitle(medicine)}`}>
+        <MedicineThumb uri={medicine.photo} name={medicine.name} tone={primaryTone(medicine)} kind={pillKind(medicine)} size={64} />
+        <View style={styles.info}>
+          <AppText variant="bodyBold" numberOfLines={2} style={styles.title}>{medicineTitle(medicine)}</AppText>
+          <AppText variant="label" numberOfLines={1}>{subtitle}</AppText>
+          <View style={styles.tags}>
+            {prescription && <Tag label="Exige receita" tone="amber" />}
+            {pharmacyCount != null && (pharmacyCount > 0
+              ? <Tag label={`${pharmacyCount} ${pharmacyCount === 1 ? 'farmácia' : 'farmácias'}`} tone="green" />
+              : <Tag label="Sem estoque" tone="neutral" />)}
           </View>
         </View>
-
-        <View style={[styles.divider, { backgroundColor: colors.surfaceMuted }]} />
-
-        <Button title="Ver detalhes" onPress={onPress} />
-      </View>}
-
-<View style={styles.favorite}><FavoriteButton selected={favorites.medicines.some(m => m.id === medicine.id)} disabled={!favorites.ready}
-        label={favorites.medicines.some(m => m.id === medicine.id) ? 'Remover medicamento dos favoritos' : 'Salvar medicamento nos favoritos'} onPress={() => favorites.toggleMedicine(medicine)} /></View>
+        {!showFavorite && <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />}
+      </Pressable>
+      {showFavorite && <FavoriteButton selected={favorite} disabled={!favorites.ready} label={favorite ? 'Remover dos favoritos' : 'Salvar nos favoritos'} onPress={() => favorites.toggleMedicine(medicine)} />}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: Radius.lg,
-    borderWidth: 1,
+    borderRadius: 24,
     padding: Spacing.lg,
-    gap: Spacing.md,
-  },
-  cardContent: { gap: Spacing.md },
-  favorite: { position: 'absolute', top: 8, right: 8 },
-  cardPressed: {
-    opacity: 0.82,
-  },
-  topRow: {
-    minHeight: 68,
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.md,
-    paddingRight: 40,
   },
-  iconSquare: {
-    width: 52,
-    height: 52,
-    borderRadius: Radius.md,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  info: {
-    flex: 1,
-    gap: 2,
-    minWidth: 0,
-  },
-  categoryRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 2,
-  },
-  statusRow: {
-    alignItems: 'flex-start',
-  },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    borderRadius: Radius.pill,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 5,
-  },
-  statusDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: Colors.primary,
-  },
-  divider: {
-    height: 1,
-  },
-  bottomRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: Spacing.md,
-  },
-  pharmacyRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    flex: 1,
-  },
-  pharmacyText: {
-    flexShrink: 1,
-  },
-  detailButton: {
-    backgroundColor: Colors.primary,
-    borderRadius: Radius.pill,
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-  },
-  detailButtonText: {
-    fontSize: 13,
-  },
+  open: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
+  pressed: { opacity: 0.85 },
+  info: { flex: 1, gap: 2, minWidth: 0 },
+  title: { fontSize: 17 },
+  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 },
 });

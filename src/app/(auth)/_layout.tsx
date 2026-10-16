@@ -8,6 +8,7 @@ export default function AuthLayout() {
       <Stack.Screen name="forgot-password" />
       <Stack.Screen name="register/cadastro" />
       <Stack.Screen name="register/endereco" />
+      <Stack.Screen name="register/mascote" />
       <Stack.Screen name="register/login" />
     </Stack>
   );
