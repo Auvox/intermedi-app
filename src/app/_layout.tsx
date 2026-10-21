@@ -1,6 +1,7 @@
 import { Stack } from "expo-router";
 import { Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold, useFonts } from "@expo-google-fonts/poppins";
 
+import { RastreadorToques } from "@/components/analytics/rastreador-toques";
 import { RegisterProvider } from "@/components/auth/context-login";
 import { LoadingScreen } from "@/components/ui/loading-screen";
 import { CareProvider } from "@/context/care-context";
@@ -18,11 +19,14 @@ export default function AuthLayout() {
         <UserProvider>
           <FavoritesProvider>
             <CareProvider>
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="index" />
-                <Stack.Screen name="(auth)" />
-                <Stack.Screen name="(tabs)" />
-              </Stack>
+              {/* toques para o mapa de calor do admin (aba Desempenho) */}
+              <RastreadorToques>
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="index" />
+                  <Stack.Screen name="(auth)" />
+                  <Stack.Screen name="(tabs)" />
+                </Stack>
+              </RastreadorToques>
             </CareProvider>
           </FavoritesProvider>
         </UserProvider>

@@ -27,7 +27,8 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}, tok
     const response = await fetch(`${API_URL}${path}`, {
       ...options,
       signal: controller.signal,
-      headers: { 'Content-Type': 'application/json', ...options.headers, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      // X-Intermedi-Plataforma: separa o app do painel web na aba Desempenho do admin
+      headers: { 'Content-Type': 'application/json', 'X-Intermedi-Plataforma': 'app', ...options.headers, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new ApiError(data.message || data.error || 'Não foi possível concluir a operação.', response.status);
