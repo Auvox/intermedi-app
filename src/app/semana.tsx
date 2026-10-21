@@ -30,12 +30,12 @@ export default function SemanaScreen() {
 
   // Doses previstas: cada dose conta a partir do dia em que entrou na rotina.
   const createdDay = (id: string) => { const ts = Number(id.split('-').pop()); return Number.isFinite(ts) ? dayKey(new Date(ts)) : keys[0]; };
-  let expected = 0, onTime = 0, missed = 0;
+  let expected = 0, confirmed = 0, missed = 0;
   keys.forEach(key => care.doses.forEach(dose => {
     if (createdDay(dose.id) > key) return;
     expected++;
     const status = care.log[key]?.[dose.id]?.status;
-    if (status === 'tomado') onTime++;
+    if (status === 'tomado') confirmed++;
     else if (key < today) missed++;
   }));
   const painDays = keys.map(key => care.pains.find(p => p.date === key && p.regions.length));
@@ -59,14 +59,14 @@ export default function SemanaScreen() {
   if (missed > 0) insights.push({ icon: 'document-text-outline', tone: 'blue', title: `${missed} ${missed === 1 ? 'dose sem confirmação' : 'doses sem confirmação'}`, text: 'Confira seus comprimidos de hoje', action: 'Abrir', href: '/comprimidos' });
 
   const message = !care.doses.length && !painTotal ? 'Ainda não tenho dados desta semana. Adicione seus remédios para eu acompanhar.'
-    : missed === 0 ? 'Nenhuma dose perdida. Separei o que vale sua atenção.'
-      : `${missed === 1 ? 'Só uma dose perdida' : `${missed} doses perdidas`}. Separei o que vale sua atenção.`;
+    : missed === 0 ? 'Nenhuma dose anterior sem confirmação. Separei o que vale sua atenção.'
+      : `${missed} ${missed === 1 ? 'dose sem confirmação' : 'doses sem confirmação'}. Separei o que vale sua atenção.`;
 
   async function exportSummary() {
     const lines = [
       `Resumo da semana (${weekRange()}) — Intermedi`,
       user?.nome ? `Paciente: ${user.nome}` : '',
-      `Doses no horário: ${onTime} de ${expected}`,
+      `Doses confirmadas: ${confirmed} de ${expected}`,
       `Dias com dor: ${painTotal}${topRegion ? ` (mais frequente: ${REGION_LABEL[topRegion] ?? topRegion})` : ''}`,
       care.doses.length ? `Remédios em uso: ${care.doses.map(d => `${d.name} ${d.dosage} às ${d.time}`).join('; ')}` : '',
     ].filter(Boolean).join('\n');
@@ -87,9 +87,9 @@ export default function SemanaScreen() {
       <View style={styles.body}>
         <View style={styles.stats}>
           <View style={[styles.stat, { backgroundColor: colors.surface }, Shadow]}>
-            <View style={styles.statHead}><IconTile icon="checkmark" tone="green" size={38} /><AppText variant="caption" style={styles.flex}>Doses no horário</AppText></View>
-            <AppText variant="h3"><AppText variant="h2" color={colors.primaryDark}>{onTime}</AppText> de {expected}</AppText>
-            <View style={[styles.track, { backgroundColor: colors.surfaceMuted }]}><View style={[styles.fill, { width: expected ? `${(onTime / expected) * 100}%` : '0%', backgroundColor: colors.primaryBright }]} /></View>
+            <View style={styles.statHead}><IconTile icon="checkmark" tone="green" size={38} /><AppText variant="caption" style={styles.flex}>Doses confirmadas</AppText></View>
+            <AppText variant="h3"><AppText variant="h2" color={colors.primaryDark}>{confirmed}</AppText> de {expected}</AppText>
+            <View style={[styles.track, { backgroundColor: colors.surfaceMuted }]}><View style={[styles.fill, { width: expected ? `${(confirmed / expected) * 100}%` : '0%', backgroundColor: colors.primaryBright }]} /></View>
           </View>
           <View style={[styles.stat, { backgroundColor: colors.surface }, Shadow]}>
             <View style={styles.statHead}><IconTile icon="pulse-outline" tone="orange" size={38} /><AppText variant="caption" style={styles.flex}>Dias com dor</AppText></View>

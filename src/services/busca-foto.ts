@@ -47,6 +47,9 @@ export async function buscarMedicamentosPorFoto(
       },
     );
 
+    if (resposta.status === 404) {
+      throw new ApiError('A busca por foto não está disponível neste servidor. Use a busca pelo nome do medicamento.', 404);
+    }
     const dados = await resposta.json();
 
     if (!resposta.ok) {

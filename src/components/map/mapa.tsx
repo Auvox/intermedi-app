@@ -24,7 +24,7 @@ type MapaProps = {
 };
 
 export default function Mapa(props: MapaProps) {
-  // Uma nova WebView recebe novamente os dados da rota depois de carregar o estilo.
+ 
   return <MapaConteudo key={props.modelo ?? 'automatico'} {...props} />;
 }
 

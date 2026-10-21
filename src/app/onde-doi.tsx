@@ -1,5 +1,7 @@
+import { LoadingScreen } from '@/components/ui/loading-screen';
+import { useUser } from '@/context/user-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -38,6 +40,15 @@ const TONES: Tone[] = ['orange', 'blue', 'purple', 'green'];
 const normalize = (text: string) => text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 export default function OndeDoiScreen() {
+  const care = useCare();
+  const { user, loading } = useUser();
+  if (!loading && !user?.token) return <Redirect href="/login" />;
+  // O formulário só monta quando a rotina da conta terminou de carregar.
+  if (!care.ready) return <LoadingScreen message="Carregando seus dados…" />;
+  return <OndeDoiConteudo key={user?.id} />;
+}
+
+function OndeDoiConteudo() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
@@ -126,7 +137,7 @@ export default function OndeDoiScreen() {
       </View>
     </ScrollView>
     <View style={[styles.footer, { paddingBottom: insets.bottom + 14, backgroundColor: colors.background }]}>
-      <Button title={saved ? 'Salvo no diário de dores ✓' : 'Salvar no meu diário de dores'} disabled={!marked.length || !care.ready} onPress={() => { care.savePain(marked); setSaved(true); }} />
+      <Button title={saved ? 'Salvo no diário de dores ✓' : 'Salvar no meu diário de dores'} disabled={!care.ready || (!marked.length && !today?.regions.length)} onPress={() => { care.savePain(marked); setSaved(true); }} />
     </View>
   </View>;
 }

@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { acompanharLocalizacao, type Localizacao, } from '@/services/navegacao';
@@ -96,8 +96,16 @@ export default function RotaScreen() {
     setErro('');
     setRotas({});
     setErrosRotas({});
+    let espera: ReturnType<typeof setTimeout> | undefined;
     try {
-      const resultado = await calcularTodasRotas(farmacia);
+      const resultado = await Promise.race([
+        calcularTodasRotas(farmacia),
+        new Promise<never>((_, reject) => {
+          espera = setTimeout(() => reject(new Error(
+            'A localização ou o cálculo demorou demais. Confira a permissão de localização do navegador ou aparelho e tente novamente.',
+          )), 30000);
+        }),
+      ]);
       if (calculo !== calculoRef.current) return;
       setRotas(resultado.rotas);
       setErrosRotas(resultado.erros);
@@ -106,6 +114,7 @@ export default function RotaScreen() {
         setErro(error instanceof Error ? error.message : 'Não foi possível calcular as rotas.');
       }
     } finally {
+      clearTimeout(espera);
       if (calculo === calculoRef.current) setCarregando(false);
     }
   }, [farmacia]);
@@ -127,12 +136,23 @@ export default function RotaScreen() {
     setSimulando(false);
   }
 
+  // As instruções avançam junto dos eventos de GPS/simulação, sem um efeito
+  // que dispara outra renderização a cada atualização da posição.
+  function atualizarPosicao(posicao: Localizacao) {
+    setPosicaoAtual(posicao);
+    setPassoAtual(atual => {
+      const proximo = rota?.passos[atual + 1];
+      return proximo && calcularDistancia(posicao, proximo.localizacaoManobra) <= 20 ? atual + 1 : atual;
+    });
+  }
+
   async function iniciarNavegacao() {
     if (!rota || iniciando || navegando) return;
 
     const sessao = ++sessaoRef.current;
 
     setIniciando(true);
+    setPassoAtual(0);
     setErro('');
     setPosicaoAtual(rota.origem);
 
@@ -140,7 +160,7 @@ export default function RotaScreen() {
       const acompanhamento = await acompanharLocalizacao(
         (posicao) => {
           if (sessaoRef.current === sessao) {
-            setPosicaoAtual(posicao);
+            atualizarPosicao(posicao);
           }
         },
       );
@@ -172,6 +192,7 @@ export default function RotaScreen() {
     encerrarNavegacao();
 
     const sessao = sessaoRef.current;
+    setPassoAtual(0);
 
     setErro('');
 
@@ -180,7 +201,7 @@ export default function RotaScreen() {
         rota.geometria,
         (posicao) => {
           if (sessaoRef.current === sessao) {
-            setPosicaoAtual(posicao);
+            atualizarPosicao(posicao);
           }
         },
         () => {
@@ -200,23 +221,6 @@ export default function RotaScreen() {
       );
     }
   }
-
-  useEffect(() => {
-    if (!navegando || !rota || !posicaoAtual) return;
-
-    const proximoPasso = rota.passos[passoAtual + 1];
-
-    if (!proximoPasso) return;
-
-    const distancia = calcularDistancia(
-      posicaoAtual,
-      proximoPasso.localizacaoManobra,
-    );
-
-    if (distancia <= 20) {
-      setPassoAtual((atual) => atual + 1);
-    }
-  }, [navegando, rota, posicaoAtual, passoAtual]);
 
   useEffect(() => {
     return () => {
@@ -338,6 +342,7 @@ export default function RotaScreen() {
           farmacias={farmaciasDaRota}
           localizacao={posicaoAtual ?? rota?.origem}
           geometria={rota?.geometria}
+          enquadrarFarmacias={!rota}
           expandido
           modelo={estiloMapa}
           espacoInferior={painelAltura + insets.bottom + 24}
@@ -501,7 +506,14 @@ export default function RotaScreen() {
         ) : (
           <View style={[styles.vazio, { backgroundColor: colors.surface }]}>
             <Ionicons name="location-outline" size={32} color={colors.textMuted} />
-            <AppText variant="bodyBold">UBS não encontrada</AppText>
+            {carregandoFarmacia ? <>
+              <ActivityIndicator color={colors.primary} accessibilityLabel="Carregando farmácia" />
+              <AppText variant="bodyBold">Carregando farmácia…</AppText>
+            </> : <>
+              <AppText variant="bodyBold">Não foi possível abrir a rota</AppText>
+              <AppText variant="label">{erroExibido || 'Selecione uma farmácia para ver a rota.'}</AppText>
+              {!!id && <Button title="Tentar novamente" variant="outline" onPress={recarregarFarmacia} />}
+            </>}
           </View>
         )}
       </ScrollView>
