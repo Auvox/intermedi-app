@@ -118,6 +118,11 @@ export default function MeusDadosScreen() {
   }
 
   function escolherFoto() {
+    // Alert.alert não abre diálogos no React Native Web.
+    if (Platform.OS === 'web') {
+      void escolherDaGaleria().catch(error => showMessage('Erro', error instanceof Error ? error.message : 'Não foi possível abrir a imagem.'));
+      return;
+    }
     Alert.alert('Foto de perfil', 'Escolha uma opção', [
       {
         text: 'Tirar foto',
@@ -240,7 +245,7 @@ export default function MeusDadosScreen() {
         ]}>
         <View style={styles.identity}>
           <Pressable
-            onPress={Platform.OS === 'web' ? escolherDaGaleria : escolherFoto} disabled={savingPhoto || deleting}
+            onPress={escolherFoto} disabled={savingPhoto || deleting}
             accessibilityRole="button"
             accessibilityLabel="Alterar foto de perfil"
             style={[

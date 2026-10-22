@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -13,14 +12,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
 import { Wordmark } from '@/components/ui/brand-mark';
-import { TextField } from '@/components/ui/text-field';
 import { useTheme } from '@/context/theme-context';
 import { Colors, Spacing } from '@/constants/theme';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
   const { colors } = useTheme();
-  const [contact, setContact] = useState('');
 
   return (
     <KeyboardAvoidingView
@@ -40,18 +37,12 @@ export default function ForgotPasswordScreen() {
           </View>
 
           <AppText variant="h3" style={styles.description}>
-            Informe seu <AppText variant="h3" style={styles.bold}>e-mail</AppText> ou{' '}
-            <AppText variant="h3" style={styles.bold}>telefone</AppText> para receber o código de
-            recuperação.
+            A recuperação de senha ainda não está disponível nesta versão. Entre com sua senha para acessar sua conta.
           </AppText>
 
-          <View style={styles.form}>
-            <TextField placeholder="E-mail ou Telefone" value={contact} onChangeText={setContact} />
-          </View>
-
           <Button
-            title="Enviar código"
-            onPress={() => router.back()}
+            title="Voltar ao login"
+            onPress={() => router.replace('/login')}
             style={styles.submitButton}
           />
         </ScrollView>
